@@ -1,0 +1,24 @@
+# Created 2025-04-10 Thu 12:59
+#+title: Scientific module repository template
+#+author: Jeffrey Szymanski
+* Repository administration
+** Conda envornmental YAMLs
+** Snakemake
+** README
+Directory Structure
+#+begin_example
+-- Main
+   |-- config
+   |-- resources
+   |-- results
+   |-- scripts
+   |-- test
+   |-- tools
+   |-- workflows
+#+end_example
+
+*** Prerequisites
+*** Change Log
+* Pipeline
+* Development
+* Ideas
