@@ -345,3 +345,4 @@ TSWLatexianTemp*
 # Uncomment the next line to have this generated file ignored.
 #*Notes.bib
 docs/superpowers/
+data/metadata_canpredict_legacy.xlsx
