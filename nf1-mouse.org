@@ -710,6 +710,338 @@ mice
 samples
 plasm_ders
 #+end_src
+*** TODO Mouse cfDNA Isolation Optimization Protocol
+:PROPERTIES:
+:ID:       881009ca-8675-48c2-a320-edf263e9b8f8
+:export_options: toc:nil tags:nil todo:nil \n:t ^:nil H:15 d:nil
+:export_file_name: ./protocols/nf1-mouse-cfdna-isolation-optimization-protocol.pdf
+:export_author: Jeffrey Szymanski
+:export_date:
+:export_latex_class: empty
+:export_latex_header+: \usepackage{/home/jeszyman/repos/latex/sty/documentation}
+:export_latex_header+: \usepackage[backend=bibtex,style=numeric,url=true]{biblatex}
+:export_latex_header+: \addbibresource{../resources/nf1-mouse.bib}
+:END:
+:DRAWER:
+- [[elisp:(run-latex-at-point)][compile]] using [[id:3975a173-ac71-4c02-b032-ef215329ca59][run-latex-at-point]]
+- [[file:protocols/nf1-mouse-cfdna-isolation-optimization-protocol.pdf][PDF]]
+- [[file:protocols/nf1-mouse-cfdna-isolation-optimization-protocol.tex][TeX]]
+:END:
+#+begin_src emacs-lisp
+(setq org-latex-prefer-user-labels t)
+#+end_src
+#+begin_src bash
+cd ~/repos/nf1-mouse/protocols
+lualatex -interaction=nonstopmode nf1-mouse-cfdna-isolation-optimization-protocol.tex
+biber nf1-mouse-cfdna-isolation-optimization-protocol
+lualatex -interaction=nonstopmode nf1-mouse-cfdna-isolation-optimization-protocol.tex
+lualatex -interaction=nonstopmode nf1-mouse-cfdna-isolation-optimization-protocol.tex
+#+end_src
+
+**** Preamble                                                        :ignore:
+
+#+include: "./latex/latex.org::#dd9bb77e-6ff7-44e0-9026-c371bdaf9603" :only-contents t
+#+latex: % [[file:~/repos/latex/latex.org::#dd9bb77e-6ff7-44e0-9026-c371bdaf9603][Last compiled]]
+
+\vspace{5mm}
+\hfill Version 2
+
+**** Introduction
+Experiment to test and optimize cell-free DNA isolation conditions for small volumes of mouse plasma.
+
+We will use this experiment to ask about isolation precision (repeatability and reproducibility), effects of hemolysis and SPRI bead removal of genomic DNA, and the ability to detect PDX ctDNA.
+
+The experiment workflow is summarized in Figure [[fig_workflow]].
+
+#+BEGIN_SRC mermaid :file ./resources/media/workflow.pdf :pdf-fit :quiet :tangle /tmp/test.mmd :comments no :eval always-export
+
+   flowchart LR
+
+   %% Classes with Larger Text
+
+   classDef input_pdx1 fill:#8DA8FF,stroke:#333,stroke-width:4px,text-align:left,font-size:22px;
+   classDef input_pdx1_vheme fill:#E74C3C,stroke:#333,stroke-width:4px,text-align:left,font-size:22px;
+   classDef input_nopdx fill:#3498DB,stroke:#333,stroke-width:4px,text-align:left,font-size:22px;
+   classDef input_nopdx_vheme fill:#E74C3C,stroke:#333,stroke-width:4px,text-align:left,font-size:22px;
+
+   classDef pdx1 fill:#8DA8FF,stroke:#333,stroke-width:4px,font-size:22px;
+   classDef pdx1_vheme fill:#E74C3C,stroke:#333,stroke-width:4px,font-size:22px;
+   classDef nopdx fill:#3498DB,stroke:#333,stroke-width:4px,font-size:22px;
+   classDef nopdx_vheme fill:#E74C3C,stroke:#333,stroke-width:4px,font-size:22px;
+
+   classDef dum fill-opacity:0,stroke-width:0,stroke:none,height:0px,width:0px,font-size:22px;
+
+   classDef analysis stroke:#333,stroke-width:4px,text-align:left,font-size:22px;
+
+
+   %% Nodes
+
+   %% Inputs
+   ms1_pdx1_term[
+   Mouse 1
+   PDX1 1
+   Terminal bleed
+   ~300 μL]:::input_pdx1
+
+   ms2_pdx1_term[
+   Mouse 2
+   PDX1 1
+   Terminal bleed
+   ~300 μL]:::input_pdx1
+
+   ms5_pdx1_serialf([
+   Mouse 5
+   PDX1 1
+   Final serial bleed
+   ~50 μL]):::input_pdx1
+
+   ms6_pdx1_serial_vheme([
+   Mouse 6
+   PDX1 1
+   Serial bleed
+   ~50 μL]):::input_pdx1_vheme
+
+   ms3_nopdx_term[
+   Mouse 3
+   No PDX1
+   Terminal bleed
+   ~300 μL]:::input_nopdx
+
+   ms4_nopdx_term_vheme[
+   Mouse 4
+   No PDX1
+   Terminal bleed
+   VISUAL HEMOLYSIS
+   ~300 μL]:::input_nopdx_vheme
+
+   %% Pooled
+
+   pdx1_term_pool[
+   Pooled Mice 1 & 2
+   PDX1 1
+   ~600 μL]:::pdx1
+
+   %% Aliquots
+
+   pdx1_term_pool_alq_big1{{
+   200 μL aliquot}}:::pdx1
+
+   pdx1_term_pool_alq_big2{{
+   200 μL aliquot}}:::pdx1
+
+   pdx1_term_pool_alq_small1{{
+   50 μL Aliquot}}:::pdx1
+
+   pdx1_term_pool_alq_small2{{
+   50 μL Aliquot}}:::pdx1
+
+   ms3_nopdx_term_big{{
+   200 μL Aliquot}}:::nopdx
+
+   ms3_nopdx_term_small{{
+   50 μL Aliquot}}:::nopdx
+
+   ms4_nopdx_term_big{{
+   200 μL Aliquot}}:::nopdx_vheme
+
+   ms4_nopdx_term_small{{
+   50 μL Aliquot}}:::nopdx_vheme
+
+   %% Isolations
+   ms5_pdx1_serialf_iso[[MagMax Isolation]]:::pdx1
+
+   ms6_pdx1_serial_vheme_iso[[MagMax Isolation]]:::pdx1_vheme
+
+   pdx1_term_pool_alq_big2_iso[[MagMax isolation]]:::pdx1
+
+   pdx1_term_pool_alq_big1_iso[[MagMax isolation]]:::pdx1
+
+   pdx1_term_pool_alq_small1_iso[[MagMax isolation]]:::pdx1
+
+   pdx1_term_pool_alq_small2_iso[[MagMax isolation]]:::pdx1
+
+   ms3_nopdx_term_big_iso[[
+   MagMax isolation]]:::nopdx
+
+   ms3_nopdx_term_small_iso[[
+   MagMax isolation]]:::nopdx
+
+   ms4_nopdx_term_big_iso[[
+   MagMax isolation]]:::nopdx_vheme
+
+   ms4_nopdx_term_small_iso[[
+   MagMax isolation]]:::nopdx_vheme
+
+   %% Bead
+   ms6_pdx1_serial_vheme_iso_rtbead[/
+   Right-side bead selection/]:::pdx1_vheme
+
+   ms3_nopdx_term_big_iso_rtbead[/
+   Right-sided bead selection
+   /]:::nopdx_vheme
+
+   ms3_nopdx_term_small_iso_rtbead[/
+   Right-sided bead selection
+   /]:::nopdx_vheme
+
+   ms4_nopdx_term_big_iso_rtbead[/
+   Right-sided bead selection
+   /]:::nopdx_vheme
+
+   ms4_nopdx_term_small_iso_rtbead[/
+   Right-sided bead selection
+   /]:::nopdx_vheme
+
+
+   Analysis((Analysis)):::analysis
+   %% Edges
+
+   ms1_pdx1_term  ==> pdx1_term_pool
+   ms2_pdx1_term  ==> pdx1_term_pool
+
+   pdx1_term_pool ==> pdx1_term_pool_alq_big1 ==> pdx1_term_pool_alq_big1_iso ==> pdx1_term_pool_alq_big1_iso_nobead[ ]:::dum  ==>|**pdx1_pool_ms12_bigaq1**| Analysis
+
+   pdx1_term_pool ==> pdx1_term_pool_alq_big2 ==> pdx1_term_pool_alq_big2_iso ==> pdx1_term_pool_alq_big2_iso_nobead[ ]:::dum  ==>|**pdx1_pool_ms12_bigaq2**| Analysis
+
+   pdx1_term_pool ==> pdx1_term_pool_alq_small1 ==> pdx1_term_pool_alq_small1_iso ==> pdx1_term_pool_alq_small1_iso_nobead[ ]:::dum ==>|**pdx1_pool_ms12_smallaq1**| Analysis
+
+   pdx1_term_pool ==> pdx1_term_pool_alq_small2 ==> pdx1_term_pool_alq_small2_iso ==> pdx1_term_pool_alq_small2_iso_nobead[ ]:::dum ==>|**pdx1_pool_ms12_smallaq2**| Analysis
+
+   ms5_pdx1_serialf ==> ms5_pdx1_serialf_nopool[ ]:::dum ==> ms5_pdx1_serialf_noaliq[ ]:::dum ==> ms5_pdx1_serialf_iso ==> ms5_pdx1_serialf_iso_nobead[ ]:::dum ==> |**ms5_pdx1_serialf**| Analysis
+
+   ms6_pdx1_serial_vheme ==> ms6_pdx1_serial_vheme_nopool[ ]:::dum ==> ms6_pdx1_serial_vheme_noaliq[ ]:::dum ==> ms6_pdx1_serial_vheme_iso ==> ms6_pdx1_serial_vheme_iso_rtbead ==> |**ms6_vheme_pdx1_serial_rtbead**| Analysis
+
+   ms3_nopdx_term ==> ms3_nopdx_term_nopool[ ]:::dum ==> ms3_nopdx_term_big ==> ms3_nopdx_term_big_iso ==> ms3_nopdx_term_big_iso_nobead[ ]:::dum ==>|**ms3_nopdx_term_bigaq**| Analysis
+
+   ms4_nopdx_term_vheme ==> ms4_nopdx_term_nopool[ ]:::dum ==> ms4_nopdx_term_big ==> ms4_nopdx_term_big_iso ==> ms4_nopdx_term_big_iso_nobead[ ]:::dum ==>|**ms4_nopdx_term_vheme_bigaq**| Analysis
+
+                      ms3_nopdx_term_nopool[ ]:::dum ==> ms3_nopdx_term_small ==> ms3_nopdx_term_small_iso ==> ms3_nopdx_term_small_iso_nobead[ ]:::dum ==> |**ms3_nopdx_term_smallaq**|Analysis
+
+                      ms4_nopdx_term_nopool[ ]:::dum ==> ms4_nopdx_term_small ==> ms4_nopdx_term_small_iso ==> ms4_nopdx_term_small_iso_nobead[ ]:::dum ==> |**ms4_nopdx_term_vheme_smallaq**|Analysis
+
+   ms3_nopdx_term_big_iso ==> ms3_nopdx_term_big_iso_rtbead ==> |**ms3_nopdx_term_bigaq_rtbead**| Analysis
+   ms3_nopdx_term_small_iso ==> ms3_nopdx_term_small_iso_rtbead ==> |**ms3_nopdx_term_smallaq_rtbead**| Analysis
+
+   ms4_nopdx_term_big_iso ==> ms4_nopdx_term_big_iso_rtbead ==> |**ms4_nopdx_term_vheme_bigaq_rtbead**| Analysis
+   ms4_nopdx_term_small_iso ==> ms4_nopdx_term_small_iso_rtbead ==> |**ms4_nopdx_term_vheme_smallaq_rtbead**| Analysis
+
+#+END_SRC
+
+#+CAPTION: Experiment Workflow. Workflow is divided into stages from left to right of input, pooling, aliquoting, isolation, right-sided bead selection, and analysis. Final isolations to be analyzed are labeled to the right.
+#+NAME: fig_workflow
+#+ATTR_LATEX: :placement [H]
+[[file:../resources/media/workflow.pdf]]
+
+Inputs necessary for the protocol are described in Table [[tab_inputs]]]. All inputs should be from untreated mice. Note ms1, ms2, ms5, and ms6 should have the same PDX. Ideally, all PDX mice should have large tumors at each time point sampled.
+
+#+NAME: tab_inputs
+#+CAPTION: Isolation workflow inputs.
+#+ATTR_LATEX: :align l p{0.7\textwidth} :booktabs t
+| Input Identifier      | Description                                              |
+|-----------------------+----------------------------------------------------------|
+| ms1_pdx1_term         | Mouse 1, PDX1, terminal bleed, no visual hemolysis       |
+| ms2_pdx1_term         | Mouse 2. PDX1, terminal bleed, no visual hemolysis       |
+| ms3_nopdx_term        | Mouse 3, no PDX, terminal bleed, no visual hemolysis     |
+| ms4_nopdx_term_vheme  | Mouse 4, no PDX, terminal bleed, _with_ visual hemolysis |
+| ms5_pdx1_serialf      | Mouse 5, PDX1, final serial sample, no visual hemolysis  |
+| ms6_pdx1_serial_vheme | Mouse 6, PDX1, serial bleed _with_ visual hemolysis      |
+
+Final isolations to be analyzed are shown in Table [[tab_analytes]]. For each final isolation, the same analyses will be performed, generating the same output variables. Specific experimental questions addressed are in Table [[tab_questions]].
+
+#+NAME: tab_analytes
+#+CAPTION: Final isolated analytes to be analyzed.
+#+ATTR_LATEX: :align l p{0.7\textwidth} :booktabs t
+| Isolation Identifier                | Description                                                                                               |
+|-------------------------------------+-----------------------------------------------------------------------------------------------------------|
+|                                     | <30>                                                                                                      |
+| ms3_nopdx_term_bigaq                | Mouse 3, no PDX, terminal bleed, large volume isolation                                                   |
+| ms3_nopdx_term_bigaq_rtbead         | Mouse 3, no PDX, terminal bleed, large volume isolation, right-side bead selection                        |
+| ms3_nopdx_term_smallaq              | Mouse 3, no PDX, terminal bleed, small volume isolation                                                   |
+| ms3_nopdx_term_smallaq_rtbead       | Mouse 3, no PDX, terminal bleed, small volume isolation, right-side bead selection                        |
+| ms4_nopdx_term_vheme_bigaq          | Mouse 4, no PDX, terminal bleed, with visual hemolysis, large volume isolation                            |
+| ms4_nopdx_term_vheme_bigaq_rtbead   | Mouse 4, no PDX, terminal bleed, with visual hemolysis, large volume isolation, right-side bead selection |
+| ms4_nopdx_term_vheme_smallaq        | Mouse 4, no PDX, terminal bleed, with visual hemolysis, small isolation                                   |
+| ms4_nopdx_term_vheme_smallaq_rtbead | Mouse 4, no PDX, terminal bleed, with visual hemolysis, isolation, right-side bead selection              |
+| ms5_pdx1_serialf                    | Mouse 5 with PDX, final serial sample                                                                     |
+| ms6_pdx1_serial_vheme_rtbead        | Mouse 6 with PDX, serial bleed with visual hemolysis, right-side bead selection                           |
+| pdx1_pool_ms12_bigaq1               | Pooled plasma from mice 1 & 2 with PDX, large volume isolation, replicate 1                               |
+| pdx1_pool_ms12_bigaq2               | Pooled plasma from mice 1 & 2 with PDX, large volume isolation, replicate 2                               |
+| pdx1_pool_ms12_smallaq1             | Pooled plasma from mice 1 & 2 with PDX, small volume isolation, replicate 1                               |
+| pdx1_pool_ms12_smallaq2             | Pooled plasma from mice 1 & 2 with PDX, small volume isolation, replicate 2                               |
+
+
+\clearpage
+
+#+NAME: tab_questions
+#+CAPTION: Relevant experimental questions and associated data.
+#+ATTR_LATEX: :environment longtable :align |p{7cm}|p{6cm}|p{3cm}| :rules \hline
+|------------------------------------------------------------------------+---------------------------------------------------------------------+-------------------|
+| Question                                                               | Sample or comparison                                                | Outcome metrics   |
+|------------------------------------------------------------------------+---------------------------------------------------------------------+-------------------|
+| Are isolations repeatable?                                             | pdx1_pool_ms12_bigaq 1 vs 2                                         | All               |
+|------------------------------------------------------------------------+---------------------------------------------------------------------+-------------------|
+| Are isolations repeatable at low volume?                               | pdx1_pool_ms12_smallaq 1 vs 2                                       | All               |
+|------------------------------------------------------------------------+---------------------------------------------------------------------+-------------------|
+| Are isolations reproducible across volume?                             | pdx1_pool_ms12_bigaq1/2 vs smallaq 1/2                              | All               |
+|------------------------------------------------------------------------+---------------------------------------------------------------------+-------------------|
+| Are terminal and final serial bleeds similar?                          | pdx_pool_ms12_smallaq1/2 vs ms5_pdx1_serialf                        | All               |
+|------------------------------------------------------------------------+---------------------------------------------------------------------+-------------------|
+| Do SPRI beads affect isolation of non-hemolyzed samples?               | ms3_nopdx_term_bigaq vs ms3_nopdx_bigaq_rtbead                      | All               |
+|------------------------------------------------------------------------+---------------------------------------------------------------------+-------------------|
+| Do SPRI beads affect isolation of non-hemolyzed samples at low volume? | ms3_nopdx_term_smallaq vs ms3_nopdx_term_smallaq_rtbead             | All               |
+|------------------------------------------------------------------------+---------------------------------------------------------------------+-------------------|
+| Is hemolysis detectable by spectrophotometry?                          | ms4_nopdx_term_vheme_bigaq vs ms3_nopdx_term_bigaq                  | Hemolysis index   |
+|------------------------------------------------------------------------+---------------------------------------------------------------------+-------------------|
+| Is hemolysis detectable by spectrophotometry at low volume?            | ms4_nopdx_term_vheme_smallaq vs ms3_nopdx_term_smallaq              | Hemolysis index   |
+|------------------------------------------------------------------------+---------------------------------------------------------------------+-------------------|
+| Do SPRI beads remove genomic DNA?                                      | ms4_nopdx_term_vheme_bigaq_rtbead vs ms4_nopdx_term_vheme_bigaq     | Bioanalyzer       |
+|------------------------------------------------------------------------+---------------------------------------------------------------------+-------------------|
+| Do SPRI beads remove genomic DNA at low volume?                        | ms4_nopdx_term_vheme_smallaq_rtbead vs ms4_nopdx_term_vheme_smallaq | Bioanalyzer       |
+|------------------------------------------------------------------------+---------------------------------------------------------------------+-------------------|
+| Is PDX ctDNA evident?                                                  | pdx1_pool_ms12_bigaq1/2 vs ms3_nopdx_term_bigaq                     | conc, Bioanalyzer |
+|------------------------------------------------------------------------+---------------------------------------------------------------------+-------------------|
+| Is PDX ctDNA evident at low volume?                                    | pdx1_pool_ms12_smallaq1/2 vs ms3_nopdx_term_smallaq                 | conc, Bioanalyzer |
+|------------------------------------------------------------------------+---------------------------------------------------------------------+-------------------|
+| Is PDX ctDNA evident from serial samples?                              | ms1_pdx1_serialf vs ms3_nopdx_term_smallaq                          | conc, Bioanalyzer |
+|------------------------------------------------------------------------+---------------------------------------------------------------------+-------------------|
+| Is PDX ctDNA evident with corrected hemolysis?                         | ms6_pdx1_serial_vheme_rtbead vs ms4_nopdx_term_vheme_smallaq        | conc, Bioanalyzer |
+|------------------------------------------------------------------------+---------------------------------------------------------------------+-------------------|
+
+**** Protocol
+
+1. Ensure inputs - see Table ref:tab_inputs.
+
+2. Input pre-processing - Perform pre-processing immediately prior to the input's isolation on a per-input basis. Yield calculation will require set volumes, so use the exact volumes indicated as inputs.
+
+   - Pool mouse 1 and mouse 2 terminal bleed plasma.
+   - Aliquot pooled PDX terminal plasma (200 μL, 200 μL, 50 μL, 50 μL).
+   - Aliquot mouse 3 terminal bleed plasma (200 μL, 50 μL).
+   - Aliquot mouse 4 terminal bleed plasma (200 μL, 50 μL).
+
+3. Isolate cfDNA - for each isolation, follow the steps of the \citetitle{magmax_manual} \cite{magmax_manual}. (This is the manual specifically for small volume isolations). Use manual protocol, option 2. For 50 μL samples, first dilute sample volume up to 100 μL with PBS.
+
+4. Perform right-sided bead selection as described in \citeauthor{heider2020} \citetitle{heider2020} \cite{heider2020}, methods section "Size Selection and Library Preparation of Blood-Spot Cell-Free DNA" through the 7:1 bead ratio elution:
+
+/We opted to perform size selection to remove contaminating long gDNA fragments that would have prohibited library preparation. Thus, a right-side size selection was performed on DNA eluates using AMPure XP beads (Beckman Coulter). For this purpose, we adapted a protocol for a right-side size selection (13). Following optimization of bead:sample ratios for cfDNA fragment sizes, we used a bead:sample ratio of 1:1 to remove contaminating gDNA. The supernatant was retained as part of the right-side size-selection protocol. A second size-selection step used a 7:1 bead:sample ratio to capture remaining fragments, and the size-selected DNA was eluted in 25 μL water./
+
+The resulting 25 μL volume is appropriate to carry forward for EM-seq library preparation \cite{NEB2024}.
+
+--Per-sample STOPPING POINT--
+
+Analysis for each final isolate:
+   1. Qubit High sensitivity dsDNA fluorometric quantification as described in the kit user guide \cite{qubit}. Generate one standard curve for each session (can span multiple or all samples). Perform for each analyte *in nonconsecutive duplicate*. One microliter volumes are sufficient for testing. If resulting concentration is <200 pg, re-measure with 3 μL volumes. Retain concentration values and raw flourescence values including standard curve raw fluorescence.
+   2. Nanodrop spectrophotometry as described in the user guide \cite{nanodrop}. Use same volume as in the Qubit and again test all samples in nonconsecutive duplicate. Use the dsDNA measurement program and retain ng/uL, A260/A280, A260/A230, and UV spectrum. Also take a A414 reading.
+   3. Bioanalyzer electrophoresis with HS kit protocol. Perfrom once per analyte. Retain peak table XML and electropherogram XML.
+**** Change Log
+- Version 2 - Adjusted for serial bleeds from separate mice than pooled terminal bleed PDX sources.
+**** References                                                      :ignore:
+#+LATEX: \printbibliography
+
+#  LocalWords:  smallaq pdx SPRI
+** EM-seq library preparation
+Libraries prepared with NEBNext Enzymatic Methyl-seq (EM-seq) kit, which preserves native fragment features. Alignment with Disambiguate to retain only human reads from xenograft samples.
+** Sequencing and alignment
+Target median deduplicated sequencing depth of 15×. Reads aligned to hg38 with BISCUIT.
 
 * Workflows
 ** Configuration
