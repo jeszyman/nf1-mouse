@@ -1059,6 +1059,7 @@ Target median deduplicated sequencing depth of 15×. Reads aligned to hg38 with 
 *** All rule
 *** On success
 * Results
+** cfDNA isolation optimization
 ** figure_schema.R
 ** Figure strategy
 The results Snakemake workflow is mount-aware: large or external files are referenced
@@ -1079,5 +1080,42 @@ Two sub-pipelines:
 ** Glossary
 ** Literature
 ** External resources
+** Bibliography
+#+BEGIN_SRC bibtex :tangle ./resources/nf1-mouse.bib :comments no
+@misc{magmax_manual,
+  title        = {MagMAX Cell-Free DNA Isolation Kit User Guide},
+  author       = {{Thermo Fisher Scientific}},
+  year         = {2023},
+  note         = {Document Number MAN0015629},
+  howpublished          = {\url{https://assets.thermofisher.com/TFS-Assets/LSG/manuals/MAN0015629_MagMAX_CellFree_DNA_Isola_UB.pdf}},
+  urldate      = {2024-11-21}
+}
+
+@misc{NEB2024,
+  title        = {Enzymatic Methyl-seq Kit: Instruction Manual},
+  author       = {{New England Biolabs}},
+  year         = {2024},
+  howpublished       = {\url{https://www.neb.com/en-us/-/media/nebus/files/manuals/manuale7120.pdf}},
+  url          = {https://www.neb.com/en-us/-/media/nebus/files/manuals/manuale7120.pdf},
+  note         = {Accessed: 2024-11-21},
+}
+
+@manual{qubit,
+  title        = {Qubit 1X dsDNA HS Assay Kit User Guide},
+  author       = {Thermo Fisher Scientific},
+  year         = {2024},
+  howpublished          = {https://assets.thermofisher.com/TFS-Assets/LSG/manuals/MAN0017455_Qubit_1X_dsDNA_HS_Assay_Kit_UG.pdf},
+  note         = {Accessed: 2024-11-22},
+}
+
+@misc{nanodrop,
+  title        = {NanoDrop One User Guide},
+  author       = {Thermo Fisher Scientific},
+  year         = {2024},
+  howpublished = {\url{https://tools.thermofisher.com/content/sfs/manuals/3091-NanoDrop-One-Help-UG-en.pdf}},
+  note         = {Accessed: 2024-11-22},
+}
+
+#+END_SRC
 * Ideas
 * [[id:14780b6a-e3d7-44b1-bb04-0272f9466166][Makefile]]
