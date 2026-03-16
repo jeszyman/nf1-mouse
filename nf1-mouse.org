@@ -56,6 +56,9 @@ K08 Aim 2: cfDNA monitoring of tumor biology and therapy response in /in vivo/ N
   - Updated experimental system to reflect actual 5 treatment arms (vehicle, mirdametinib, volasertib, combination, untreated)
   - Renamed sample ID prefix from sam to smp across all tables
 - [2026-03-16 Sun]
+  - Designed PDX read handling evaluation (bioinfo-dev): 3 strategies (direct-to-human, ICRG combined ref, Disambiguate). Discovered bwa-meth NM tag incompatibility with Disambiguate; BISCUIT required for Strategy 3. Xengsort excluded for EM-seq. Spec and plan in docs/superpowers/specs/ and plans/.
+  - Ingested [cite:@bhandari2025] (PDX disambiguation benchmarking) and [cite:@fu2025] (CDX cfDNA fragmentation) into Literature section
+  - Added methylation-aware Xengsort idea to Ideas section
   - Knowledge transfer from career.org: enriched disease background, added cross-links (bidirectional), populated People/Literature/External resources sections
   - Refactored metadata.xlsx: subset mouse-only data from CAN-PREDICT workbook into 5 project-scoped sheets (mice, pdx_lines, samples, cfdna_isolations, sequencing_libraries); updated org schemas to match
   - Added one-metadata-workbook convention to collab module in work.org
@@ -1269,6 +1272,8 @@ Two sub-pipelines:
 - [[id:36873dd1-7fb7-414c-91b6-9867274a3fd9][cfDNA quantification of cNF burden]] — JHMI/Hopkins IRB, cNF natural history study (NCT04941027) collaboration with Carlos Romo and R. Taylor Sundby
 - [[id:aa6ddddd-02f9-448d-b081-218aae5a35e0][EM-seq low input validation]] — technical validation of EM-seq at low cfDNA inputs
 - [[id:5a924e28-76f7-4217-aa0f-a3c1d9081757][EM-seq WGS fragmentomics validation]] — combined EM-seq and WGS fragmentomics validation
+- [cite:@bhandari2025] — Benchmarked 12 mouse read removal protocols for PDX WGS/WES/RNA-seq (21 PDXs). Xengsort outperforms all others including Disambiguate; pseudo-alignment approaches more efficient than alignment-based. CNA detection and gene fusions minimally affected by mouse contamination; somatic mutations and immune/stromal expression inflated. Directly informs alignment strategy.
+- [cite:@fu2025] — Used CDX mouse model to dissect cfDNA fragmentation: short fragment enrichment in both host cfDNA and ctDNA (more in ctDNA); host cfDNA fragmentation distinguishes tumor cell lines while ctDNA fragmentation distinguishes anatomical sites. Relevant to interpreting fragmentomics in PDX context.
 ** External resources
 - [[file:~/repos/nf1-cappseq/nf1-cappseq.org][NF1 CAPP-seq repo]]
 - [[id:4e0ba57c-5b29-4ef7-8f82-f84008cfe8ee][CTF Private Donor MPNST LDT]] — CTF-funded two-track clinical/research LDT using CHLA LBSeq4Kids assay
@@ -1310,5 +1315,22 @@ Two sub-pipelines:
 }
 
 #+END_SRC
-* Ideas
+* Ideas                                                              :ideas:
+** Methylation-aware Xengsort for EM-seq PDX read classification [#Y]
+:PROPERTIES:
+:ID:       A1835C32-1FEB-4902-8127-DCF343353E83
+:END:
+Xengsort uses k-mer hashing to classify reads as human or mouse before alignment. It was designed for unconverted WGS/WES/RNA-seq data. For EM-seq, enzymatic C-to-T conversion at unmethylated cytosines breaks k-mer identity, pushing reads into "ambiguous" or "neither" bins.
+
+Most k-mers (those without CpGs) are unaffected by conversion and may carry enough signal for correct classification. However, CpG-dense regions (islands, shores) — which are the most informative for methylation analysis — are disproportionately affected.
+
+Potential approach: for each k-mer in the Xengsort index that contains CpG sites, enumerate the methylation conversion variants (C or T at each CpG position) and insert all variants with the same species label. A 25-mer with N CpGs produces 2^N variants. For most k-mers (0-1 CpGs) this is 1-2 entries; for CpG-dense k-mers (2-3 CpGs) it's 4-8 entries. Hash table expansion is modest since CpG-dense regions are a small fraction of the genome.
+
+Key questions:
+- How much does the hash table expand with full CpG enumeration?
+- At what CpG density per k-mer does the combinatorial expansion become impractical?
+- Can a partial enumeration (e.g., cap at 2 CpGs per k-mer, dump higher to ambiguous) balance precision and compute?
+- Does this outperform Disambiguate on real EM-seq data, or does Disambiguate's alignment-score comparison remain superior?
+
+For the current PDX read handling evaluation, Xengsort is dropped in favor of Disambiguate (alignment-score comparison handles conversion naturally via bwa-meth). This idea is for potential future tool development.
 * [[id:14780b6a-e3d7-44b1-bb04-0272f9466166][Makefile]]
