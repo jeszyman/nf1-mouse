@@ -440,6 +440,276 @@ cfDNA from PDX mouse plasma provides a real-time, systemic measure of tumor biol
 #+end_src
 
 * Methods
+** cfDNA isolation
+cfDNA is isolated from mouse plasma using the MagMAX Cell-Free DNA Isolation Kit (Thermo Fisher, MAN0015629) following the manual protocol option 2 for small volumes. For 50 μL samples, plasma is diluted to 100 μL with PBS before isolation.
+
+Right-sided SPRI bead selection (AMPure XP, 1:1 bead:sample ratio followed by 7:1 capture) is applied to remove contaminating genomic DNA when hemolysis is suspected.
+** cfDNA isolation optimization experiment                                     :sci-exp:
+*** Data tables
+#+name: pdx
+| pdx_id | pdx_alt_id |
+|--------+------------|
+| pdx001 | WU-255     |
+| pdx002 | 2-055      |
+
+#+name: mice
+| mouse_id | pdx    |
+|----------+--------|
+| ms001    | pdx001 |
+| ms002    | pdx001 |
+| ms003    | NA     |
+| ms004    | NA     |
+| ms005    | pdx002 |
+| ms006    | pdx002 |
+|          |        |
+
+#+name: samples
+| sample_id | mouse_id | bleed_type | blood?_mL |
+|-----------+----------+------------+-----------|
+| bd001     | ms001    | terminal   | ~200      |
+| bd002     | ms002    | terminal   | ~200      |
+| bd003     | ms003    | terminal   | ~200      |
+| bd004     | ms004    | terminal   | ~200      |
+| bd005     | ms005    | serial     | ~50       |
+| bd006     | ms006    | serial     | ~50       |
+
+#+name: plasma-ders
+| mouse_id | sample_id | pder_id | pder_type | v_heme |
+|----------+-----------+---------+-----------+--------|
+| ms001    | bd001     | pder001 | plasma    | no     |
+| ms002    | bd002     | pder002 | plasma    | no     |
+| ms003    | bd003     | pder003 | plasma    | no     |
+| ms004    | bd004     | pder004 | plasma    | yes    |
+| ms005    | bd005     | pder005 | plasma    | ?      |
+| ms006    |           |         | plasma    |        |
+
+#+name: pooled-plasma
+| pooled_pder_id | source_pder_id |
+|----------------+----------------|
+| pool001        | pder001        |
+| pool001        | pder002        |
+
+#+name: cfdna-isolations
+| pder_id | cf_iso_id | spri | input_ul |
+|---------+-----------+------+----------|
+| pder002 | cfiso012  | no   |       50 |
+| pder003 | cfiso003  | yes  |       50 |
+| pder003 | cfiso006  | yes  |      200 |
+| pder003 | cfiso008  | no   |       50 |
+| pder003 | cfiso009  | no   |      200 |
+| pder004 | cfiso004  | yes  |       50 |
+| pder004 | cfiso005  | yes  |      200 |
+| pder004 | cfiso013  | no   |      200 |
+| pder004 | cfiso007  | no   |       50 |
+| pder005 | cfiso011  | no   |       50 |
+| pder005 | cfiso014  | yes  |       50 |
+| pool001 | cfiso015  | no   |       50 |
+| pool002 | cfiso016  | no   |      200 |
+
+- Mouse plasma sample bank [2024-11-01 Fri] [[https://wustl.box.com/s/jdkh9q3cdh80abyk6983y2adc0gccn25][box]]
+- data model
+  - entities
+    - mouse
+      - mouse-id
+      - weight -day
+    - tumor
+      - omics profile
+	- chr8
+	- suz12
+	- eed
+	- tp53
+	- cdkn2a
+	- ckdn2b
+	- nf1
+    - pdx
+      - pdx-id
+      - tumor-source
+      - volume / day
+      - treatment
+	- drug (HDAC, MEKi)
+    - sample
+      - tissue
+      - plasma
+	- volume
+	- collect date
+	- terminal / nonterminal
+	- visual-hemolyzed
+    - dna-isolate
+      - qubit-dna-conc
+      - nanodrop
+	- dna-conc
+	- 260-280-ratio
+	- 260-230-ratio
+	- maybe oxyhemoglobin score, but only human i think 414nm, has been done in dog- https://bmcvetres.biomedcentral.com/articles/10.1186/s12917-022-03445-8#Abs1
+	- spectrum file
+      - bioanalyzer
+	- trace-file
+	- percent-cfdna-target
+	- main-peak-height
+	- cfdna-area-ratio
+- [2025-02-21 Fri] Taylor "Okay, we dont have the same PDX. We use Shim10, Shim18, ISLE (an NIH one), JH2002, PP4T"
+- https://mail.google.com/mail/u/0/#inbox/FMfcgzQZTMHNTlZZDvQgSmjqTmxHSMpm
+*** R analysis code
+#+name: qubit-index
+| qubit_file                  | qubit_id                                        | pder_id  |
+|-----------------------------+-------------------------------------------------+----------|
+| Qubit_12_5_24.csv           | Mouse 1 + 2 PDX 1 50uL - 2                      | cfiso015 |
+| Qubit_12_5_24.csv           | Mouse 1 + 2 PDX 1 50uL - 1                      | cfiso015 |
+| Qubit_12_5_24.csv           | Mouse 1 + 2 PDX 1 200uL - 2                     | cfiso016 |
+| Qubit_12_5_24.csv           | Mouse 1 + 2 PDX 1 200uL - 1                     | cfiso016 |
+| 12_3_24_Qubit - labeled.csv | SPRI - Mouse 4 No PDX Terminal w/ Hemo - 50uL   | cfiso004 |
+| 12_3_24_Qubit - labeled.csv | SPRI - Mouse 3 No PDX Terminal w/o Hemo - 50uL  | cfiso003 |
+| 12_3_24_Qubit - labeled.csv | SPRI - Mouse 4 No PDX Terminal w/ Hemo - 200uL  | cfiso005 |
+| 12_3_24_Qubit - labeled.csv | SPRI - Mouse 3 No PDX Terminal w/o Hemo - 50uL  | cfiso003 |
+| 12_3_24_Qubit - labeled.csv | Mouse 4 No PDX Terminal w/ Hemo - 50uL          | cfiso007 |
+| 12_3_24_Qubit - labeled.csv | Mouse 3 No PDX Terminal w/o Hemo - 50uL         | cfiso008 |
+| 12_3_24_Qubit - labeled.csv | Mouse 3 No PDX Terminal w/o Hemo - 200uL        | cfiso009 |
+| 12_3_24_Qubit - labeled.csv | Mouse 2 PDX 1 Serial - 50uL                     | cfiso011 |
+| 12_3_24_Qubit - labeled.csv | SPRI - Mouse 4 No PDX Terminal w/ Hemo - 50uL   | cfiso004 |
+| 12_3_24_Qubit - labeled.csv | SPRI - Mouse 4 No PDX Terminal w/ Hemo - 200uL  | cfiso005 |
+| 12_3_24_Qubit - labeled.csv | SPRI - Mouse 3 No PDX Terminal w/o Hemo - 50uL  | cfiso003 |
+| 12_3_24_Qubit - labeled.csv | SPRI - Mouse 2 PDX 1 Serial - 50uL              | cfiso014 |
+| 12_3_24_Qubit - labeled.csv | Mouse 4 No PDX Terminal w/ Hemo - 50uL          | cfiso007 |
+| 12_3_24_Qubit - labeled.csv | Mouse 3 No PDX Terminal w/o Hemo - 50uL         | cfiso008 |
+| 12_3_24_Qubit - labeled.csv | Mouse 3 No PDX Terminal w/o Hemo - 200uL        | cfiso009 |
+| 12_3_24_Qubit - labeled.csv | Mouse 2 PDX 1 Serial - 50uL                     | cfiso011 |
+| 12_3_24_Qubit - labeled.csv | SPRI - Mouse 4 No PDX Terminal w/ Hemo - 50uL   | cfiso004 |
+| 12_3_24_Qubit - labeled.csv | SPRI - Mouse 4 No PDX Terminal w/ Hemo - 200uL  | cfiso005 |
+| 12_3_24_Qubit - labeled.csv | SPRI - Mouse 3 No PDX Terminal w/o Hemo - 50uL  | cfiso003 |
+| 12_3_24_Qubit - labeled.csv | SPRI - Mouse 3 No PDX Terminal w/o Hemo - 200uL | cfiso006 |
+| 12_3_24_Qubit - labeled.csv | SPRI - Mouse 2 PDX 1 Serial - 50uL              | cfiso014 |
+| 12_3_24_Qubit - labeled.csv | Mouse 4 No PDX Terminal w/ Hemo - 50uL          | cfiso007 |
+| 12_3_24_Qubit - labeled.csv | Mouse 4 No PDX Terminal w/ Hemo - 200uL         | cfiso013 |
+| 12_3_24_Qubit - labeled.csv | Mouse 3 No PDX Terminal w/o Hemo - 50uL         | cfiso008 |
+| 12_3_24_Qubit - labeled.csv | Mouse 3 No PDX Terminal w/o Hemo - 200uL        | cfiso009 |
+| 12_3_24_Qubit - labeled.csv | Mouse 2 PDX 1 Serial - 50uL                     | cfiso011 |
+
+#+begin_src R :session nf1-mouse
+devtools::install_github("jwfoley/bioanalyzeR")
+
+library(bioanalyzeR)
+
+list.files(paste0(find.package("bioanalyzeR"), "/extdata"), recursive = TRUE)
+
+test = read.electrophoresis("/tmp/test3.xml.gz")
+
+
+test = read.electrophoresis("/tmp/2100 expert_High Sensitivity DNA Assay_DE13804685_2025-07-24_15-58-18.xml.gz")
+
+test$samples
+
+qplot.electrophoresis(test,
+                      y = "fluorescence"
+)
+
+qplot.electrophoresis(test,
+    xlim = c(100, 800),
+    normalize = "window",
+    title = "TapeStation D1000 normalized"
+)
+
+stdcrv.mobility(test)
+qc.electrophoresis(test, "length")
+
+
+
+qplot.electrophoresis(test,
+    x = "relative.distance",
+    y = "fluorescence",
+    include.markers = TRUE,
+    show.peaks = "markers",
+    title = "TapeStation D1000 with marker peaks"
+    )
+
+test = read.electrophoresis(
+  system.file(
+    "extdata",
+    "bioanalyzer",
+    "/tmp/test.xml.gz",
+    package="bioanalyzer"
+))
+#+end_src
+
+#+begin_src R :session nf1-mouse :var cfdna_isolations=cfdna-isolations
+cfdna_isolations
+
+#+end_src
+
+#+begin_src R :session nf1-mouse :var cfdna_isolations=cfdna-isolations :var qubit_index=qubit-index :var pdx=pdx :var mice=mice :var samples=samples :var plasma_ders=plasma-ders
+install.packages("tidyverse")
+
+library(tidyverse)
+
+qubit_input1 = read_csv("./data/12_3_24_Qubit - labeled.csv", skip = 1)
+
+qubit_input2 = read_csv("./data/Qubit_12_5_24.csv")
+
+qubit_input = merge(qubit_input1,qubit_input2, all = T)
+
+qubit_mod <- qubit_input %>%
+  inner_join(qubit_index, by = c("Run ID" = "qubit_id")) %>%
+  as_tibble() %>%
+  mutate(input_ul = `Sample Volume (uL)`,
+         qubit_pg_ul = `Qubit tube conc.`) %>%
+  mutate(qubit_pg_ul = as.numeric(qubit_pg_ul)) %>%
+  mutate(input_pg = input_ul * qubit_pg_ul) %>%
+  mutate(input_pg_present = ifelse(is.na(input_pg), "no", "yes")) %>%
+  group_by(pder_id) %>%
+  mutate(
+    # Identify the maximum input_ul for each pder_id
+    max_input_ul = max(input_ul, na.rm = TRUE),
+    # Determine the input_pg corresponding to the row with the max input_ul
+    max_input_pg = input_pg[input_ul == max_input_ul][1],
+    # Calculate the expected input_pg using the formula
+    input_pg_expected = (input_ul / max_input_ul) * max_input_pg
+  ) %>%
+  ungroup() %>%
+  mutate(input_pg_ul = input_pg / input_ul)
+
+names(qubit_mod)
+
+qubit = qubit_mod
+
+ggplot(test, aes(x = pder_id, y = input_pg_expected)) + geom_boxplot() + geom_point()
+
+qubit %>%
+  mutate(qubit_pg_ul = ifelse(is.na(qubit_pg_ul), 0, qubit_pg_ul)) %>%
+  mutate(input_ul = factor(input_ul)) %>%
+  ggplot(., aes(x = pder_id, y = qubit_pg_ul)) +
+  geom_jitter(aes(color = input_pg_present, shape = input_ul), size = 4) +  # Color points based on value_type
+  geom_hline(yintercept = .5) +
+  theme_minimal()
+
+qubit %>%
+  ggplot(., aes(x = pder_id, y = input_pg_ul)) +
+  geom_boxplot()
+
+
+  # Group by pder_id
+  group_by(pder_id) %>%
+  # Find the row with the maximum input_ul for each pder_id
+  mutate(input_pg_expected = input_ul/max(input_ul) * max(input_pg))
+
+
+           input_pg[input_ul == max(input_ul, na.rm = TRUE)]) %>%
+  # Ungroup to remove the grouped structure
+  ungroup()
+
+  group_by(pder_id) %>%
+  mutate()
+
+names(qubit)
+
+
+qubit %>% inner_join(qubit_index, by)
+
+class(cfdna_isolations)
+qubit_index
+pdx
+mice
+samples
+plasm_ders
+#+end_src
 
 * Workflows
 ** Configuration
