@@ -1,24 +1,238 @@
-# Created 2025-04-10 Thu 12:59
-#+title: Scientific module repository template
+# Created 2026-03-03 Tue 12:39
+#+title: NF1 Mouse
 #+author: Jeffrey Szymanski
-* Repository administration
-** Conda envornmental YAMLs
-** Snakemake
-** README
-Directory Structure
+
+bleed dates =/= tumro volumne dates!!
+
+are ms3/4 low vol actaul isolation inputs 50 or 25?
+
+what are MN2 #1-3 extra Terminal 100uL 0.2 PCR tube (2)?
+
+separation of concerns- seq1uential numbering
+
+good practice shared box links
+
+ms1 and ms2 different pdxs?
+
+* .TODO Search nf1-mouse for needed manual updates?
+* README
+
+** Project overview
+K08 Aim 2: cfDNA monitoring of tumor biology and therapy response in /in vivo/ NF1 MPNST PDX models.
+- Aim 2.1: Correlate cfDNA features with tumor characteristics at terminal bleed
+- Aim 2.2: Characterize cfDNA dynamics in serial, non-terminal bleeds
+- Aim 2.3: Infer tumor molecular changes from cfDNA dynamics
+** Experimental system
+- 4 PDX lines: JH-2-002, WU-356 (Chr8q-gain); JH-2-055, WU-487 (Chr8q-WT)
+- Host strain: NOD.Cg-Rag1^{null} Il2rg^{null} (NRG)
+- 3 treatment arms: vehicle, MEKi (mirdametinib 1.5 mg/kg PO QD), PLK1i (volasertib 5 mg/kg IP QOD)
+- Serial submandibular bleeds (50–100 μL) at baseline and days 7, 14, 21, 28
+- Terminal bleed (~400 μL) and tumor harvest at day 28
+- cfDNA isolated with MagMax kit, profiled by EM-seq
+** Key files
+- =nf1-mouse.org= — literate programming notebook (this file)
+- =config/common.yaml= — project configuration
+- =data/metadata.xlsx= — manual data inputs
+- =workflows/= — Snakemake pipelines
+** Directory structure
 #+begin_example
 -- Main
    |-- config
+   |-- data
    |-- resources
    |-- results
+     |--<RES_OBJ_ID>
    |-- scripts
-   |-- test
-   |-- tools
+   |-- tests
    |-- workflows
 #+end_example
+** Working in this repo
+** Change log
+- [2026-03-16 Sun]
+  - Project init: transferred content from mouse-cfdna repo, populated for K08 Aim 2 scope
+- [2026-03-03 Mon]
+  - Initial setup from sci-repo template
+* Project setup and administration
+** Yaml
+*** Common
+** Repository setup
+** Machine provisioning
+** Conda environments
+The project's primary conda environment is declared under =conda-env= in =common.yaml=. Shared environments (e.g., =biotools=, =basecamp=) are listed under =sourced-conda-envs= with pinned versions. Environment YAML files live in their respective repos (e.g., =~/repos/biotools/biotools.yaml=).
+* Biological model
+** CTF grant and Hirbe collaboration
+- CTF grant AW00010324 (Hirbe PI, WashU) — Year 4 progress report due [2026-04-01], WashU internal deadline [2026-03-30]. Some funding supported Jeff's salary at Mayo during NCE period.
+- NCE deliverables: finish murine cfDNA work, continue banking, get Paul's paper out. Angie covered on banking and paper; murine work is our deliverable.
+- JCI reviewer question to address: "Can Chromosome 8 gain serial monitoring be done in mice blood samples? Would that add value in assessing early responses in human studies?"
+- Approach: Disambiguate (separate human vs mouse reads from xenograft samples) then ichorCNA to track copy number / chr 8 gains.
+- Data for this analysis is in hand [2026-03-16]. Jeff confirmed on board.
+- This data also supports Guangfeng's JCI resubmission. Angie offered co-authorship on the paper.
+** NF1 MPNST PDX model system
+NF1-associated malignant peripheral nerve sheath tumors (MPNSTs) are aggressive sarcomas and the leading cause of cancer death in NF1. Patient-derived xenograft (PDX) models recapitulate tumor histology and molecular features.
 
-*** Prerequisites
-*** Change Log
-* Pipeline
-* Development
+- PDX lines:
+  | Line      | Chr8q Status | Source Institution |
+  |-----------+--------------+--------------------|
+  | JH-2-002  | Gain         | Johns Hopkins      |
+  | WU-356    | Gain         | WashU              |
+  | JH-2-055  | WT           | Johns Hopkins      |
+  | WU-487    | WT           | WashU              |
+- Host strain: NOD.Cg-Rag1^{null} Il2rg^{null} (NRG), immune deficient
+- Tumors implanted subcutaneously, early passage (P2–P4)
+- Treatment begins when tumors reach 150–200 mm³
+- 3 arms: vehicle, MEKi (mirdametinib), PLK1i (volasertib)
+- n = 4 mice per line per arm (12 conditions, 48 mice total)
+** cfDNA as translational platform
+cfDNA from PDX mouse plasma provides a real-time, systemic measure of tumor biology:
+- Serial submandibular bleeds enable longitudinal monitoring without sacrificing the animal
+- Human-specific reads recovered after Disambiguate filtering
+- Multi-omic cfDNA features: copy number (ichorCNA), fragmentomics (NNMF signatures), methylation (EM-seq), nucleosome positioning (Griffin)
+- Terminal bleeds paired with matched tumor tissue for validation
+* Data
+** Data model
+*** Mice schema
+#+begin_src yaml
+# Mice
+# Mice table contains mouse-specific metadata for research subjects
+  # Primary key also serves as foreign key to subjects table
+  # Includes strain, genotype, and housing information
+  - name: mice
+    title: Mouse Research Subjects
+    description: Mouse subjects used in research
+    path: data/nf1_manual_inputs.xlsx
+    control:
+      type: excel
+      sheet: mice
+    schema:
+      missingValues: &mv ["", "unknown", "UNK", "unk", "n/a", "NA", "GET", "None"]
+      fields:
+        # PRIMARY KEY - also serves as foreign key to subjects table
+        # Three-letter prefix: 'mou' + 4 digits
+        - name: mouse_id
+          title: Mouse Identifier
+          description: Unique identifier for mouse subject. Format is 'mou' followed by 4 digits. Links directly to subject_id in subjects table.
+          example: mou0001
+          type: string
+          constraints:
+            required: true
+            unique: true
+            pattern: '^mou\d{4}$'
+
+        # MOUSE-SPECIFIC FIELDS
+
+        - name: strain
+          title: Mouse Strain
+          description: Genetic background strain of the mouse
+          example: nod
+          type: string
+          constraints:
+            required: true
+            maxLength: 50
+
+        - name: stock
+          title: Mouse Stock
+          description: Full stock designation including genetic modifications, lowercase with underscores
+          example: nod_cg_rag1_null_il2rg_null
+          type: string
+          constraints:
+            required: true
+            maxLength: 100
+
+        - name: sex
+          title: Mouse Sex
+          description: Biological sex of the mouse
+          example: m
+          type: string
+          constraints:
+            required: true
+            enum: [m, f]
+          enumDescriptions:
+            m: Male
+            f: Female
+
+        - name: birth_date
+          title: Birth Date
+          description: Date of birth in ISO8601 format (YYYY-MM-DD)
+          example: 2024-01-15
+          type: date
+          constraints:
+            required: false
+            minimum: "2020-01-01"
+            maximum: "2026-12-31"
+
+        - name: institution_housed
+          title: Institution Housed
+          description: The institution where the mouse was housed for experiments
+          example: washu
+          type: string
+          constraints:
+            enum: [washu, nci]
+          enumDescriptions:
+            washu: Washington University in St. Louis
+            nci: National Cancer Institute
+
+        - name: study_protocol_id
+          title: Study Protocol
+          description: Identifier for institution research protocol
+          example: 99-CC-0168
+          type: string
+          constraints:
+            required: false
+
+        # OPTIONAL NOTES
+        - name: notes
+          title: Notes
+          description: Free-text notes about this mouse
+          type: string
+          constraints:
+            required: false
+            maxLength: 500
+
+    primaryKey: mouse_id
+    foreignKeys:
+      - fields: mouse_id
+        reference:
+          resource: subjects
+          fields: subject_id
+#+end_src
+
+* Methods
+
+* Workflows
+** Configuration
+*** Data
+*** Results
+** Preamble named blocks
+** [[file:workflows/data.smk][Data pipeline]]
+*** make_data_model.R
+** [[file:workflows/results.smk][Results pipeline]]
+*** Preamble
+*** LINK to Load packages
+*** LINK to Load configuration
+*** LINK to variable naming
+*** Functions
+*** All rule
+*** On success
+* Results
+** figure_schema.R
+** Figure strategy
+The results Snakemake workflow is mount-aware: large or external files are referenced
+from mounts on other systems; otherwise outputs go to =results/<RES_OBJ_ID>/=.
+Two sub-pipelines:
+
+- *Summary TSV pipeline* — produces structured tables consumed by the report.
+- *Base image pipeline* — produces base-level figures assembled in the report.
+** Running results report
+\newcommand{\datadir}{nf1-mouse}
+\setcounter{secnumdepth}{0}
+\vspace{5mm}
+\hfill Last compiled 2026-03-03.
+\setcounter{tocdepth}{2}
+\tableofcontents
+* Reference
+** People and contacts
+** Glossary
+** Literature
+** External resources
 * Ideas
+* [[id:14780b6a-e3d7-44b1-bb04-0272f9466166][Makefile]]
