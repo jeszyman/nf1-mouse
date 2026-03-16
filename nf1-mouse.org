@@ -196,6 +196,249 @@ cfDNA from PDX mouse plasma provides a real-time, systemic measure of tumor biol
           fields: subject_id
 #+end_src
 
+*** PDX lines schema
+#+begin_src yaml
+  - name: pdx_lines
+    title: PDX Lines
+    description: Patient-derived xenograft lines used in the study
+    path: data/nf1_manual_inputs.xlsx
+    control:
+      type: excel
+      sheet: pdx_lines
+    schema:
+      missingValues: *mv
+      fields:
+        - name: pdx_line_id
+          title: PDX Line Identifier
+          description: Unique identifier for PDX line
+          example: JH-2-002
+          type: string
+          constraints:
+            required: true
+            unique: true
+
+        - name: source_tumor
+          title: Source Tumor
+          description: Original patient tumor identifier
+          type: string
+          constraints:
+            required: false
+
+        - name: chr8q_status
+          title: Chromosome 8q Status
+          description: Chr8q copy number status
+          type: string
+          constraints:
+            required: true
+            enum: [gain, wt]
+
+        - name: institution
+          title: Source Institution
+          description: Institution providing the PDX line
+          type: string
+          constraints:
+            required: true
+            enum: [washu, jhu]
+
+    primaryKey: pdx_line_id
+#+end_src
+
+*** Samples schema
+#+begin_src yaml
+  - name: samples
+    title: Blood Samples
+    description: Blood samples collected from mice
+    path: data/nf1_manual_inputs.xlsx
+    control:
+      type: excel
+      sheet: samples
+    schema:
+      missingValues: *mv
+      fields:
+        - name: sample_id
+          title: Sample Identifier
+          description: Unique identifier for blood sample
+          example: smp0001
+          type: string
+          constraints:
+            required: true
+            unique: true
+            pattern: '^smp\d{4}$'
+
+        - name: mouse_id
+          title: Mouse Identifier
+          description: Foreign key to mice table
+          type: string
+          constraints:
+            required: true
+
+        - name: bleed_type
+          title: Bleed Type
+          description: Type of blood collection
+          type: string
+          constraints:
+            required: true
+            enum: [serial, terminal]
+
+        - name: timepoint_day
+          title: Timepoint Day
+          description: Day of collection relative to treatment start
+          type: integer
+          constraints:
+            required: true
+
+        - name: volume_ul
+          title: Volume (uL)
+          description: Collected blood volume in microliters
+          type: number
+          constraints:
+            required: false
+
+        - name: visual_hemolysis
+          title: Visual Hemolysis
+          description: Whether sample shows visible hemolysis
+          type: boolean
+          constraints:
+            required: false
+
+    primaryKey: sample_id
+    foreignKeys:
+      - fields: mouse_id
+        reference:
+          resource: mice
+          fields: mouse_id
+#+end_src
+
+*** cfDNA isolations schema
+#+begin_src yaml
+  - name: cfdna_isolations
+    title: cfDNA Isolations
+    description: Cell-free DNA isolation records
+    path: data/nf1_manual_inputs.xlsx
+    control:
+      type: excel
+      sheet: cfdna_isolations
+    schema:
+      missingValues: *mv
+      fields:
+        - name: cfdna_iso_id
+          title: cfDNA Isolation Identifier
+          description: Unique identifier for cfDNA isolation
+          example: iso0001
+          type: string
+          constraints:
+            required: true
+            unique: true
+            pattern: '^iso\d{4}$'
+
+        - name: sample_id
+          title: Sample Identifier
+          description: Foreign key to samples table
+          type: string
+          constraints:
+            required: true
+
+        - name: kit
+          title: Isolation Kit
+          description: Kit used for cfDNA isolation
+          type: string
+          constraints:
+            required: true
+
+        - name: spri_cleanup
+          title: SPRI Bead Cleanup
+          description: Whether right-sided SPRI bead selection was performed
+          type: boolean
+          constraints:
+            required: false
+
+        - name: input_ul
+          title: Input Volume (uL)
+          description: Plasma input volume in microliters
+          type: number
+          constraints:
+            required: true
+
+        - name: elution_ul
+          title: Elution Volume (uL)
+          description: Elution volume in microliters
+          type: number
+          constraints:
+            required: false
+
+        - name: qubit_conc_pg_ul
+          title: Qubit Concentration (pg/uL)
+          description: cfDNA concentration measured by Qubit HS dsDNA assay
+          type: number
+          constraints:
+            required: false
+
+    primaryKey: cfdna_iso_id
+    foreignKeys:
+      - fields: sample_id
+        reference:
+          resource: samples
+          fields: sample_id
+#+end_src
+
+*** Sequencing libraries schema
+#+begin_src yaml
+  - name: sequencing_libraries
+    title: Sequencing Libraries
+    description: EM-seq library preparation and sequencing records
+    path: data/nf1_manual_inputs.xlsx
+    control:
+      type: excel
+      sheet: sequencing_libraries
+    schema:
+      missingValues: *mv
+      fields:
+        - name: library_id
+          title: Library Identifier
+          description: Unique identifier for sequencing library
+          example: lib0001
+          type: string
+          constraints:
+            required: true
+            unique: true
+            pattern: '^lib\d{4}$'
+
+        - name: cfdna_iso_id
+          title: cfDNA Isolation Identifier
+          description: Foreign key to cfdna_isolations table
+          type: string
+          constraints:
+            required: true
+
+        - name: prep_kit
+          title: Library Prep Kit
+          description: Kit used for library preparation
+          type: string
+          constraints:
+            required: true
+
+        - name: sequencing_platform
+          title: Sequencing Platform
+          description: Sequencing platform used
+          type: string
+          constraints:
+            required: false
+
+        - name: read_length
+          title: Read Length
+          description: Sequencing read length in base pairs
+          type: integer
+          constraints:
+            required: false
+
+    primaryKey: library_id
+    foreignKeys:
+      - fields: cfdna_iso_id
+        reference:
+          resource: cfdna_isolations
+          fields: cfdna_iso_id
+#+end_src
+
 * Methods
 
 * Workflows
