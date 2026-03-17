@@ -96,6 +96,11 @@ FASTQ naming convention on bucket: ={num}_nf1_lib{num}_S{lane}_R{1,2}_001.fastq.
   - Org updates: bioanalyzR QC analysis method, species-specific LINE dPCR method, bioanalyzer campaign results, TapeStation batch 2 results
   - Updated experimental system to reflect actual 5 treatment arms (vehicle, mirdametinib, volasertib, combination, untreated)
   - Renamed sample ID prefix from sam to smp across all tables
+  - Added data map for mouse-specific files across GCS bucket, NCI Globus, and local disk
+  - Created bioinfo-dev heading for PDX read handling evaluation: 3 strategies (direct, ICRG, Disambiguate), all BISCUIT
+  - Set up /mnt/data/projects/nf1-mouse/ local disk tree; downloaded mm10, built ICRG combined ref, BISCUIT indexing
+  - Selected lib0625 and lib0626 (WU-487 terminal bleeds, highest cfDNA yield) as test samples
+  - Wrote disambiguate.py (pysam NM-tag comparator) and 4 strategy shell scripts
 - [2026-03-16 Sun]
   - Knowledge transfer from career.org: enriched disease background, added cross-links (bidirectional), populated People/Literature/External resources sections
   - Refactored metadata.xlsx: subset mouse-only data from CAN-PREDICT workbook into 5 project-scoped sheets (mice, pdx_lines, samples, cfdna_isolations, sequencing_libraries); updated org schemas to match
