@@ -25,7 +25,7 @@ K08 Aim 2: cfDNA monitoring of tumor biology and therapy response in /in vivo/ N
 ** Experimental system
 - 4 PDX lines: JH-2-002, WU-356 (Chr8q-gain); JH-2-055, WU-487 (Chr8q-WT)
 - Host strain: NOD.Cg-Rag1^{null} Il2rg^{null} (NRG)
-- 3 treatment arms: vehicle, MEKi (mirdametinib 1.5 mg/kg PO QD), PLK1i (volasertib 5 mg/kg IP QOD)
+- 5 treatment arms: vehicle, mirdametinib (A, 0.3 mg/kg QDx5 days), volasertib (VS, 50 mg/kg BIDx5 days), mirdametinib + volasertib (A+VS), untreated
 - Serial submandibular bleeds (50–100 μL) at baseline and days 7, 14, 21, 28
 - Terminal bleed (~400 μL) and tumor harvest at day 28
 - cfDNA isolated with MagMax kit, profiled by EM-seq
@@ -48,6 +48,13 @@ K08 Aim 2: cfDNA monitoring of tumor biology and therapy response in /in vivo/ N
 #+end_example
 ** Working in this repo
 ** Change log
+- [2026-03-17 Mon]
+  - Data ingest from jeff-pad career directory: transferred bioanalyzer runs (25 production + 2 pilot), metadata xlsx files, protocols, dPCR reports to inputs/
+  - Metadata ingest: expanded from 18 mice / 30 samples to 140 mice / 332 samples / 3236 tumor measurements via one-off Python script (scripts/ingest_metadata.py)
+  - Added WU-225 and MN2 to pdx_lines; treatment field and tumor_injection_date added to mice schema; tumor_measurements sheet added as 6th table
+  - Org updates: bioanalyzR QC analysis method, species-specific LINE dPCR method, bioanalyzer campaign results, TapeStation batch 2 results
+  - Updated experimental system to reflect actual 5 treatment arms (vehicle, mirdametinib, volasertib, combination, untreated)
+  - Renamed sample ID prefix from sam to smp across all tables
 - [2026-03-16 Sun]
   - Knowledge transfer from career.org: enriched disease background, added cross-links (bidirectional), populated People/Literature/External resources sections
   - Refactored metadata.xlsx: subset mouse-only data from CAN-PREDICT workbook into 5 project-scoped sheets (mice, pdx_lines, samples, cfdna_isolations, sequencing_libraries); updated org schemas to match
@@ -208,6 +215,21 @@ cfDNA from PDX mouse plasma provides a real-time, systemic measure of tumor biol
           constraints:
             required: false
 
+        - name: treatment
+          title: Treatment Arm
+          description: Drug treatment assignment for this mouse
+          type: string
+          constraints:
+            required: false
+            enum: [vehicle, mirdametinib, volasertib, mirdametinib_volasertib, untreated]
+
+        - name: tumor_injection_date
+          title: Tumor Injection Date
+          description: Date of tumor implantation
+          type: date
+          constraints:
+            required: false
+
         # OPTIONAL NOTES
         - name: notes
           title: Notes
@@ -258,7 +280,7 @@ cfDNA from PDX mouse plasma provides a real-time, systemic measure of tumor biol
           description: Chr8q copy number status
           type: string
           constraints:
-            required: true
+            required: false
             enum: [gain, wt]
 
         - name: institution
@@ -425,6 +447,14 @@ cfDNA from PDX mouse plasma provides a real-time, systemic measure of tumor biol
           constraints:
             required: false
 
+        - name: bioanalyzer_conc_pg_ul
+          title: Bioanalyzer Concentration (pg/uL)
+          description: cfDNA concentration from Agilent Bioanalyzer HS DNA assay
+          type: number
+          constraints:
+            required: false
+            minimum: 0
+
     primaryKey: cfdna_iso_id
     foreignKeys:
       - fields: sample_id
@@ -496,6 +526,63 @@ cfDNA from PDX mouse plasma provides a real-time, systemic measure of tumor biol
         reference:
           resource: cfdna_isolations
           fields: cfdna_iso_id
+#+end_src
+
+*** Tumor measurements schema
+#+begin_src yaml
+  - name: tumor_measurements
+    title: Tumor Measurements
+    description: Longitudinal tumor volume and body weight measurements
+    path: data/metadata.xlsx
+    control:
+      type: excel
+      sheet: tumor_measurements
+    schema:
+      missingValues: *mv
+      fields:
+        - name: mouse_id
+          title: Mouse ID
+          description: Foreign key to mice table
+          type: string
+          constraints:
+            required: true
+
+        - name: measurement_date
+          title: Measurement Date
+          description: Date of measurement in ISO8601 format
+          type: date
+          constraints:
+            required: true
+
+        - name: days_post_implant
+          title: Days Post Implantation
+          description: Number of days after tumor implantation
+          type: integer
+          constraints:
+            required: false
+            minimum: 0
+
+        - name: tumor_volume_mm3
+          title: Tumor Volume (mm3)
+          description: Tumor volume in cubic millimeters
+          type: number
+          constraints:
+            required: false
+            minimum: 0
+
+        - name: body_weight_g
+          title: Body Weight (g)
+          description: Mouse body weight in grams
+          type: number
+          constraints:
+            required: false
+            minimum: 0
+
+    foreignKeys:
+      - fields: mouse_id
+        reference:
+          resource: mice
+          fields: mouse_id
 #+end_src
 
 * Methods
@@ -607,6 +694,7 @@ Right-sided SPRI bead selection (AMPure XP, 1:1 bead:sample ratio followed by 7:
 	- main-peak-height
 	- cfdna-area-ratio
 - [2025-02-21 Fri] Taylor "Okay, we dont have the same PDX. We use Shim10, Shim18, ISLE (an NIH one), JH2002, PP4T"
+- [2025-02-21 Fri] Sequencing pilot design meeting. Taylor to confirm sample numbers and depth with Jack. Jeff picks WashU samples. Mark to investigate qPCR for human/mouse-specific LINE-based cfDNA quantification.
 - https://mail.google.com/mail/u/0/#inbox/FMfcgzQZTMHNTlZZDvQgSmjqTmxHSMpm
 *** R analysis code
 #+name: qubit-index
@@ -643,51 +731,7 @@ Right-sided SPRI bead selection (AMPure XP, 1:1 bead:sample ratio followed by 7:
 | 12_3_24_Qubit - labeled.csv | Mouse 3 No PDX Terminal w/o Hemo - 200uL        | cfiso009 |
 | 12_3_24_Qubit - labeled.csv | Mouse 2 PDX 1 Serial - 50uL                     | cfiso011 |
 
-#+begin_src R :session nf1-mouse
-devtools::install_github("jwfoley/bioanalyzeR")
-
-library(bioanalyzeR)
-
-list.files(paste0(find.package("bioanalyzeR"), "/extdata"), recursive = TRUE)
-
-test = read.electrophoresis("/tmp/test3.xml.gz")
-
-
-test = read.electrophoresis("/tmp/2100 expert_High Sensitivity DNA Assay_DE13804685_2025-07-24_15-58-18.xml.gz")
-
-test$samples
-
-qplot.electrophoresis(test,
-                      y = "fluorescence"
-)
-
-qplot.electrophoresis(test,
-    xlim = c(100, 800),
-    normalize = "window",
-    title = "TapeStation D1000 normalized"
-)
-
-stdcrv.mobility(test)
-qc.electrophoresis(test, "length")
-
-
-
-qplot.electrophoresis(test,
-    x = "relative.distance",
-    y = "fluorescence",
-    include.markers = TRUE,
-    show.peaks = "markers",
-    title = "TapeStation D1000 with marker peaks"
-    )
-
-test = read.electrophoresis(
-  system.file(
-    "extdata",
-    "bioanalyzer",
-    "/tmp/test.xml.gz",
-    package="bioanalyzer"
-))
-#+end_src
+See [[file:nf1-mouse.org::*Bioanalyzer QC analysis][Bioanalyzer QC analysis]] in Methods for bioanalyzR analysis code.
 
 #+begin_src R :session nf1-mouse :var cfdna_isolations=cfdna-isolations
 cfdna_isolations
@@ -1101,6 +1145,33 @@ Analysis for each final isolate:
 Libraries prepared with NEBNext Enzymatic Methyl-seq (EM-seq) kit, which preserves native fragment features. Alignment with Disambiguate to retain only human reads from xenograft samples.
 ** Sequencing and alignment
 Target median deduplicated sequencing depth of 15×. Reads aligned to hg38 with BISCUIT.
+** Bioanalyzer QC analysis
+cfDNA fragment size distribution and concentration are assessed using the Agilent 2100 Bioanalyzer with High Sensitivity DNA assay. Raw XML output files are read and analyzed in R using the [[https://github.com/jwfoley/bioanalyzeR][bioanalyzR]] package. Input data are stored at =inputs/bioanalyzer/= (25 production runs, 2025-06-03 through 2025-07-25) and =inputs/bioanalyzer_pilot/= (2 pilot runs, 2024-12-10 and 2025-05-01).
+
+#+begin_src R :session nf1-mouse :eval no
+library(bioanalyzeR)
+
+## Read a single run
+ba_run <- read.electrophoresis("inputs/bioanalyzer/<run_dir>/<filename>.xml")
+ba_run$samples
+
+## Fluorescence trace plot
+qplot.electrophoresis(ba_run, y = "fluorescence")
+
+## Normalized plot in cfDNA size range (100-800 bp)
+qplot.electrophoresis(ba_run,
+    xlim = c(100, 800),
+    normalize = "window",
+    title = "HS DNA cfDNA region"
+)
+
+## QC metrics
+stdcrv.mobility(ba_run)
+qc.electrophoresis(ba_run, "length")
+#+end_src
+
+** Species-specific LINE dPCR
+Xenograft plasma contains cfDNA from both human tumor and mouse host. Species-specific quantification uses dPCR/qPCR targeting human and mouse LINE repetitive elements. TapeStation HSD1000 QC accompanies each dPCR batch to verify cfDNA size distribution and total concentration. Batch 2 (2025-03-21) characterized 12 samples from WU487 terminal, MN2 terminal, and JH-2-055 serial bleeds, with TapeStation concentrations ranging from 2.84 to 1500 pg/uL. Input: [[file:/mnt/gcs/jeszyman/projects/nf1-mouse/inputs/metadata/nf1_murine_dpcr_batch2_3_21_25.pdf][TapeStation batch 2 report]].
 
 * Workflows
 ** Configuration
@@ -1119,6 +1190,55 @@ Target median deduplicated sequencing depth of 15×. Reads aligned to hg38 with 
 *** On success
 * Results
 ** cfDNA isolation optimization
+*** Bioanalyzer QC campaign
+Bioanalyzer HS DNA assays were performed on cfDNA isolations from serial and terminal bleeds across the JH-2-055 cohort and terminal samples from WU487 and WU225. The campaign spanned 25 runs from 2025-06-03 through 2025-07-25 and covered samples collected between 2024-09-10 and 2024-11-05. Two pilot runs (2024-12-10, 2025-05-01) preceded the production campaign. Raw data are stored at =inputs/bioanalyzer/= and =inputs/bioanalyzer_pilot/=.
+
+|   Run date |    Samples collected | Sample type               |
+|------------+----------------------+---------------------------|
+| 2025-06-03 |           2024-10-29 | serial                    |
+| 2025-06-04 |           2024-10-15 | serial                    |
+| 2025-06-05 |           2024-10-01 | serial                    |
+| 2025-06-06 |           2024-10-08 | serial                    |
+| 2025-06-12 |           2024-10-22 | SPRI pilot + serial (MN2) |
+| 2025-06-13 |           2024-10-22 | SPRI trial + serial (MN2) |
+| 2025-06-18 |           2024-10-29 | serial                    |
+| 2025-06-19 |           2024-10-22 | serial                    |
+| 2025-06-20 |    2024-10-22, 10-29 | serial                    |
+| 2025-06-23 |    2024-10-22, 10-15 | serial                    |
+| 2025-06-23 |           2024-10-08 | serial                    |
+| 2025-06-24 |           2024-10-15 | serial                    |
+| 2025-06-25 |    2024-10-15, 10-08 | serial                    |
+| 2025-06-26 |    2024-10-01, 10-08 | serial                    |
+| 2025-06-27 |    2024-10-01, 09-17 | serial                    |
+| 2025-06-30 |           2024-09-17 | serial                    |
+| 2025-07-09 |           2024-09-17 | serial                    |
+| 2025-07-10 |    2024-09-17, 09-10 | serial                    |
+| 2025-07-11 |           2024-09-10 | serial                    |
+| 2025-07-14 |           2024-09-10 | serial                    |
+| 2025-07-15 |           2024-09-10 | serial                    |
+| 2025-07-17 |             terminal | WU487 terminal            |
+| 2025-07-18 |             terminal | WU487 + WU225 terminal    |
+| 2025-07-24 |             terminal | WU225 terminal            |
+| 2025-07-25 | 2024-11-05, terminal | WU225 terminal + serial   |
+
+*** TapeStation HSD1000 batch 2 (2025-03-21)
+TapeStation HS D1000 QC for species-specific LINE dPCR batch 2. Twelve samples: WU487 terminals (n=5), MN2 terminals (n=2), JH-2-055 serials at days 5, 19, 40, 47, 60 (n=5). Concentrations ranged from 2.84 pg/uL (m25, JH-2-055 serial) to 1500 pg/uL (m8, WU487 terminal). See [[file:nf1-mouse.org::*Species-specific LINE dPCR][Species-specific LINE dPCR]] in Methods.
+
+| Well | Sample | Model    | Type     | Day | Conc (pg/uL) |
+|------+--------+----------+----------+-----+--------------|
+| B1   | m7     | WU487    | terminal |     |         68.6 |
+| C1   | m8     | WU487    | terminal |     |       1500.0 |
+| D1   | m9     | WU487    | terminal |     |        379.0 |
+| E1   | m10    | WU487    | terminal |     |        150.0 |
+| F1   | m11    | WU487    | terminal |     |        209.0 |
+| G1   | m12    | MN2      | terminal |     |        245.0 |
+| H1   | m25    | JH-2-055 | serial   |   5 |         2.84 |
+| A2   | m26    | JH-2-055 | serial   |  19 |         8.48 |
+| B2   | m27    | JH-2-055 | serial   |   5 |         11.4 |
+| C2   | m28    | JH-2-055 | serial   |  40 |         58.2 |
+| D2   | m29    | JH-2-055 | serial   |  47 |         64.2 |
+| E2   | m30    | JH-2-055 | serial   |  60 |         35.6 |
+
 ** figure_schema.R
 ** Figure strategy
 The results Snakemake workflow is mount-aware: large or external files are referenced
