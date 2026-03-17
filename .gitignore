@@ -347,3 +347,4 @@ TSWLatexianTemp*
 #*Notes.bib
 docs/superpowers/
 data/metadata_canpredict_legacy.xlsx
+tmp/
