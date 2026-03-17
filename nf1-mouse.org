@@ -16,6 +16,7 @@ ms1 and ms2 different pdxs?
 
 * .TODO Search nf1-mouse for needed manual updates?
 * TODO Pull lib0625 and lib0626 FASTQs from GCS overnight                :gcal:
+SCHEDULED: <2026-03-17 Tue 20:00>
 gsutil rsync from =gs://chaudhuri-lab-bucket1/jeszyman/data/nf1/Project_JohnShern_CS039619_112EMseqlib_061225/Flowcell_22WFNNLT4/= for Sample_98_nf1_lib98 (lib0625, 58 GB) and Sample_99_nf1_lib99 (lib0626, 52 GB) into =data/fastqs/=. Rename to standard lib IDs on landing. Estimated ~3-5 hours with =gsutil -m=.
 * README
 
