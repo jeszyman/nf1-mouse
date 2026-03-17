@@ -48,6 +48,13 @@ K08 Aim 2: cfDNA monitoring of tumor biology and therapy response in /in vivo/ N
 #+end_example
 ** Working in this repo
 ** Change log
+- [2026-03-17 Mon]
+  - Data ingest from jeff-pad career directory: transferred bioanalyzer runs (25 production + 2 pilot), metadata xlsx files, protocols, dPCR reports to inputs/
+  - Metadata ingest: expanded from 18 mice / 30 samples to 140 mice / 332 samples / 3236 tumor measurements via one-off Python script (scripts/ingest_metadata.py)
+  - Added WU-225 and MN2 to pdx_lines; treatment field and tumor_injection_date added to mice schema; tumor_measurements sheet added as 6th table
+  - Org updates: bioanalyzR QC analysis method, species-specific LINE dPCR method, bioanalyzer campaign results, TapeStation batch 2 results
+  - Updated experimental system to reflect actual 5 treatment arms (vehicle, mirdametinib, volasertib, combination, untreated)
+  - Renamed sample ID prefix from sam to smp across all tables
 - [2026-03-16 Sun]
   - Knowledge transfer from career.org: enriched disease background, added cross-links (bidirectional), populated People/Literature/External resources sections
   - Refactored metadata.xlsx: subset mouse-only data from CAN-PREDICT workbook into 5 project-scoped sheets (mice, pdx_lines, samples, cfdna_isolations, sequencing_libraries); updated org schemas to match
