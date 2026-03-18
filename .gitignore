@@ -348,3 +348,7 @@ TSWLatexianTemp*
 docs/superpowers/
 data/metadata_canpredict_legacy.xlsx
 tmp/
+.ob-jupyter/
+running_results.html
+dev/icrg-analysis/*.tsv
+dev/icrg-analysis/icrg_failure_analysis.html
