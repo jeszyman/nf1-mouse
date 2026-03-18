@@ -109,6 +109,7 @@ FASTQ naming convention on bucket: ={num}_nf1_lib{num}_S{lane}_R{1,2}_001.fastq.
   - Critical gap: no Chr8q-gain lines have EM-seq data (all 18 libs are Chr8q-WT)
   - Recovered Wang JCI paper context (201331-JCI-RG-1): Reviewer A #4 drives this work
   - Created beamer presentation (15 slides) at =~/career/presentations/pdx-read-handling-2026/=
+  - Refined PDX read handling beamer presentation: added Xengsort slide, defined ICRG, reordered strategies-before-BAM-tags, consolidated ICRG failure to 2 slides, consolidated plan/metrics to 2 slides (16\to12 slides)
   - Documented LINE dPCR terminal/serial discrepancy and ICRG reference inconsistencies
 - [2026-03-17 Mon]
   - Data ingest from jeff-pad career directory: transferred bioanalyzer runs (25 production + 2 pilot), metadata xlsx files, protocols, dPCR reports to inputs/
