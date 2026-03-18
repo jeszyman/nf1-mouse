@@ -5,48 +5,49 @@
 # 
 # Source:  /home/jeszyman/repos/nf1-mouse/nf1-mouse.org
 # Author:  Jeffrey Szymanski
-# Tangled: 2026-03-18 06:45:51
+# Tangled: 2026-03-18 08:24:29
 # ============================================================
 
 set -euo pipefail
-# Compare strategies across both samples
-# Collect: total reads, mapped reads, MAPQ>=30, human-assigned reads
+# Compare strategies across all samples
+# Collect: total read pairs (from FASTQ), mapped, MAPQ>=30, human-assigned, ambiguous rate
 
 BASEDIR="/mnt/data/projects/nf1-mouse/emseq/pdx-read-handling"
-OUTFILE="/mnt/data/projects/nf1-mouse/emseq/pdx-read-handling/comparison.tsv"
+OUTFILE="${BASEDIR}/comparison.tsv"
 
-echo -e "sample\tstrategy\ttotal_reads\tmapped_reads\tmapq30_reads\thuman_reads" > "$OUTFILE"
+echo -e "sample\tstrategy\ttotal_read_pairs\tmapped_reads\tmapq30_reads\thuman_reads\tambiguous_reads\tambiguous_pct" > "$OUTFILE"
 
-for SAMPLE in lib0625 lib0626; do
+for SAMPLE in lib0622 lib0623 lib0624 lib0625 lib0626 lib0627 \
+              lib0628 lib0629 lib0630 lib0631 lib0632 lib0633 \
+              lib0634 lib0635 lib0636 lib0637 lib0638 lib0639; do
+
+  # Count total read pairs from FASTQ (shared denominator for both strategies)
+  FASTQ_DIR="/mnt/data/projects/nf1-mouse/emseq/fastqs/${SAMPLE}"
+  if [ -d "$FASTQ_DIR" ]; then
+    TOTAL_PAIRS=$(zcat "${FASTQ_DIR}"/*_R1_001.fastq.gz | awk 'NR%4==1' | wc -l)
+  else
+    continue
+  fi
+
   # Strategy 1
   S1_BAM="$BASEDIR/strategy1/${SAMPLE}/${SAMPLE}.hg38.sorted.bam"
   if [ -f "$S1_BAM" ]; then
-    TOTAL=$(samtools view -c "$S1_BAM")
     MAPPED=$(samtools view -c -F 4 "$S1_BAM")
     MAPQ30=$(samtools view -c -F 4 -q 30 "$S1_BAM")
-    echo -e "${SAMPLE}\tstrategy1_direct\t${TOTAL}\t${MAPPED}\t${MAPQ30}\t${MAPQ30}" >> "$OUTFILE"
-  fi
-
-  # Strategy 2
-  S2_BAM="$BASEDIR/strategy2/${SAMPLE}/${SAMPLE}.icrg.human_only.sorted.bam"
-  S2_FULL="$BASEDIR/strategy2/${SAMPLE}/${SAMPLE}.icrg.sorted.bam"
-  if [ -f "$S2_BAM" ]; then
-    TOTAL=$(samtools view -c "$S2_FULL")
-    MAPPED=$(samtools view -c -F 4 "$S2_FULL")
-    HUMAN=$(samtools view -c "$S2_BAM")
-    MAPQ30=$(samtools view -c -F 4 -q 30 "$S2_BAM")
-    echo -e "${SAMPLE}\tstrategy2_icrg\t${TOTAL}\t${MAPPED}\t${MAPQ30}\t${HUMAN}" >> "$OUTFILE"
+    echo -e "${SAMPLE}\tstrategy1_direct\t${TOTAL_PAIRS}\t${MAPPED}\t${MAPQ30}\t${MAPQ30}\t0\t0.0" >> "$OUTFILE"
   fi
 
   # Strategy 3
+  S3_SUMMARY="$BASEDIR/strategy3/${SAMPLE}/${SAMPLE}.disambig.summary.txt"
   S3_BAM="$BASEDIR/strategy3/${SAMPLE}/${SAMPLE}.disambig.human.bam"
   S3_HG38="$BASEDIR/strategy3/${SAMPLE}/${SAMPLE}.hg38.sorted.bam"
-  if [ -f "$S3_BAM" ]; then
-    TOTAL=$(samtools view -c "$S3_HG38")
+  if [ -f "$S3_SUMMARY" ]; then
     MAPPED=$(samtools view -c -F 4 "$S3_HG38")
-    HUMAN=$(samtools view -c "$S3_BAM")
+    HUMAN=$(awk -F'\t' '$1=="human_assigned"{print $2}' "$S3_SUMMARY")
+    AMBIG=$(awk -F'\t' '$1=="ambiguous"{print $2}' "$S3_SUMMARY")
+    AMBIG_PCT=$(awk -F'\t' '$1=="ambiguous_pct"{print $2}' "$S3_SUMMARY")
     MAPQ30=$(samtools view -c -F 4 -q 30 "$S3_BAM")
-    echo -e "${SAMPLE}\tstrategy3_disambig\t${TOTAL}\t${MAPPED}\t${MAPQ30}\t${HUMAN}" >> "$OUTFILE"
+    echo -e "${SAMPLE}\tstrategy3_disambig\t${TOTAL_PAIRS}\t${MAPPED}\t${MAPQ30}\t${HUMAN}\t${AMBIG}\t${AMBIG_PCT}" >> "$OUTFILE"
   fi
 done
 

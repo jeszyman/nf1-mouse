@@ -5,7 +5,7 @@
 # 
 # Source:  /home/jeszyman/repos/nf1-mouse/nf1-mouse.org
 # Author:  Jeffrey Szymanski
-# Tangled: 2026-03-18 06:45:51
+# Tangled: 2026-03-18 08:24:29
 # ============================================================
 
 set -euo pipefail
@@ -14,7 +14,7 @@ set -euo pipefail
 
 SAMPLE=$1
 THREADS=${2:-8}
-REF="/mnt/data/projects/nf1-mouse/ref/biscuit_hg38/Homo_sapiens.GRCh38.dna.primary_assembly.fa"
+REF="/mnt/data/projects/nf1-mouse/ref/biscuit/ncbi_hg38_noalt/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna"
 FASTQ_DIR="/mnt/data/projects/nf1-mouse/emseq/fastqs/${SAMPLE}"
 OUTDIR="/mnt/data/projects/nf1-mouse/emseq/pdx-read-handling/strategy1/${SAMPLE}"
 mkdir -p "$OUTDIR"
