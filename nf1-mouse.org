@@ -2,6 +2,21 @@
 #+title: NF1 Mouse
 #+author: Jeffrey Szymanski
 
+
+  Settled:
+  - Two strategies: Direct-to-human (Strategy 1) vs Disambiguate (Strategy 3), bo
+  - ICRG is closed (fundamental EM-seq incompatibility, not a setup error)
+  - Xengsort excluded (k-mer classification breaks on EM-seq conversion)
+  - Scripts exist, 2-sample pilot done, disambiguate.py rewritten to streaming
+  - VM spec decided, full plan exists at docs/superpowers/plans/2026-03-18-direct
+
+  Immediately actionable on jeff-beast:
+  1. Pull remaining 16 FASTQs from GCS
+  2. Run Phase A R analysis (MAPQ, overlap, chromosome distribution) on existing
+  3. Validate scripts on one more sample (lib0622)
+
+
+- [ ] extract visuals from [cite:@bhandari2025]
 bleed dates =/= tumro volumne dates!!
 
 are ms3/4 low vol actaul isolation inputs 50 or 25?
@@ -90,6 +105,12 @@ FASTQ naming convention on bucket: ={num}_nf1_lib{num}_S{lane}_R{1,2}_001.fastq.
 
 ** Working in this repo
 ** Change log
+- [2026-03-19 Wed]
+  - Updated spec to align with actual project state: 2 strategies (direct + disambiguate), ICRG closed
+  - Corrected false ICRG chromosome collision narrative — verified mm10_ prefix was already in place; real failure is EM-seq conversion collapse + tied-read bias
+  - Found GavinHaLab/PDX_mouseSubtraction pipeline (combined ref + chr suffixing + mate-pair filter + realign); useful reference even though ICRG is dead for EM-seq
+  - Added TODO: sequence Chr8q-gain lines for JCI Reviewer A response
+  - Added general TODO: always verify chromosome names distinct when building multi-species references
 - [2026-03-18 Tue]
   - Pulled 3M-read-pair FASTQ subsets for lib0625/lib0626 via GCS mount (zcat | head | gzip)
   - Ran all 3 PDX read handling strategies to completion (sequential, ~5.5 hrs total); OOM crash from parallel run informed resource optimization
@@ -1820,6 +1841,9 @@ ICRG is not viable for whole-genome EM-seq PDX read handling. Disambiguate with 
 - [ ] Test whether FASTA order (human-first vs mouse-first) affects tied-read species assignment
 - [ ] Compare ICRG performance with Bismark aligner (as used in [cite:@callari2018]) vs BISCUIT to determine if failure is aligner-specific
 - [ ] Quantify fraction of human-origin reads (per Disambiguate) that ICRG sends to mouse chroms, by genomic region (conserved vs divergent)
+- [ ] Sequence EM-seq libraries for Chr8q-gain PDX lines (MN2, WU-225, JH-2-002, WU-356). Currently all 18 EM-seq libraries are from Chr8q-WT lines (WU-487, JH-2-055). Chr8q monitoring for JCI Reviewer A response requires data from gain lines.
+- [ ] Re-evaluate ICRG strategy: prior failure (<1% human reads) root cause still unresolved. Known issues from prior sessions: wrong index format (bwa-meth index used with BISCUIT), path mismatches, Ensembl vs NCBI assembly inconsistencies. Chromosome naming was already handled (=mm10_= prefix). See GavinHaLab/PDX_mouseSubtraction for reference implementation including mate-pair filter and realignment to hg38-only.
+- [ ] General: when building concatenated multi-species references, always verify chromosome names are distinct between species before indexing. Collision (e.g., both using =chr1=) silently breaks chromosome-based filtering.
 
 ** Ideas
 - The ICRG approach may be rescuable with a post-hoc MAPQ=0 rescue step: for MAPQ=0 reads, check XA tag for cross-species alternative alignments and re-classify
