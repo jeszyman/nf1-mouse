@@ -5,7 +5,7 @@
 # 
 # Source:  /home/jeszyman/repos/nf1-mouse/nf1-mouse.org
 # Author:  Jeffrey Szymanski
-# Tangled: 2026-03-18 08:24:29
+# Tangled: 2026-03-24 11:06:46
 # ============================================================
 
 set -euo pipefail
@@ -35,7 +35,7 @@ biscuit align -@ "$THREADS" "$MM10_REF" "$R1" "$R2" \
 samtools index "${OUTDIR}/${SAMPLE}.mm10.sorted.bam"
 
 # Disambiguate: compare NM tags, assign to species with fewer mismatches
-conda run -n biotools python3 /home/jeszyman/repos/nf1-mouse/dev/pdx-read-handling/disambiguate.py \
+python3 "$(dirname "$0")/disambiguate.py" \
   --human-bam "${OUTDIR}/${SAMPLE}.hg38.sorted.bam" \
   --mouse-bam "${OUTDIR}/${SAMPLE}.mm10.sorted.bam" \
   --out-prefix "${OUTDIR}/${SAMPLE}" \

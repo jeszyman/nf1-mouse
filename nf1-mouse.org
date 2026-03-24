@@ -105,6 +105,13 @@ FASTQ naming convention on bucket: ={num}_nf1_lib{num}_S{lane}_R{1,2}_001.fastq.
 
 ** Working in this repo
 ** Change log
+- [2026-03-24 Mon]
+  - Updated CTF grant section with Chr8q-gain sequencing gap details from email thread (2026-03-14 through 2026-03-18): all 18 libs are Chr8q-WT, need MN2/WU-225 sequencing for JCI, Jeff offered to prep more plasma
+  - Added mu4e message links to CTF email thread for traceability
+  - Updated contacts: added Aadel and Paul emails, added Tiffany Redden (WashU grant specialist)
+  - Created project conda env =nf1-mouse= (biscuit, samtools, pysam) at =config/nf1-mouse-conda-env.yaml=, tangled from org; removed dependency on shared biotools/emseq envs
+  - Updated disambiguate.py call to relative path via =$(dirname "$0")= instead of hardcoded repo path
+  - Updated =common.yaml= to use =nf1-mouse= as project conda env
 - [2026-03-19 Wed]
   - Updated spec to align with actual project state: 2 strategies (direct + disambiguate), ICRG closed
   - Corrected false ICRG chromosome collision narrative — verified mm10_ prefix was already in place; real failure is EM-seq conversion collapse + tied-read bias
@@ -157,7 +164,24 @@ FASTQ naming convention on bucket: ={num}_nf1_lib{num}_S{lane}_R{1,2}_001.fastq.
 ** Repository setup
 ** Machine provisioning
 ** Conda environments
-The project's primary conda environment is declared under =conda-env= in =common.yaml=. Shared environments (e.g., =biotools=, =basecamp=) are listed under =sourced-conda-envs= with pinned versions. Environment YAML files live in their respective repos (e.g., =~/repos/biotools/biotools.yaml=).
+The project's primary conda environment is =nf1-mouse=, declared under =conda-env= in =common.yaml=. All scripts in this repo use this env.
+
+*** nf1-mouse
+:PROPERTIES:
+:header-args:yaml: :tangle ./config/nf1-mouse-conda-env.yaml
+:END:
+
+#+begin_src yaml
+name: nf1-mouse
+channels:
+  - conda-forge
+  - bioconda
+
+dependencies:
+  - biscuit
+  - samtools
+  - pysam
+#+end_src
 * Biological model
 :PROPERTIES:
 :ID:       f1ff894b-756e-4e68-a637-ee7282d463d6
@@ -173,6 +197,11 @@ The project's primary conda environment is declared under =conda-env= in =common
 - Approach: Disambiguate (separate human vs mouse reads from xenograft samples) then ichorCNA to track copy number / chr 8 gains.
 - Data for this analysis is in hand [2026-03-16]. Jeff confirmed on board.
 - This data also supports Guangfeng's JCI resubmission. Angie offered co-authorship on the paper.
+- [2026-03-18 Wed] Critical gap identified: all 18 existing EM-seq libraries are from Chr8q-WT lines (WU-487 and JH-2-055). No sequencing from Chr8q-gain models (MN2 or WU-225). WT samples can show human/mouse read handling and other CNAs for CTF report, but likely insufficient for JCI resubmission which specifically asks about Chr8 gain monitoring. Jeff offered to work up additional mouse plasma from Chr8q-gain lines; plasma believed to be already isolated. Awaiting Angie's response.
+- Email threads:
+  - [[mu4e:msgid:BN7PR01MB3715CC434C37B6881079949C9640A@BN7PR01MB3715.prod.exchangelabs.com][CTF Progress Report — Jeff on board, approach confirmed (2026-03-16)]]
+  - [[mu4e:msgid:BN7PR01MB3715C4DC359FE6778A42FA509641A@BN7PR01MB3715.prod.exchangelabs.com][CTF Progress Report — likely CNA data for Guangfeng timeline (2026-03-17)]]
+  - [[mu4e:msgid:BN7PR01MB3715A87513CC83EB65A6032D964EA@BN7PR01MB3715.prod.exchangelabs.com][CTF Progress Report — Chr8q-gain sequencing gap identified (2026-03-18)]]
 ** NF1 MPNST PDX model system
 NF1 (neurofibromatosis type 1) affects ~1 in 2,500 individuals worldwide. Plexiform neurofibromas (PNs) can progress through atypical neurofibroma (AN) to malignant peripheral nerve sheath tumor (MPNST), the leading cause of cancer death in NF1. Lifetime MPNST risk is 8–13%; 5-year disease-specific survival is ~30%. Molecular progression follows NF1 biallelic loss → CDKN2A/B deletion → TP53 and PRC2 (SUZ12/EED) loss, with MPNST subtypes distinguished by H3K27me3-loss vs H3K27me3-retained status. Patient-derived xenograft (PDX) models recapitulate tumor histology and molecular features, enabling controlled /in vivo/ studies of cfDNA dynamics.
 
@@ -1348,11 +1377,12 @@ Two sub-pipelines:
 * Reference
 ** People and contacts
 - Angela Hirbe, M.D., Ph.D. — Associate Professor of Medicine and Pediatrics, Director Adult Neurofibromatosis Clinical Program, Division of Oncology/Sarcoma, WashU. CTF grant PI. Manages PDX models and mouse experiments. hirbea@wustl.edu, 314-362-8965.
-- Aadel Chaudhuri, M.D., Ph.D. — Mayo Clinic. K08 mentor, cfDNA expertise, co-investigator on NF1 cfDNA projects.
-- Paul — WashU, Hirbe lab. Experience with mouse bleeds, leads PDX experiment execution.
+- Aadel Chaudhuri, M.D., Ph.D. — Mayo Clinic. K08 mentor, cfDNA expertise, co-investigator on NF1 cfDNA projects. Chaudhuri.Aadel@mayo.edu.
+- Paul A. Jones — WashU, Hirbe lab. Experience with mouse bleeds, leads PDX experiment execution. paul.a.jones@wustl.edu.
 - Guangfeng Wang — WashU, Hirbe lab. First author on JCI FAK+MEK paper (201331-JCI-RG-1). wang.g@wustl.edu.
 - Stacey Chamberlain — Nurse Coordinator, Hirbe lab. 314-286-1567.
 - Sanita Burgic — Nurse Practitioner, Hirbe lab.
+- Tiffany Redden — Senior Grant Specialist, WashU DOM Research Administration. Assigned to CTF AW00010324 progress report. reddent@wustl.edu.
 ** Glossary
 ** Literature
 - Wang et al. "Dual inhibition of FAK and MEK is a therapeutic vulnerability in chromosome 8 gain MPNST" — JCI manuscript 201331-JCI-RG-1 (Guangfeng Wang first author, Angela Hirbe senior). CRISPR screen of all Chr8 genes identified PTK2/FAK as druggable target in Chr8-gain MPNST. Dual FAK+MEK inhibition (defactinib + avutometinib) synergistically effective in Chr8-gain PDX models (MN2, WU-225) but not Chr8-diploid. Major revision requested [2025-11-18 Tue]; revision in progress. Reviewer A comment #4 asked whether Chr8 gain can be monitored serially in mouse blood — this is the direct motivation for our PDX cfDNA read handling and ichorCNA work. Co-authorship offered to Szymanski and Chaudhuri for contributing the cfDNA monitoring data.
@@ -1930,7 +1960,7 @@ biscuit align -@ "$THREADS" "$MM10_REF" "$R1" "$R2" \
 samtools index "${OUTDIR}/${SAMPLE}.mm10.sorted.bam"
 
 # Disambiguate: compare NM tags, assign to species with fewer mismatches
-conda run -n biotools python3 /home/jeszyman/repos/nf1-mouse/dev/pdx-read-handling/disambiguate.py \
+python3 "$(dirname "$0")/disambiguate.py" \
   --human-bam "${OUTDIR}/${SAMPLE}.hg38.sorted.bam" \
   --mouse-bam "${OUTDIR}/${SAMPLE}.mm10.sorted.bam" \
   --out-prefix "${OUTDIR}/${SAMPLE}" \

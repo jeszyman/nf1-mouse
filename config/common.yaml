@@ -1,4 +1,2 @@
 project: nf1-mouse
-conda-env: basecamp
-sourced-conda-envs:
-  biotools: "0.1.0"
+conda-env: nf1-mouse
