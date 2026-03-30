@@ -1,6 +1,11 @@
 # Created 2026-03-03 Tue 12:39
 #+title: NF1 Mouse
 #+author: Jeffrey Szymanski
+
+mouse chr8 samples- https://mail.google.com/mail/u/0/#inbox/FMfcgzQgKvKNWDpjskqzJTvLfWKwTpDx
+
+mouse plan in /docs/superpowers/   subsample- see batch-test-results-collection
+
 https://mail.google.com/mail/u/0/#inbox/FMfcgzQgKvKNWDpjskqzJTvLfWKwTpDx
 
   Settled:
