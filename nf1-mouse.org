@@ -1,7 +1,7 @@
 # Created 2026-03-03 Tue 12:39
 #+title: NF1 Mouse
 #+author: Jeffrey Szymanski
-
+https://mail.google.com/mail/u/0/#inbox/FMfcgzQgKvKNWDpjskqzJTvLfWKwTpDx
 
   Settled:
   - Two strategies: Direct-to-human (Strategy 1) vs Disambiguate (Strategy 3), bo
@@ -105,6 +105,18 @@ FASTQ naming convention on bucket: ={num}_nf1_lib{num}_S{lane}_R{1,2}_001.fastq.
 
 ** Working in this repo
 ** Change log
+- [2026-03-30 Mon]
+  - Production alignment status: Strategy 1 (hg38 direct) running on GCP VM (224 vCPU, 220 GB RAM)
+  - BISCUIT 1.8.0 header truncation bug fixed via =samtools view -bS -t ref.fai= workaround
+  - Alignment rate: 9.7 batches/hr, perfectly linear across 133 hrs of runtime (range 9.5–10.0, no degradation)
+  - Per-sample: ~380M read pairs, ~1,430 batches, ~147 hrs (~6 days) wall time at 8 threads
+  - 5 samples actively aligning: lib0622 (90%), lib0623 (82%), lib0624 (87%), lib0625 (77%), lib0626 (42%)
+  - lib0628 lost ~45 hrs of compute (435/1430 batches) from memory-pressure crash when 8 parallel procs exceeded 190/220 GB RAM; reduced to 5-6 parallel
+  - lib0627, lib0629 failed immediately (header error under memory pressure); queued for retry
+  - First BAM (lib0622) expected ~2026-03-31
+  - Updated Strategy 3 script to reuse Strategy 1 hg38 BAMs — only runs mm10 alignment + disambiguate
+  - Added alignment benchmarks section to =* Direct vs Disambiguate= heading
+  - Total pipeline projection: ~36 days remaining (Strategy 1 + Strategy 3 mm10)
 - [2026-03-24 Mon]
   - Updated CTF grant section with Chr8q-gain sequencing gap details from email thread (2026-03-14 through 2026-03-18): all 18 libs are Chr8q-WT, need MN2/WU-225 sequencing for JCI, Jeff offered to prep more plasma
   - Added mu4e message links to CTF email thread for traceability
@@ -136,7 +148,7 @@ FASTQ naming convention on bucket: ={num}_nf1_lib{num}_S{lane}_R{1,2}_001.fastq.
   - Updated metadata: MN2 and WU-225 chr8q_status = gain per Hirbe email
   - Critical gap: no Chr8q-gain lines have EM-seq data (all 18 libs are Chr8q-WT)
   - Recovered Wang JCI paper context (201331-JCI-RG-1): Reviewer A #4 drives this work
-  - Created beamer presentation (15 slides) at =~/career/presentations/pdx-read-handling-2026/=
+  - Created beamer presentation (15 slides) at =~/private/presentations/talks/pdx-read-handling-2026/=
   - Refined PDX read handling beamer presentation: added Xengsort slide, defined ICRG, reordered strategies-before-BAM-tags, consolidated ICRG failure to 2 slides, consolidated plan/metrics to 2 slides (16\to12 slides)
   - Documented LINE dPCR terminal/serial discrepancy and ICRG reference inconsistencies
 - [2026-03-17 Mon]
@@ -197,11 +209,18 @@ dependencies:
 - Approach: Disambiguate (separate human vs mouse reads from xenograft samples) then ichorCNA to track copy number / chr 8 gains.
 - Data for this analysis is in hand [2026-03-16]. Jeff confirmed on board.
 - This data also supports Guangfeng's JCI resubmission. Angie offered co-authorship on the paper.
-- [2026-03-18 Wed] Critical gap identified: all 18 existing EM-seq libraries are from Chr8q-WT lines (WU-487 and JH-2-055). No sequencing from Chr8q-gain models (MN2 or WU-225). WT samples can show human/mouse read handling and other CNAs for CTF report, but likely insufficient for JCI resubmission which specifically asks about Chr8 gain monitoring. Jeff offered to work up additional mouse plasma from Chr8q-gain lines; plasma believed to be already isolated. Awaiting Angie's response.
+- [2026-03-18 Wed] Critical gap identified: all 18 existing EM-seq libraries are from Chr8q-WT lines (WU-487 and JH-2-055). No sequencing from Chr8q-gain models (MN2 or WU-225). WT samples can show human/mouse read handling and other CNAs for CTF report, but likely insufficient for JCI resubmission which specifically asks about Chr8 gain monitoring. Jeff offered to work up additional mouse plasma from Chr8q-gain lines; plasma believed to be already isolated.
+- [2026-03-20 Fri] New sequencing round agreed. EM-seq confirmed (Jeff preference over WGS to build out methylation analysis in the model). Jack Shern (NCI) and Chloe Sachs (NCI) will make EM-seq libraries and sequence at NIH. Jeff committed to disambiguation pipeline working; Aadel's condition: "EM-seq as long as Jeff can work out disambiguation." Jeff estimated <1 week for analysis once data arrives. Jeff said to expect no more than 5 samples.
+- [2026-03-23 Mon] Sample selection plan finalized:
+  - JH-2-055 serial bleeds (Chr8q-WT): day 5 and day 19 post-treatment start (no week 2 sample collected for this mouse). Two mice: #4-4 and #2-2.
+  - MN2 serial bleeds (Chr8q-gain): Guangfeng's repeat experiment, double therapy group. Timepoints: [2026-02-12] (first week of treatment) and [2026-02-19] (treatment termination). Mark will isolate all plasma from those dates, then send whichever two mice look best.
+  - Jeff also requested untreated terminal bleed Chr8q-gain samples as backup — do not bank 100% on serial bleeds.
+- [2026-03-24 Tue] Bioanalyzer results reviewed for JH-2-055 samples. The 10/1/2024 samples (#4-4) show ~35 pg/uL in the 167 bp mono-nucleosomal cfDNA peak — substantially lower than most other samples (typically ≥100 pg/uL). However, these samples are cleaner (less genomic contamination). Important: the 35 pg/uL is the bioanalyzer-reported concentration within the 167 bp peak region only (area under the electropherogram curve gated around that peak, calibrated against internal standards), not total DNA. Total sample DNA is higher. Need to confirm which EM-seq kit version Chloe has: original E7120 requires 10 ng minimum (would not work at ~890 pg total cfDNA in 25 uL), but EM-seq v2 E8015 requires only 100 pg minimum (890 pg = 8.9× above that, viable).
 - Email threads:
   - [[mu4e:msgid:BN7PR01MB3715CC434C37B6881079949C9640A@BN7PR01MB3715.prod.exchangelabs.com][CTF Progress Report — Jeff on board, approach confirmed (2026-03-16)]]
   - [[mu4e:msgid:BN7PR01MB3715C4DC359FE6778A42FA509641A@BN7PR01MB3715.prod.exchangelabs.com][CTF Progress Report — likely CNA data for Guangfeng timeline (2026-03-17)]]
   - [[mu4e:msgid:BN7PR01MB3715A87513CC83EB65A6032D964EA@BN7PR01MB3715.prod.exchangelabs.com][CTF Progress Report — Chr8q-gain sequencing gap identified (2026-03-18)]]
+  - [[mu4e:msgid:BN7PR01MB3715A87513CC83EB65A6032D964EA@BN7PR01MB3715.prod.exchangelabs.com][CTF Progress Report — EM-seq confirmed, NIH sequencing, sample plan (2026-03-20 through 2026-03-24)]]
 ** NF1 MPNST PDX model system
 NF1 (neurofibromatosis type 1) affects ~1 in 2,500 individuals worldwide. Plexiform neurofibromas (PNs) can progress through atypical neurofibroma (AN) to malignant peripheral nerve sheath tumor (MPNST), the leading cause of cancer death in NF1. Lifetime MPNST risk is 8–13%; 5-year disease-specific survival is ~30%. Molecular progression follows NF1 biallelic loss → CDKN2A/B deletion → TP53 and PRC2 (SUZ12/EED) loss, with MPNST subtypes distinguished by H3K27me3-loss vs H3K27me3-retained status. Patient-derived xenograft (PDX) models recapitulate tumor histology and molecular features, enabling controlled /in vivo/ studies of cfDNA dynamics.
 
@@ -1261,6 +1280,12 @@ Analysis for each final isolate:
 #  LocalWords:  smallaq pdx SPRI
 ** EM-seq library preparation
 Libraries prepared with NEBNext Enzymatic Methyl-seq (EM-seq) kit, which preserves native fragment features. Alignment with Disambiguate to retain only human reads from xenograft samples.
+
+- Input requirements by kit version:
+  - Original EM-seq (E7120): minimum 10 ng DNA input
+  - EM-seq v2 (E8015): minimum 100 pg DNA input (100-fold lower)
+- Existing 18 libraries (all Chr8q-WT) were prepared from samples with ≥100 pg/uL bioanalyzer cfDNA concentration, well above either kit minimum at 25 uL elution volume.
+- New round (2026-03-24): NIH (Chloe Sachs) preparing libraries. Some JH-2-055 serial samples as low as ~35 pg/uL in 167 bp peak (~890 pg total in 25 uL). Requires v2 kit; original kit minimum would not be met.
 ** Sequencing and alignment
 Target median deduplicated sequencing depth of 15×. Reads aligned to hg38 with BISCUIT.
 ** Bioanalyzer QC analysis
@@ -1874,6 +1899,8 @@ ICRG is not viable for whole-genome EM-seq PDX read handling. Disambiguate with 
 - [ ] Sequence EM-seq libraries for Chr8q-gain PDX lines (MN2, WU-225, JH-2-002, WU-356). Currently all 18 EM-seq libraries are from Chr8q-WT lines (WU-487, JH-2-055). Chr8q monitoring for JCI Reviewer A response requires data from gain lines.
 - [ ] Re-evaluate ICRG strategy: prior failure (<1% human reads) root cause still unresolved. Known issues from prior sessions: wrong index format (bwa-meth index used with BISCUIT), path mismatches, Ensembl vs NCBI assembly inconsistencies. Chromosome naming was already handled (=mm10_= prefix). See GavinHaLab/PDX_mouseSubtraction for reference implementation including mate-pair filter and realignment to hg38-only.
 - [ ] General: when building concatenated multi-species references, always verify chromosome names are distinct between species before indexing. Collision (e.g., both using =chr1=) silently breaks chromosome-based filtering.
+- [ ] Try limited/subsampled BISCUIT alignment on a second VM to validate rate and parallelize across machines. Current single-VM bottleneck is RAM (25 GB/process, 220 GB total → max 6-8 parallel). A second VM could cut total wall time in half.
+- [ ] Identify metadata for first-completing samples (lib0622–lib0625: WU-487 terminal bleeds, mou0001–mou0004) and prepare ichorCNA copy number analysis pipeline so CNA analysis can start immediately when BAMs are ready. Key metadata: sample IDs (sam0587–sam0590), mouse IDs (mou0001–mou0004), PDX line WU-487, Chr8q status WT, cfDNA concentrations (467, 536, 111, 1720 pg/µl).
 
 ** Ideas
 - The ICRG approach may be rescuable with a post-hoc MAPQ=0 rescue step: for MAPQ=0 reads, check XA tag for cross-species alternative alignments and re-classify
@@ -1970,6 +1997,43 @@ samtools flagstat "${OUTDIR}/${SAMPLE}.hg38.sorted.bam" > "${OUTDIR}/${SAMPLE}.h
 samtools flagstat "${OUTDIR}/${SAMPLE}.mm10.sorted.bam" > "${OUTDIR}/${SAMPLE}.mm10.flagstat.txt"
 samtools flagstat "${OUTDIR}/${SAMPLE}.disambig.human.bam" > "${OUTDIR}/${SAMPLE}.disambig.human.flagstat.txt"
 #+end_src
+
+** Production run: alignment benchmarks
+
+BISCUIT 1.8.0 alignment on GCP n2-highmem (224 vCPU, 220 GB RAM), conda env =nf1-mouse=.
+
+*** Per-sample input scale
+Each EM-seq library is ~71 GB compressed (R1+R2), ~380M read pairs (PE150).
+BISCUIT processes reads in fixed batches of 529,802 sequences (264,901 read pairs), yielding ~1,430 batches per sample.
+
+*** Throughput
+- ~710 read pairs/sec/thread (bisulfite-aware alignment to hg38 no-alt, 195 contigs)
+- 8 threads per process: ~5,680 read pairs/sec, ~370 sec (6.2 min) wall time per batch
+- Pace is constant from batch 1 through batch 1,062+: mean 370 sec, range 305–438 sec
+- No degradation over multi-day runs
+
+*** Reference context
+| Aligner            | Typical rate (reads/sec/thread) | Notes                  |
+|--------------------+---------------------------------+------------------------|
+| BWA-MEM2 (genomic) | 3,000–5,000                     | Non-bisulfite          |
+| BISCUIT (EM-seq)   | 700–1,000                       | C→T conversion-aware   |
+| Bismark (bowtie2)  | 200–400                         | Three-letter alignment |
+
+BISCUIT at 710 reads/sec/thread is within expected range for bisulfite-aware whole-genome alignment. The ~5× slowdown relative to standard BWA-MEM reflects the additional cost of handling C→T converted reads on both strands.
+
+*** Resource usage per BISCUIT process
+- RAM: ~25 GB (BWT + SA arrays for hg38 no-alt)
+- CPU: 800% (8 threads, fully saturated)
+- Sort temp files: ~1.4 GB each, ~15 files per sample at peak (samtools sort -T on /mnt/data)
+- Final sorted BAM: TBD (first sample completing)
+
+*** Wall time estimates (hg38 alignment, Strategy 1)
+- Per sample: ~1,430 batches × 370 sec ÷ 3,600 = ~147 hrs (~6 days) at 8 threads
+- With 6 parallel processes (150 GB RAM): 18 samples ÷ 6 = 3 waves × ~6 days = ~18 days
+- Limiting factor: RAM (25 GB/process), not CPU (224 vCPUs available, using 48)
+
+*** BISCUIT header truncation bug (v1.8.0)
+BISCUIT 1.8.0 truncates =@SQ= header lines for references with long contig names (e.g., =chrUn_KI270302v1= → =chrUn_KI2=, missing =LN:= tag). Workaround: pipe through =samtools view -bS -t ref.fai= to inject correct =@SQ= lines from the =.fai= file before sorting. This bug affected the NCBI hg38 no-alt reference (195 contigs, many with names >10 chars); UCSC mm10 (66 contigs) may also be affected.
 
 ** Comparison metrics
 
