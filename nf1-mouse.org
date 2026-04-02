@@ -2128,7 +2128,7 @@ The likely mechanism is that EM-seq C→T conversion at unmethylated CpGs reduce
 ** References
 #+print_bibliography:
 
-* Sub-50M cohort CNA analysis                                    :bioinfo_dev:
+* Sub-50M cohort CNA analysis                                   :bioinfo_dev:
 :PROPERTIES:
 :header-args:jupyter-R: :session cna-sub50M :kernel biotools :async yes :dir ./dev/cna-sub50M
 :EXPORT_FILE_NAME: ./cna-sub50M-analysis
@@ -2152,12 +2152,12 @@ Six WU-487 terminal bleeds from NRG mice: 3 vehicle-treated (mou0001-mou0003, co
 
 | lib_id  | mouse_id | treatment    | tumor vol (mm^{3}) | body wt (g) | cfDNA (pg/uL) |
 |---------+----------+--------------+--------------------+-------------+---------------|
-| lib0622 | mou0001  | vehicle      |              1,823 |          23 |           467 |
-| lib0623 | mou0002  | vehicle      |              1,410 |          26 |           536 |
-| lib0624 | mou0003  | vehicle      |              1,048 |          26 |           111 |
-| lib0625 | mou0004  | mirdametinib |              1,902 |          23 |         1,720 |
-| lib0626 | mou0005  | mirdametinib |              2,380 |          21 |         2,380 |
-| lib0627 | mou0006  | mirdametinib |              2,551 |          27 |           387 |
+| lib0622 | mou0001  | vehicle      | 1,823              |          23 |           467 |
+| lib0623 | mou0002  | vehicle      | 1,410              |          26 |           536 |
+| lib0624 | mou0003  | vehicle      | 1,048              |          26 |           111 |
+| lib0625 | mou0004  | mirdametinib | 1,902              |          23 |         1,720 |
+| lib0626 | mou0005  | mirdametinib | 2,380              |          21 |         2,380 |
+| lib0627 | mou0006  | mirdametinib | 2,551              |          27 |           387 |
 
 *** Tumor growth curves
 
@@ -2299,6 +2299,18 @@ source("05_tumor_fraction.R")
 
 The heatmap reveals two distinct sample groups: lib0626 and lib0627 have elevated tumor fractions across all strategies and presets after disambiguation (S3A TF = 0.46 and 0.65 respectively with default-low-input/nopon), while the remaining 4 samples cluster at low TF (0.05-0.16) regardless of strategy. Critically, S1 fails to distinguish high-TF from low-TF samples because mouse contamination inflates baseline TF estimates for all samples. For S1, lib0626's TF is 0.08 (nopon) or 0.15 (withpon), masking the true 0.46-0.47 TF visible only after disambiguation.
 
+*** Preset robustness
+
+ichorCNA offers multiple presets tuned for different input types. We evaluated whether TF estimates are robust across presets for the recommended S3A + PoN configuration.
+
+#+begin_src jupyter-R :results output graphics file :file dev/cna-sub50M/plots/preset_robustness.png :width 14 :height 12 :units in :res 300
+source("22_preset_robustness.R")
+#+end_src
+
+[[file:dev/cna-sub50M/plots/preset_robustness.png]]
+
+For the two high-TF samples (lib0626, lib0627), TF estimates are consistent across all three presets (CV < 0.15), indicating that the CNA signal is strong enough to be detected regardless of preset sensitivity. For low-TF samples, the aggressive preset tends to report slightly lower TF values while the permissive preset reports lower values still, reflecting different regularization stringency. The default-low-input preset provides the best balance and is recommended for production use with cfDNA input.
+
 ** CNA profiles
 
 *** Genome-wide CNA: S1 vs S3A side-by-side (lib0626)
@@ -2320,6 +2332,18 @@ source("20_cna_comparison_pub.R")
 [[file:dev/cna-sub50M/plots/cna_pub_lib0627.png]]
 
 lib0627 (mirdametinib, TF = 0.65 by S3A) shows the most pronounced CNA after disambiguation. The S3A profile reveals broad gains on chromosomes 1q, 7, 8q, 15, and losses on chromosomes 1p, 9p, and 17. Even S1 begins to show some CNA signal for this high-TF sample, but the amplitudes are severely compressed compared to S3A. At this tumor fraction, S1 detects a TF of 0.38, approximately 40% lower than the true value.
+
+*** Per-chromosome CNA analysis
+
+To understand how contamination affects CNA detection at the chromosome level, we computed weighted median log2 ratios per chromosome for each strategy.
+
+#+begin_src jupyter-R :results output graphics file :file dev/cna-sub50M/plots/per_chr_analysis.png :width 16 :height 12 :units in :res 300
+source("21_per_chr_analysis.R")
+#+end_src
+
+[[file:dev/cna-sub50M/plots/per_chr_analysis.png]]
+
+The per-chromosome heatmap (Panel A) for lib0626 reveals that S1 shows uniformly near-zero log2 ratios across all chromosomes due to mouse contamination dampening the CNA signal. S3A unmasks chromosome-specific gains and losses. Panel B confirms a systematic signal compression: most chromosomes fall below the identity line, indicating that S1 underestimates the true CNA magnitude. Panel C quantifies the signal amplification ratio (S3A/S1) per chromosome, showing that disambiguation amplifies CNA signal by 2-8 fold at chromosomes with true alterations.
 
 *** MPNST-specific loci
 
