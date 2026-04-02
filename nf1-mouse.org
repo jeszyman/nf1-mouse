@@ -2167,8 +2167,7 @@ Longitudinal tumor volume measurements are available for all 6 mice from implant
 source("14_tumor_growth_curves.R")
 #+end_src
 
-#+RESULTS:
-[[file:plots/tumor_growth_curves.png]]
+[[file:dev/cna-sub50M/plots/tumor_growth_curves.png]]
 
 All tumors reached substantial volumes at endpoint (1,048-2,551 mm^{3}). The mirdametinib-treated mice (mou0004-mou0006) had terminal tumor volumes comparable to or larger than vehicle controls (mou0001-mou0003), indicating that mirdametinib did not substantially reduce tumor growth at the evaluated dose and schedule. This is consistent with the drug resistance phenotype observed in WU-487. Tumor volumes ranged 2.4-fold across the cohort, providing a biologically meaningful dynamic range for correlating tumor burden with circulating tumor fraction.
 
@@ -2186,8 +2185,7 @@ Disambiguate classifies each read pair into human-assigned, mouse-assigned, or a
 source("18_improved_figures.R")
 #+end_src
 
-#+RESULTS:
-[[file:plots/fig1_species_classification.png]]
+[[file:dev/cna-sub50M/plots/fig1_species_classification.png]]
 
 Across all 6 samples, 67-71% of read pairs are mouse-assigned and only 18-22% are human-assigned, with 11-12% ambiguous. This species composition is consistent across treatment arms and reflects the expected dominance of host-derived cfDNA in PDX plasma. The uniformity of species ratios across samples indicates that technical variability in library preparation and sequencing does not substantially affect species classification.
 
@@ -2197,8 +2195,7 @@ Across all 6 samples, 67-71% of read pairs are mouse-assigned and only 18-22% ar
 source("02_read_assignment.R")
 #+end_src
 
-#+RESULTS:
-[[file:plots/human_pct_vs_cfdna.png]]
+[[file:dev/cna-sub50M/plots/human_pct_vs_cfdna.png]]
 
 lib0626 and lib0627 show slightly higher human read fractions (21.8% and 22.1%) compared to other samples (18.1-20.2%). These two samples also have the highest ichorCNA tumor fractions after disambiguation (see below), suggesting that elevated tumor-derived cfDNA contributes modestly more human reads to the total pool.
 
@@ -2208,8 +2205,7 @@ lib0626 and lib0627 show slightly higher human read fractions (21.8% and 22.1%) 
 source("03_alignment_metrics.R")
 #+end_src
 
-#+RESULTS:
-[[file:plots/mapped_reads.png]]
+[[file:dev/cna-sub50M/plots/mapped_reads.png]]
 
 Strategy 1 retains approximately 117-120M mapped reads per sample (both reads of all 50M pairs that map anywhere to hg38). After disambiguation, S3A retains approximately 20-24M mapped reads (human-only), and S3B retains 31-35M (human + ambiguous). The 5-6-fold reduction from S1 to S3A reflects the removal of the ~67-71% mouse contamination plus the ~11% ambiguous reads.
 
@@ -2219,8 +2215,7 @@ Strategy 1 retains approximately 117-120M mapped reads per sample (both reads of
 source("03_alignment_metrics.R")
 #+end_src
 
-#+RESULTS:
-[[file:plots/retention_vs_s1.png]]
+[[file:dev/cna-sub50M/plots/retention_vs_s1.png]]
 
 S3A retains 17-20% of S1's mapped reads. S3B retains 27-30%. The consistency across samples confirms that species classification is not sample-dependent and reflects the stable mouse-to-human ratio in PDX plasma cfDNA.
 
@@ -2232,8 +2227,7 @@ To directly quantify mouse contamination in Strategy 1, we performed exact read-
 source("18_improved_figures.R")
 #+end_src
 
-#+RESULTS:
-[[file:plots/fig2_s1_contamination.png]]
+[[file:dev/cna-sub50M/plots/fig2_s1_contamination.png]]
 
 Of the 11.1M reads that pass S1's MAPQ >= 20 filter in lib0626, 68.6% are classified as mouse by disambiguate, 24.7% as human, and 6.6% as ambiguous. This demonstrates that mouse reads from conserved genomic regions produce hg38 alignment scores sufficient to pass standard quality filters, making MAPQ-based filtering alone inadequate for PDX cfDNA analysis.
 
@@ -2243,8 +2237,7 @@ Of the 11.1M reads that pass S1's MAPQ >= 20 filter in lib0626, 68.6% are classi
 source("12_read_mapping_figure.R")
 #+end_src
 
-#+RESULTS:
-[[file:plots/read_mapping_comprehensive.png]]
+[[file:dev/cna-sub50M/plots/read_mapping_comprehensive.png]]
 
 The three-panel figure summarizes the PDX read handling comparison. Panel A shows that S1 retains 5-6 times more "human" read pairs than S3A, but this excess consists primarily of mouse contamination. Panel B shows the disambiguate species classification revealing that the majority of reads in every sample are mouse-origin. Panel C demonstrates for lib0626 that 68.6% of reads passing S1's MAPQ >= 20 quality filter are actually mouse reads.
 
@@ -2258,8 +2251,7 @@ Fragment length distributions distinguish cfDNA from genomic DNA: tumor-derived 
 source("13_fragment_histograms.R")
 #+end_src
 
-#+RESULTS:
-[[file:plots/fragment_histograms.png]]
+[[file:dev/cna-sub50M/plots/fragment_histograms.png]]
 
 In raw counts, S1 dominates all samples because it retains 5-6 times more reads. However, only lib0626 and lib0627 show a discernible mono-nucleosomal peak in the S3A distribution, consistent with their elevated tumor fractions. The remaining 4 samples show minimal structure after disambiguation, consistent with low tumor content.
 
@@ -2269,8 +2261,7 @@ In raw counts, S1 dominates all samples because it retains 5-6 times more reads.
 source("13b_fragment_histograms_pct.R")
 #+end_src
 
-#+RESULTS:
-[[file:plots/fragment_histograms_pct.png]]
+[[file:dev/cna-sub50M/plots/fragment_histograms_pct.png]]
 
 Normalizing each strategy to its own total reveals the shape difference most clearly. For lib0626 and lib0627, S3A shows a pronounced mono-nucleosomal peak at approximately 167 bp that is attenuated or absent in S1. This shape change confirms that disambiguation enriches for tumor-derived cfDNA by removing the genomic DNA background from mouse host cells. For low-TF samples (lib0622-lib0625), all three strategies produce similar flat profiles, indicating that the cfDNA nucleosomal signature is below detection at these tumor fractions (TF approximately 0.05-0.09).
 
@@ -2284,8 +2275,7 @@ ichorCNA was run across all combinations of 3 strategies, 3 presets (default-low
 source("05_tumor_fraction.R")
 #+end_src
 
-#+RESULTS:
-[[file:plots/pon_effect.png]]
+[[file:dev/cna-sub50M/plots/pon_effect.png]]
 
 Applying the default hg38 panel of normals (PoN) improves cross-sample consistency for S1 (vehicle arm CV drops from 0.33 to 0.11). For disambiguated strategies (S3A, S3B), the PoN effect is smaller because mouse contamination removal already reduces systematic bias. The PoN primarily corrects for reference-specific read depth artifacts that affect both real CNA signals and contamination-driven false signals.
 
@@ -2295,8 +2285,7 @@ Applying the default hg38 panel of normals (PoN) improves cross-sample consisten
 source("18_improved_figures.R")
 #+end_src
 
-#+RESULTS:
-[[file:plots/fig3_tf_comparison.png]]
+[[file:dev/cna-sub50M/plots/fig3_tf_comparison.png]]
 
 With the recommended settings (default-low-input preset, with PoN, autosomes only), disambiguation reveals the true tumor fraction landscape. lib0626 jumps from TF = 0.15 (S1) to 0.47 (S3A), a 3.1-fold increase. lib0627 jumps from 0.20 to 0.65, a 3.3-fold increase. The four low-TF samples (lib0622-lib0625) show TF = 0.09-0.12 across all strategies, indicating that disambiguation correctly identifies these as low tumor content rather than artificially depressing their estimates.
 
@@ -2306,8 +2295,7 @@ With the recommended settings (default-low-input preset, with PoN, autosomes onl
 source("05_tumor_fraction.R")
 #+end_src
 
-#+RESULTS:
-[[file:plots/tf_heatmap.png]]
+[[file:dev/cna-sub50M/plots/tf_heatmap.png]]
 
 The heatmap reveals two distinct sample groups: lib0626 and lib0627 have elevated tumor fractions across all strategies and presets after disambiguation (S3A TF = 0.46 and 0.65 respectively with default-low-input/nopon), while the remaining 4 samples cluster at low TF (0.05-0.16) regardless of strategy. Critically, S1 fails to distinguish high-TF from low-TF samples because mouse contamination inflates baseline TF estimates for all samples. For S1, lib0626's TF is 0.08 (nopon) or 0.15 (withpon), masking the true 0.46-0.47 TF visible only after disambiguation.
 
@@ -2319,8 +2307,7 @@ The heatmap reveals two distinct sample groups: lib0626 and lib0627 have elevate
 source("20_cna_comparison_pub.R")
 #+end_src
 
-#+RESULTS:
-[[file:plots/cna_pub_lib0626.png]]
+[[file:dev/cna-sub50M/plots/cna_pub_lib0626.png]]
 
 For lib0626 (mirdametinib, TF = 0.46 by S3A), direct alignment (S1) shows a flat profile with minimal CNA signal because the 68.6% mouse contamination dampens all log2 ratio deviations. After disambiguation, S3A reveals clear gains and losses across multiple chromosomes that are consistent with the known MPNST CNA landscape. CNA events are color-coded by ichorCNA classification: gains (orange/red) and heterozygous deletions (blue) become visible only after species decontamination.
 
@@ -2330,8 +2317,7 @@ For lib0626 (mirdametinib, TF = 0.46 by S3A), direct alignment (S1) shows a flat
 source("20_cna_comparison_pub.R")
 #+end_src
 
-#+RESULTS:
-[[file:plots/cna_pub_lib0627.png]]
+[[file:dev/cna-sub50M/plots/cna_pub_lib0627.png]]
 
 lib0627 (mirdametinib, TF = 0.65 by S3A) shows the most pronounced CNA after disambiguation. The S3A profile reveals broad gains on chromosomes 1q, 7, 8q, 15, and losses on chromosomes 1p, 9p, and 17. Even S1 begins to show some CNA signal for this high-TF sample, but the amplitudes are severely compressed compared to S3A. At this tumor fraction, S1 detects a TF of 0.38, approximately 40% lower than the true value.
 
@@ -2341,8 +2327,7 @@ lib0627 (mirdametinib, TF = 0.65 by S3A) shows the most pronounced CNA after dis
 source("06_cna_profiles.R")
 #+end_src
 
-#+RESULTS:
-[[file:plots/cna_mpnst_loci.png]]
+[[file:dev/cna-sub50M/plots/cna_mpnst_loci.png]]
 
 CNA values at MPNST-specific loci (CDKN2A, CDKN2B, TP53, NF1, SUZ12, EED, EZH2) are examined across all samples and strategies. For high-TF samples (lib0626, lib0627), disambiguation reveals losses at expected tumor suppressor and PRC2 loci that are attenuated or absent in S1. For low-TF samples, CNA signal at these loci is near the noise floor regardless of strategy, consistent with the limited statistical power to detect focal events at TF < 0.10.
 
@@ -2352,8 +2337,7 @@ CNA values at MPNST-specific loci (CDKN2A, CDKN2B, TP53, NF1, SUZ12, EED, EZH2) 
 source("06_cna_profiles.R")
 #+end_src
 
-#+RESULTS:
-[[file:plots/cna_chr8q.png]]
+[[file:dev/cna-sub50M/plots/cna_chr8q.png]]
 
 WU-487 is Chr8q-WT, so this region serves as a negative control. Across all samples and strategies, the Chr8q 50-145 Mb region shows neutral log2 ratios (near zero), confirming that disambiguation does not introduce artifactual CNA calls and that the WU-487 line indeed lacks the Chr8q gain seen in other MPNST PDX lines.
 
@@ -2365,8 +2349,7 @@ WU-487 is Chr8q-WT, so this region serves as a negative control. Across all samp
 source("18_improved_figures.R")
 #+end_src
 
-#+RESULTS:
-[[file:plots/fig4_tf_vs_tumor.png]]
+[[file:dev/cna-sub50M/plots/fig4_tf_vs_tumor.png]]
 
 Using corrected terminal tumor volumes (1,048-2,551 mm^{3}, previously incorrectly recorded as body weights of 23-27 g), the relationship between tumor burden and cfDNA tumor fraction becomes interpretable. With S3A (default-low-input, with PoN), mou0006 (2,551 mm^{3}) has TF = 0.65 and mou0005 (1,868 mm^{3}) has TF = 0.47. However, the correlation across all 6 samples is not significant (Spearman rho = 0.26, p = 0.66), driven by the vehicle arm tumors (1,048-1,823 mm^{3}) all having low TF (0.05-0.12) regardless of volume. This suggests that tumor volume alone is insufficient to predict cfDNA tumor fraction, and that biological factors such as tumor vascularity, necrosis, and cfDNA shedding rate contribute substantially.
 
@@ -2378,8 +2361,7 @@ The ratio of short (<150 bp) to long (>250 bp) cfDNA fragments is a marker of tu
 source("19_short_long_ratio.R")
 #+end_src
 
-#+RESULTS:
-[[file:plots/short_long_ratio_pub.png]]
+[[file:dev/cna-sub50M/plots/short_long_ratio_pub.png]]
 
 After disambiguation (S3A), the short-to-long ratio increases for lib0626 and lib0627, consistent with enrichment of tumor-derived cfDNA fragments. For low-TF samples, the ratio remains similar across strategies, confirming that the fragment size distribution shift is driven by tumor content rather than a systematic bias introduced by the disambiguation procedure. The correlation between short-to-long ratio and tumor fraction provides an orthogonal validation of ichorCNA tumor fraction estimates.
 
@@ -2389,8 +2371,7 @@ After disambiguation (S3A), the short-to-long ratio increases for lib0626 and li
 source("16_strategy_concordance.R")
 #+end_src
 
-#+RESULTS:
-[[file:plots/strategy_concordance.png]]
+[[file:dev/cna-sub50M/plots/strategy_concordance.png]]
 
 The concordance matrix shows high Spearman correlations (rho > 0.9) between S3A and S3B across PoN settings, confirming that including ambiguous reads does not substantially alter rank ordering of tumor fractions. S1 correlations with disambiguated strategies are lower (rho approximately 0.7-0.8), reflecting the confounding effect of mouse contamination on S1 estimates. The scatter plot shows that S1 severely underestimates tumor fraction for high-TF samples (lib0626, lib0627) while overestimating for low-TF samples, making S1 unreliable for quantitative tumor fraction assessment.
 
@@ -2400,8 +2381,7 @@ The concordance matrix shows high Spearman correlations (rho > 0.9) between S3A 
 source("05_tumor_fraction.R")
 #+end_src
 
-#+RESULTS:
-[[file:plots/tf_vs_cfdna.png]]
+[[file:dev/cna-sub50M/plots/tf_vs_cfdna.png]]
 
 cfDNA concentration does not predict tumor fraction. lib0625 has the second-highest cfDNA concentration (1,720 pg/uL) but low TF across all strategies, while lib0627 has moderate cfDNA (387 pg/uL) but the highest TF (0.65). This dissociation indicates that total cfDNA yield reflects host biology (blood volume, processing) rather than tumor content, and that tumor fraction estimation requires sequence-based approaches such as ichorCNA.
 
@@ -2411,8 +2391,7 @@ cfDNA concentration does not predict tumor fraction. lib0625 has the second-high
 source("18_improved_figures.R")
 #+end_src
 
-#+RESULTS:
-[[file:plots/fig5_summary_multipanel.png]]
+[[file:dev/cna-sub50M/plots/fig5_summary_multipanel.png]]
 
 The four-panel summary captures the core findings: (A) species classification shows 67-71% mouse reads across all samples; (B) tumor fraction estimates diverge sharply between strategies for the two high-TF samples; (C) the TF-tumor volume relationship after disambiguation is biologically plausible but not statistically significant at n = 6; (D) direct quantification of contamination in S1 demonstrates that the majority of reads passing quality filters are mouse-origin.
 
