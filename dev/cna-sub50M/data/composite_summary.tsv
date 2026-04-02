@@ -1,0 +1,7 @@
+lib_id	tf_1	tf_3a	tf_3b	sample_id	mouse_id	pdx_line	chr8q	treatment	bleed_type	collection_date	cfdna_conc_pg_ul	body_weight_g	tumor_vol_mm3
+lib0622	0.131	0.07012	0.07621	smp0587	mou0001	WU-487	WT	vehicle	terminal	2024-08-20	467	23	1823
+lib0623	0.07804	0.04806	0.08874	smp0588	mou0002	WU-487	WT	vehicle	terminal	2024-08-20	536	26	1410
+lib0624	0.1578	0.08916	0.07218	smp0589	mou0003	WU-487	WT	vehicle	terminal	2024-08-20	111	26	1048
+lib0625	0.073	0.07288	0.07546	smp0590	mou0004	WU-487	WT	mirdametinib	terminal	2024-08-30	1720	23	1902
+lib0626	0.07969	0.4606	0.3484	smp0591	mou0005	WU-487	WT	mirdametinib	terminal	2024-08-30	2380	21	1868
+lib0627	0.3825	0.6496	0.5438	smp0592	mou0006	WU-487	WT	mirdametinib	terminal	2024-08-30	387	27	2551

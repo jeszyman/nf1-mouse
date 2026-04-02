@@ -1,0 +1,7 @@
+lib_id	mouse_id	treatment	cfdna_conc_pg_ul	tumor_vol_mm3
+lib0622	mou0001	vehicle	467	1823
+lib0623	mou0002	vehicle	536	1410
+lib0624	mou0003	vehicle	111	1048
+lib0625	mou0004	mirdametinib	1720	1902
+lib0626	mou0005	mirdametinib	2380	1868
+lib0627	mou0006	mirdametinib	387	2551

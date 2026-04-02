@@ -1,0 +1,7 @@
+lib_id	human_pct	mouse_pct	ambiguous_pct	treatment	cfdna_conc_pg_ul
+lib0622	20.2	67.4	12.3	vehicle	467
+lib0623	18.5	69.9	11.6	vehicle	536
+lib0624	19.5	69.1	11.4	vehicle	111
+lib0625	18.1	70.7	11.2	mirdametinib	1720
+lib0626	21.8	66.7	11.5	mirdametinib	2380
+lib0627	22.1	67.3	10.6	mirdametinib	387
