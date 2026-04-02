@@ -2265,6 +2265,16 @@ source("13b_fragment_histograms_pct.R")
 
 Normalizing each strategy to its own total reveals the shape difference most clearly. For lib0626 and lib0627, S3A shows a pronounced mono-nucleosomal peak at approximately 167 bp that is attenuated or absent in S1. This shape change confirms that disambiguation enriches for tumor-derived cfDNA by removing the genomic DNA background from mouse host cells. For low-TF samples (lib0622-lib0625), all three strategies produce similar flat profiles, indicating that the cfDNA nucleosomal signature is below detection at these tumor fractions (TF approximately 0.05-0.09).
 
+*** High-TF vs low-TF fragment comparison
+
+#+begin_src jupyter-R :results output graphics file :file dev/cna-sub50M/plots/fragment_pub.png :width 12 :height 12 :units in :res 300
+source("23_fragment_pub.R")
+#+end_src
+
+[[file:dev/cna-sub50M/plots/fragment_pub.png]]
+
+This focused comparison isolates the key finding: for high-TF samples (lib0626, lib0627), S3A reveals a clear mono-nucleosomal peak at 167 bp that is hidden in S1 by the overwhelming mouse genomic DNA background. For low-TF samples, neither strategy produces a nucleosomal peak, confirming that the nucleosomal signature requires sufficient tumor-derived cfDNA to be detectable above the background. The 167 bp peak corresponds to the canonical cfDNA fragment length protected by a single nucleosome plus linker histone, a hallmark of apoptotic cell-free DNA release from tumor cells.
+
 ** Tumor fraction estimation
 
 ichorCNA was run across all combinations of 3 strategies, 3 presets (default-low-input, aggressive, permissive), and 2 panel-of-normals settings (nopon, withpon), for a total of 108 runs on autosomes only.
@@ -2420,6 +2430,16 @@ source("18_improved_figures.R")
 The four-panel summary captures the core findings: (A) species classification shows 67-71% mouse reads across all samples; (B) tumor fraction estimates diverge sharply between strategies for the two high-TF samples; (C) the TF-tumor volume relationship after disambiguation is biologically plausible but not statistically significant at n = 6; (D) direct quantification of contamination in S1 demonstrates that the majority of reads passing quality filters are mouse-origin.
 
 ** Result summary
+
+*** Integrated sample summary
+
+#+begin_src jupyter-R :results output graphics file :file dev/cna-sub50M/plots/waterfall_summary.png :width 14 :height 10 :units in :res 300
+source("24_waterfall_summary.R")
+#+end_src
+
+[[file:dev/cna-sub50M/plots/waterfall_summary.png]]
+
+Samples sorted by S3A tumor fraction reveal a clear bimodal distribution: lib0627 (TF = 0.65) and lib0626 (TF = 0.47) separate cleanly from the four low-TF samples (TF = 0.08-0.12). The X marks show the corresponding S1 estimates, which compress the dynamic range by failing to distinguish high-TF from low-TF samples. Tumor volume, human read fraction, and cfDNA concentration are shown for context. While the two highest-TF samples have the largest tumors, neither cfDNA concentration nor tumor volume alone explains the TF variation, emphasizing the need for computational tumor fraction estimation through CNA-based methods.
 
 *** Key findings
 
