@@ -4,7 +4,7 @@ library(tidyverse)
 library(readxl)
 
 # Paths
-gcs_base <- "/mnt/gcs/jeszyman/projects/nf1/emseq/pdx-read-handling-sub50M"
+gcs_base <- "/mnt/gcs/jeszyman/projects/nf1-mouse/emseq/pdx-read-handling-sub50M"
 repo     <- "/home/jeszyman/repos/nf1-mouse"
 ichor_dir <- file.path(gcs_base, "ichorcna/ichorcna")
 bio_dir  <- "/mnt/gcs/jeszyman/projects/nf1-mouse/inputs/bioanalyzer"
