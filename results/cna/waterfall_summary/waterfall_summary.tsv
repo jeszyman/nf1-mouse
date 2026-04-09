@@ -1,0 +1,7 @@
+lib_id	treatment	cfdna_conc_pg_ul	tumor_vol_mm3	human_pct	s3a_tf	s1_tf	sample_order
+lib0622	vehicle	467	1823	20.2	0.1012	0.08571	5
+lib0623	vehicle	536	1410	18.5	0.1238	0.1052	3
+lib0624	vehicle	111	1048	19.5	0.1058	0.0901	4
+lib0625	mirdametinib	1720	1902	18.1	0.1001	0.09897	6
+lib0626	mirdametinib	2380	1868	21.8	0.4694	0.1512	2
+lib0627	mirdametinib	387	2551	22.1	0.6494	0.1965	1
