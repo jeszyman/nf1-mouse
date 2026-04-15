@@ -23,3 +23,4 @@
 - Heavy data at `/mnt/data/projects/nf1-mouse/` — repo stays light
 - GCS is source of truth for raw inputs
 - Do not commit large data files to the repo
+- **Canonical `data/` layout** lives in science.org subtree ID `08049f58-adcc-49b3-8e13-7697b58fe26a` (sci_proj_repo → Data layout). Fetch via `org_subtree_by_id` at session start when doing data/ scaffolding or cleanup — it is the single source of truth across sci_proj_repo projects.
