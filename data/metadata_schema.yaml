@@ -132,6 +132,14 @@ resources:
           constraints:
             required: false
 
+        - name: tumor_injection_site
+          title: Tumor Injection Site
+          description: Anatomical site of PDX tumor implantation
+          type: string
+          constraints:
+            required: false
+            enum: [flank, sciatic_nerve, intramuscular, subcutaneous, other]
+
     primaryKey: mouse_id
     foreignKeys:
       - fields: pdx_line_id

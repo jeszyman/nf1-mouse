@@ -2,7 +2,6 @@
 #+title: NF1 Mouse
 #+author: Jeffrey Szymanski
 
-- [ ] do we have pure mouse cfdna w/o pdx?
 - [ ] implant site consistent or as a variable?
 
 - [cite:@mouliere2018a]
@@ -425,6 +424,14 @@ resources:
           type: date
           constraints:
             required: false
+
+        - name: tumor_injection_site
+          title: Tumor Injection Site
+          description: Anatomical site of PDX tumor implantation
+          type: string
+          constraints:
+            required: false
+            enum: [flank, sciatic_nerve, intramuscular, subcutaneous, other]
 
     primaryKey: mouse_id
     foreignKeys:
@@ -1385,6 +1392,7 @@ Note: LINE dPCR worked well for serial bleed samples but produced unreliable or 
 **** All rule
 **** On success
 ** Results
+- mou0067-76 are nopdx- check frag vs mouse pdx reads
 
 [[file:resources/media/fu2020frag-fig2c.png]]
 
