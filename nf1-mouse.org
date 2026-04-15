@@ -2,28 +2,9 @@
 #+title: NF1 Mouse
 #+author: Jeffrey Szymanski
 
+- [ ] do we have pure mouse cfdna w/o pdx?
+- [ ] implant site consistent or as a variable?
 
-see if we see if we have PDX Associated copy number alteration for the tumor or sell free DNA
-
-https://mail.google.com/mail/u/0/#inbox/FMfcgzQgKvKNWDpjskqzJTvLfWKwTpDx
-
-- Fragmentation biology
-  - [cite:@han2020]
-- Xenograft cfDNA biology
-  - Normal mouse cfDNA
-    - Mouse cfDNA mononucleosome peak is at about 167 bp, same as human [cite:@serpas2018dnase1l3;han2020].
-      [[file:resources/media/han2020-fig7a.png]]
-- Xenograft nucleic acid species assignment
-  - Software
-    - XenofilteR
-      - [[https://github.com/NKI-GCF/XenofilteR][repo]]
-
-
-as pure ctdna for frag in the past- maybe first pure ctdna for meth?
-
-
-
-- [cite:@fu2025frag]
 - [cite:@mouliere2018a]
 
 - mouse chr8 samples- https://mail.google.com/mail/u/0/#inbox/FMfcgzQgKvKNWDpjskqzJTvLfWKwTpDx
@@ -57,16 +38,16 @@ separation of concerns- seq1uential numbering
 good practice shared box links
 
 ms1 and ms2 different pdxs?
+* NF1 Mouse PDX cfDNA Studies
+** .TODO Search nf1-mouse for needed manual updates?
+** README
 
-* .TODO Search nf1-mouse for needed manual updates?
-* README
-
-** Project overview
+*** Project overview
 K08 Aim 2: cfDNA monitoring of tumor biology and therapy response in /in vivo/ NF1 MPNST PDX models.
 - Aim 2.1: Correlate cfDNA features with tumor characteristics at terminal bleed
 - Aim 2.2: Characterize cfDNA dynamics in serial, non-terminal bleeds
 - Aim 2.3: Infer tumor molecular changes from cfDNA dynamics
-** Experimental system
+*** Experimental system
 - 6 PDX lines:
   - Chr8q-gain: JH-2-002 (JHU), WU-356 (WashU), MN2 (WashU), WU-225 (WashU)
   - Chr8q-WT: JH-2-055 (JHU), WU-487 (WashU)
@@ -76,12 +57,12 @@ K08 Aim 2: cfDNA monitoring of tumor biology and therapy response in /in vivo/ N
 - Terminal bleed (~400 μL) and tumor harvest at day 28
 - cfDNA isolated with MagMax kit, profiled by EM-seq
 - EM-seq libraries exist for Chr8q-WT lines only: WU-487 (6 terminal) and JH-2-055 (12 serial). No Chr8q-gain lines have EM-seq data as of [2026-03-18 Wed].
-** Key files
+*** Key files
 - =nf1-mouse.org= — literate programming notebook (this file)
 - =config/common.yaml= — project configuration
 - =data/metadata.xlsx= — manual data inputs
 - =workflows/= — Snakemake pipelines
-** Directory structure
+*** Directory structure
 #+begin_example
 -- Main
    |-- config
@@ -94,7 +75,7 @@ K08 Aim 2: cfDNA monitoring of tumor biology and therapy response in /in vivo/ N
    |-- workflows
 #+end_example
 
-** Data map (mouse-specific files)
+*** Data map (mouse-specific files)
 
 #+begin_example
 -- Mayo GCS bucket (chaudhuri-lab-bucket1), mounted at /mnt/gcs/
@@ -158,8 +139,8 @@ K08 Aim 2: cfDNA monitoring of tumor biology and therapy response in /in vivo/ N
 
 FASTQ naming convention on bucket: ={num}_nf1_lib{num}_S{lane}_R{1,2}_001.fastq.gz= (with .md5 sidecars). GCS download throughput ~24 Mbit/s single-threaded, ~3-5 hours for both libs with =gsutil -m=.
 
-** Working in this repo
-** Change log
+*** Working in this repo
+*** Change log
 - [2026-03-30 Mon]
   - Production alignment status: Strategy 1 (hg38 direct) running on GCP VM (224 vCPU, 220 GB RAM)
   - BISCUIT 1.8.0 header truncation bug fixed via =samtools view -bS -t ref.fai= workaround
@@ -225,15 +206,15 @@ FASTQ naming convention on bucket: ={num}_nf1_lib{num}_S{lane}_R{1,2}_001.fastq.
   - Project init: transferred content from mouse-cfdna repo, populated for K08 Aim 2 scope
 - [2026-03-03 Mon]
   - Initial setup from sci-repo template
-* Project setup and administration
-** Yaml
-*** Common
-** Repository setup
-** Machine provisioning
-** Conda environments
+** Project setup and administration
+*** Yaml
+**** Common
+*** Repository setup
+*** Machine provisioning
+*** Conda environments
 The project's primary conda environment is =nf1-mouse=, declared under =conda-env= in =common.yaml=. All scripts in this repo use this env.
 
-*** nf1-mouse
+**** nf1-mouse
 :PROPERTIES:
 :header-args:yaml: :tangle ./config/nf1-mouse-conda-env.yaml
 :END:
@@ -249,7 +230,7 @@ dependencies:
   - samtools
   - pysam
 #+end_src
-* Biological model
+** Biological model
 :PROPERTIES:
 :ID:       f1ff894b-756e-4e68-a637-ee7282d463d6
 :END:
@@ -257,7 +238,7 @@ dependencies:
 - [[id:c8b2ac45-cb1e-46b3-82d3-97245427dc93][Implement MPNST cfDNA LDT]] (sibling long goal — clinical translation)
 - [[id:34483a88-ea9e-4fe3-ab35-b8edd6b70f03][Preliminary mouse MPNST PDX plasma for fragmentomics]] (pilot sample history)
 - [[id:6adf1ba1-0e75-4366-927c-0f08400e2766][NF1 EM-seq pilot]] (technical validation feeding this project)
-** CTF grant and Hirbe collaboration
+*** CTF grant and Hirbe collaboration
 - CTF grant AW00010324 (Hirbe PI, WashU) — Year 4 progress report due [2026-04-01], WashU internal deadline [2026-03-30]. Some funding supported Jeff's salary at Mayo during NCE period.
 - NCE deliverables: finish murine cfDNA work, continue banking, get Paul's paper out. Angie covered on banking and paper; murine work is our deliverable.
 - JCI reviewer question to address: "Can Chromosome 8 gain serial monitoring be done in mice blood samples? Would that add value in assessing early responses in human studies?"
@@ -276,7 +257,7 @@ dependencies:
   - [[mu4e:msgid:BN7PR01MB3715C4DC359FE6778A42FA509641A@BN7PR01MB3715.prod.exchangelabs.com][CTF Progress Report — likely CNA data for Guangfeng timeline (2026-03-17)]]
   - [[mu4e:msgid:BN7PR01MB3715A87513CC83EB65A6032D964EA@BN7PR01MB3715.prod.exchangelabs.com][CTF Progress Report — Chr8q-gain sequencing gap identified (2026-03-18)]]
   - [[mu4e:msgid:BN7PR01MB3715A87513CC83EB65A6032D964EA@BN7PR01MB3715.prod.exchangelabs.com][CTF Progress Report — EM-seq confirmed, NIH sequencing, sample plan (2026-03-20 through 2026-03-24)]]
-** NF1 MPNST PDX model system
+*** NF1 MPNST PDX model system
 NF1 (neurofibromatosis type 1) affects ~1 in 2,500 individuals worldwide. Plexiform neurofibromas (PNs) can progress through atypical neurofibroma (AN) to malignant peripheral nerve sheath tumor (MPNST), the leading cause of cancer death in NF1. Lifetime MPNST risk is 8–13%; 5-year disease-specific survival is ~30%. Molecular progression follows NF1 biallelic loss → CDKN2A/B deletion → TP53 and PRC2 (SUZ12/EED) loss, with MPNST subtypes distinguished by H3K27me3-loss vs H3K27me3-retained status. Patient-derived xenograft (PDX) models recapitulate tumor histology and molecular features, enabling controlled /in vivo/ studies of cfDNA dynamics.
 
 - PDX lines:
@@ -291,7 +272,7 @@ NF1 (neurofibromatosis type 1) affects ~1 in 2,500 individuals worldwide. Plexif
 - Treatment begins when tumors reach 150–200 mm³
 - 3 arms: vehicle, MEKi (mirdametinib), PLK1i (volasertib)
 - n = 4 mice per line per arm (12 conditions, 48 mice total)
-** cfDNA as translational platform
+*** cfDNA as translational platform
 cfDNA from PDX mouse plasma provides a real-time, systemic measure of tumor biology:
 - Serial submandibular bleeds enable longitudinal monitoring without sacrificing the animal
 - Human-specific reads recovered after Disambiguate filtering
@@ -301,10 +282,24 @@ cfDNA from PDX mouse plasma provides a real-time, systemic measure of tumor biol
 - Tissue-level orthogonal assays: ATAC-seq and RNA-seq on matched tumor, with possible CUT&RUN follow-up for transcription factor binding
 - [[id:c6157337-5f4a-4216-abc8-93d1a84cdbb5][PNST MRD]] and [[id:771f19d4-cd99-4013-b5de-5ba5be6b6d5d][NF1 CAPP-seq]] are related human cfDNA projects using overlapping analytical approaches
 - [[id:57a06d7a-302b-488f-94af-c41a98684555][NF1-associated tissue of origin]] uses cfDNA tissue-of-origin inference across NCI, Hopkins, Mayo, WashU, and U of M samples
-* Data
-** Data model
-*** Mice schema
-#+begin_src yaml
+** Data
+- [ ] ingest https://mail.google.com/mail/u/0/#inbox/FMfcgzQgKvKNWDpjskqzJTvLfWKwTpDx
+
+*** Data model
+**** Datapackage header
+Frictionless datapackage wrapper. The six sheet-schema blocks below tangle concatenated into =data/metadata_schema.yaml= after this header, forming a complete datapackage validated via =frictionless validate data/metadata_schema.yaml --type package=.
+#+begin_src yaml :tangle data/metadata_schema.yaml :mkdirp yes
+# Frictionless datapackage for nf1-mouse metadata.xlsx
+# Tangled from nf1-mouse.org. Do not edit directly.
+
+name: nf1-mouse-metadata
+title: NF1 Mouse K08 Aim 2 Metadata
+description: Relational metadata for PDX cfDNA monitoring study (6 sheets in data/metadata.xlsx)
+
+resources:
+#+end_src
+**** Mice schema
+#+begin_src yaml :tangle data/metadata_schema.yaml
 # Mice
 # Mice table contains mouse-specific metadata for research subjects
   # Primary key also serves as foreign key to subjects table
@@ -312,10 +307,10 @@ cfDNA from PDX mouse plasma provides a real-time, systemic measure of tumor biol
   - name: mice
     title: Mouse Research Subjects
     description: Mouse subjects used in research
-    path: data/metadata.xlsx
-    control:
-      type: excel
-      sheet: mice
+    path: metadata.xlsx
+    dialect:
+      excel:
+        sheet: mice
     schema:
       missingValues: &mv ["", "unknown", "UNK", "unk", "n/a", "NA", "GET", "None"]
       fields:
@@ -407,6 +402,15 @@ cfDNA from PDX mouse plasma provides a real-time, systemic measure of tumor biol
           constraints:
             required: false
 
+        # OPTIONAL NOTES
+        - name: notes
+          title: Notes
+          description: Free-text notes about this mouse
+          type: string
+          constraints:
+            required: false
+            maxLength: 500
+
         - name: treatment
           title: Treatment Arm
           description: Drug treatment assignment for this mouse
@@ -422,15 +426,6 @@ cfDNA from PDX mouse plasma provides a real-time, systemic measure of tumor biol
           constraints:
             required: false
 
-        # OPTIONAL NOTES
-        - name: notes
-          title: Notes
-          description: Free-text notes about this mouse
-          type: string
-          constraints:
-            required: false
-            maxLength: 500
-
     primaryKey: mouse_id
     foreignKeys:
       - fields: pdx_line_id
@@ -439,15 +434,15 @@ cfDNA from PDX mouse plasma provides a real-time, systemic measure of tumor biol
           fields: pdx_line_id
 #+end_src
 
-*** PDX lines schema
-#+begin_src yaml
+**** PDX lines schema
+#+begin_src yaml :tangle data/metadata_schema.yaml
   - name: pdx_lines
     title: PDX Lines
     description: Patient-derived xenograft lines used in the study
-    path: data/metadata.xlsx
-    control:
-      type: excel
-      sheet: pdx_lines
+    path: metadata.xlsx
+    dialect:
+      excel:
+        sheet: pdx_lines
     schema:
       missingValues: *mv
       fields:
@@ -486,15 +481,15 @@ cfDNA from PDX mouse plasma provides a real-time, systemic measure of tumor biol
     primaryKey: pdx_line_id
 #+end_src
 
-*** Samples schema
-#+begin_src yaml
+**** Samples schema
+#+begin_src yaml :tangle data/metadata_schema.yaml
   - name: samples
     title: Blood Samples
     description: Blood samples collected from mice
-    path: data/metadata.xlsx
-    control:
-      type: excel
-      sheet: samples
+    path: metadata.xlsx
+    dialect:
+      excel:
+        sheet: samples
     schema:
       missingValues: *mv
       fields:
@@ -575,15 +570,15 @@ cfDNA from PDX mouse plasma provides a real-time, systemic measure of tumor biol
           fields: mouse_id
 #+end_src
 
-*** cfDNA isolations schema
-#+begin_src yaml
+**** cfDNA isolations schema
+#+begin_src yaml :tangle data/metadata_schema.yaml
   - name: cfdna_isolations
     title: cfDNA Isolations
     description: Cell-free DNA isolation records
-    path: data/metadata.xlsx
-    control:
-      type: excel
-      sheet: cfdna_isolations
+    path: metadata.xlsx
+    dialect:
+      excel:
+        sheet: cfdna_isolations
     schema:
       missingValues: *mv
       fields:
@@ -655,15 +650,15 @@ cfDNA from PDX mouse plasma provides a real-time, systemic measure of tumor biol
           fields: sample_id
 #+end_src
 
-*** Sequencing libraries schema
-#+begin_src yaml
+**** Sequencing libraries schema
+#+begin_src yaml :tangle data/metadata_schema.yaml
   - name: sequencing_libraries
     title: Sequencing Libraries
     description: EM-seq library preparation and sequencing records
-    path: data/metadata.xlsx
-    control:
-      type: excel
-      sheet: sequencing_libraries
+    path: metadata.xlsx
+    dialect:
+      excel:
+        sheet: sequencing_libraries
     schema:
       missingValues: *mv
       fields:
@@ -720,15 +715,15 @@ cfDNA from PDX mouse plasma provides a real-time, systemic measure of tumor biol
           fields: cfdna_iso_id
 #+end_src
 
-*** Tumor measurements schema
-#+begin_src yaml
+**** Tumor measurements schema
+#+begin_src yaml :tangle data/metadata_schema.yaml
   - name: tumor_measurements
     title: Tumor Measurements
     description: Longitudinal tumor volume and body weight measurements
-    path: data/metadata.xlsx
-    control:
-      type: excel
-      sheet: tumor_measurements
+    path: metadata.xlsx
+    dialect:
+      excel:
+        sheet: tumor_measurements
     schema:
       missingValues: *mv
       fields:
@@ -777,13 +772,14 @@ cfDNA from PDX mouse plasma provides a real-time, systemic measure of tumor biol
           fields: mouse_id
 #+end_src
 
-* Methods
-** cfDNA isolation
+** Methods
+
+*** cfDNA isolation
 cfDNA is isolated from mouse plasma using the MagMAX Cell-Free DNA Isolation Kit (Thermo Fisher, MAN0015629) following the manual protocol option 2 for small volumes. For 50 μL samples, plasma is diluted to 100 μL with PBS before isolation.
 
 Right-sided SPRI bead selection (AMPure XP, 1:1 bead:sample ratio followed by 7:1 capture) is applied to remove contaminating genomic DNA when hemolysis is suspected.
-** cfDNA isolation optimization experiment                                     :sci-exp:
-*** Data tables
+*** cfDNA isolation optimization experiment                                     :sci-exp:
+**** Data tables
 #+name: pdx
 | pdx_id | pdx_alt_id |
 |--------+------------|
@@ -888,7 +884,7 @@ Right-sided SPRI bead selection (AMPure XP, 1:1 bead:sample ratio followed by 7:
 - [2025-02-21 Fri] Taylor "Okay, we dont have the same PDX. We use Shim10, Shim18, ISLE (an NIH one), JH2002, PP4T"
 - [2025-02-21 Fri] Sequencing pilot design meeting. Taylor to confirm sample numbers and depth with Jack. Jeff picks WashU samples. Mark to investigate qPCR for human/mouse-specific LINE-based cfDNA quantification.
 - https://mail.google.com/mail/u/0/#inbox/FMfcgzQZTMHNTlZZDvQgSmjqTmxHSMpm
-*** R analysis code
+**** R analysis code
 #+name: qubit-index
 | qubit_file                  | qubit_id                                        | pder_id  |
 |-----------------------------+-------------------------------------------------+----------|
@@ -1005,7 +1001,7 @@ mice
 samples
 plasm_ders
 #+end_src
-*** TODO Mouse cfDNA Isolation Optimization Protocol
+**** TODO Mouse cfDNA Isolation Optimization Protocol
 :PROPERTIES:
 :ID:       881009ca-8675-48c2-a320-edf263e9b8f8
 :export_options: toc:nil tags:nil todo:nil \n:t ^:nil H:15 d:nil
@@ -1033,7 +1029,7 @@ lualatex -interaction=nonstopmode nf1-mouse-cfdna-isolation-optimization-protoco
 lualatex -interaction=nonstopmode nf1-mouse-cfdna-isolation-optimization-protocol.tex
 #+end_src
 
-**** Preamble                                                        :ignore:
+***** Preamble                                                       :ignore:
 
 #+include: "./latex/latex.org::#dd9bb77e-6ff7-44e0-9026-c371bdaf9603" :only-contents t
 #+latex: % [[file:~/repos/latex/latex.org::#dd9bb77e-6ff7-44e0-9026-c371bdaf9603][Last compiled]]
@@ -1041,7 +1037,7 @@ lualatex -interaction=nonstopmode nf1-mouse-cfdna-isolation-optimization-protoco
 \vspace{5mm}
 \hfill Version 2
 
-**** Introduction
+***** Introduction
 Experiment to test and optimize cell-free DNA isolation conditions for small volumes of mouse plasma.
 
 We will use this experiment to ask about isolation precision (repeatability and reproducibility), effects of hemolysis and SPRI bead removal of genomic DNA, and the ability to detect PDX ctDNA.
@@ -1302,7 +1298,7 @@ Final isolations to be analyzed are shown in Table [[tab_analytes]]. For each fi
 | Is PDX ctDNA evident with corrected hemolysis?                         | ms6_pdx1_serial_vheme_rtbead vs ms4_nopdx_term_vheme_smallaq        | conc, Bioanalyzer |
 |------------------------------------------------------------------------+---------------------------------------------------------------------+-------------------|
 
-**** Protocol
+***** Protocol
 
 1. Ensure inputs - see Table ref:tab_inputs.
 
@@ -1327,13 +1323,13 @@ Analysis for each final isolate:
    1. Qubit High sensitivity dsDNA fluorometric quantification as described in the kit user guide \cite{qubit}. Generate one standard curve for each session (can span multiple or all samples). Perform for each analyte *in nonconsecutive duplicate*. One microliter volumes are sufficient for testing. If resulting concentration is <200 pg, re-measure with 3 μL volumes. Retain concentration values and raw flourescence values including standard curve raw fluorescence.
    2. Nanodrop spectrophotometry as described in the user guide \cite{nanodrop}. Use same volume as in the Qubit and again test all samples in nonconsecutive duplicate. Use the dsDNA measurement program and retain ng/uL, A260/A280, A260/A230, and UV spectrum. Also take a A414 reading.
    3. Bioanalyzer electrophoresis with HS kit protocol. Perfrom once per analyte. Retain peak table XML and electropherogram XML.
-**** Change Log
+***** Change Log
 - Version 2 - Adjusted for serial bleeds from separate mice than pooled terminal bleed PDX sources.
-**** References                                                      :ignore:
+***** References                                                     :ignore:
 #+LATEX: \printbibliography
 
 #  LocalWords:  smallaq pdx SPRI
-** EM-seq library preparation
+*** EM-seq library preparation
 Libraries prepared with NEBNext Enzymatic Methyl-seq (EM-seq) kit, which preserves native fragment features. Alignment with Disambiguate to retain only human reads from xenograft samples.
 
 - Input requirements by kit version:
@@ -1341,9 +1337,9 @@ Libraries prepared with NEBNext Enzymatic Methyl-seq (EM-seq) kit, which preserv
   - EM-seq v2 (E8015): minimum 100 pg DNA input (100-fold lower)
 - Existing 18 libraries (all Chr8q-WT) were prepared from samples with ≥100 pg/uL bioanalyzer cfDNA concentration, well above either kit minimum at 25 uL elution volume.
 - New round (2026-03-24): NIH (Chloe Sachs) preparing libraries. Some JH-2-055 serial samples as low as ~35 pg/uL in 167 bp peak (~890 pg total in 25 uL). Requires v2 kit; original kit minimum would not be met.
-** Sequencing and alignment
+*** Sequencing and alignment
 Target median deduplicated sequencing depth of 15×. Reads aligned to hg38 with BISCUIT.
-** Bioanalyzer QC analysis
+*** Bioanalyzer QC analysis
 cfDNA fragment size distribution and concentration are assessed using the Agilent 2100 Bioanalyzer with High Sensitivity DNA assay. Raw XML output files are read and analyzed in R using the [[https://github.com/jwfoley/bioanalyzeR][bioanalyzR]] package. Input data are stored at =inputs/bioanalyzer/= (25 production runs, 2025-06-03 through 2025-07-25) and =inputs/bioanalyzer_pilot/= (2 pilot runs, 2024-12-10 and 2025-05-01).
 
 #+begin_src R :session nf1-mouse :eval no
@@ -1368,29 +1364,36 @@ stdcrv.mobility(ba_run)
 qc.electrophoresis(ba_run, "length")
 #+end_src
 
-** Species-specific LINE dPCR
+*** Species-specific LINE dPCR
 Xenograft plasma contains cfDNA from both human tumor and mouse host. Species-specific quantification uses dPCR/qPCR targeting human and mouse LINE repetitive elements. TapeStation HSD1000 QC accompanies each dPCR batch to verify cfDNA size distribution and total concentration. Batch 2 (2025-03-21) characterized 12 samples from WU487 terminal, MN2 terminal, and JH-2-055 serial bleeds, with TapeStation concentrations ranging from 2.84 to 1500 pg/uL. Input: [[file:/mnt/gcs/jeszyman/projects/nf1-mouse/inputs/metadata/nf1_murine_dpcr_batch2_3_21_25.pdf][TapeStation batch 2 report]].
 
 Note: LINE dPCR worked well for serial bleed samples but produced unreliable or discordant results for terminal bleed samples. The root cause was never identified. If cross-sample validation of EM-seq read assignment is attempted using LINE dPCR species fractions, this discrepancy limits comparison to serial bleeds only.
 
-* Workflows
-** Configuration
-*** Data
-*** Results
-** Preamble named blocks
-** [[file:workflows/data.smk][Data pipeline]]
-*** make_data_model.R
-** [[file:workflows/results.smk][Results pipeline]]
-*** Preamble
-*** LINK to Load packages
-*** LINK to Load configuration
-*** LINK to variable naming
-*** Functions
-*** All rule
-*** On success
-* Results
-** cfDNA isolation optimization
-*** Bioanalyzer QC campaign
+** Workflows
+*** Configuration
+**** Data
+**** Results
+*** Preamble named blocks
+*** [[file:workflows/data.smk][Data pipeline]]
+**** make_data_model.R
+*** [[file:workflows/results.smk][Results pipeline]]
+**** Preamble
+**** LINK to Load packages
+**** LINK to Load configuration
+**** LINK to variable naming
+**** Functions
+**** All rule
+**** On success
+** Results
+
+[[file:resources/media/fu2020frag-fig2c.png]]
+
+[[file:resources/media/fu2020frag-fig1b.png]]
+
+- CANPREDICT weekly meeting [2026-04-08 Wed], Angie shared that normalized cfDNA concentration in serial samples showed a characteristic early high rise and then fall on treatment whereas vehicle was flat.
+
+*** cfDNA isolation optimization
+**** Bioanalyzer QC campaign
 Bioanalyzer HS DNA assays were performed on cfDNA isolations from serial and terminal bleeds across the JH-2-055 cohort and terminal samples from WU487 and WU225. The campaign spanned 25 runs from 2025-06-03 through 2025-07-25 and covered samples collected between 2024-09-10 and 2024-11-05. Two pilot runs (2024-12-10, 2025-05-01) preceded the production campaign. Raw data are stored at =inputs/bioanalyzer/= and =inputs/bioanalyzer_pilot/=.
 
 |   Run date |    Samples collected | Sample type               |
@@ -1421,7 +1424,7 @@ Bioanalyzer HS DNA assays were performed on cfDNA isolations from serial and ter
 | 2025-07-24 |             terminal | WU225 terminal            |
 | 2025-07-25 | 2024-11-05, terminal | WU225 terminal + serial   |
 
-*** TapeStation HSD1000 batch 2 (2025-03-21)
+**** TapeStation HSD1000 batch 2 (2025-03-21)
 TapeStation HS D1000 QC for species-specific LINE dPCR batch 2. Twelve samples: WU487 terminals (n=5), MN2 terminals (n=2), JH-2-055 serials at days 5, 19, 40, 47, 60 (n=5). Concentrations ranged from 2.84 pg/uL (m25, JH-2-055 serial) to 1500 pg/uL (m8, WU487 terminal). See [[file:nf1-mouse.org::*Species-specific LINE dPCR][Species-specific LINE dPCR]] in Methods.
 
 | Well | Sample | Model    | Type     | Day | Conc (pg/uL) |
@@ -1439,23 +1442,23 @@ TapeStation HS D1000 QC for species-specific LINE dPCR batch 2. Twelve samples: 
 | D2   | m29    | JH-2-055 | serial   |  47 |         64.2 |
 | E2   | m30    | JH-2-055 | serial   |  60 |         35.6 |
 
-** figure_schema.R
-** Figure strategy
+*** figure_schema.R
+*** Figure strategy
 The results Snakemake workflow is mount-aware: large or external files are referenced
 from mounts on other systems; otherwise outputs go to =results/<RES_OBJ_ID>/=.
 Two sub-pipelines:
 
 - *Summary TSV pipeline* — produces structured tables consumed by the report.
 - *Base image pipeline* — produces base-level figures assembled in the report.
-** Running results report
+*** Running results report
 \newcommand{\datadir}{nf1-mouse}
 \setcounter{secnumdepth}{0}
 \vspace{5mm}
 \hfill Last compiled 2026-03-03.
 \setcounter{tocdepth}{2}
 \tableofcontents
-* Reference
-** People and contacts
+** Reference
+*** People and contacts
 - Angela Hirbe, M.D., Ph.D. — Associate Professor of Medicine and Pediatrics, Director Adult Neurofibromatosis Clinical Program, Division of Oncology/Sarcoma, WashU. CTF grant PI. Manages PDX models and mouse experiments. hirbea@wustl.edu, 314-362-8965.
 - Aadel Chaudhuri, M.D., Ph.D. — Mayo Clinic. K08 mentor, cfDNA expertise, co-investigator on NF1 cfDNA projects. Chaudhuri.Aadel@mayo.edu.
 - Paul A. Jones — WashU, Hirbe lab. Experience with mouse bleeds, leads PDX experiment execution. paul.a.jones@wustl.edu.
@@ -1463,19 +1466,19 @@ Two sub-pipelines:
 - Stacey Chamberlain — Nurse Coordinator, Hirbe lab. 314-286-1567.
 - Sanita Burgic — Nurse Practitioner, Hirbe lab.
 - Tiffany Redden — Senior Grant Specialist, WashU DOM Research Administration. Assigned to CTF AW00010324 progress report. reddent@wustl.edu.
-** Glossary
-** Literature
+*** Glossary
+*** Literature
 - Wang et al. "Dual inhibition of FAK and MEK is a therapeutic vulnerability in chromosome 8 gain MPNST" — JCI manuscript 201331-JCI-RG-1 (Guangfeng Wang first author, Angela Hirbe senior). CRISPR screen of all Chr8 genes identified PTK2/FAK as druggable target in Chr8-gain MPNST. Dual FAK+MEK inhibition (defactinib + avutometinib) synergistically effective in Chr8-gain PDX models (MN2, WU-225) but not Chr8-diploid. Major revision requested [2025-11-18 Tue]; revision in progress. Reviewer A comment #4 asked whether Chr8 gain can be monitored serially in mouse blood — this is the direct motivation for our PDX cfDNA read handling and ichorCNA work. Co-authorship offered to Szymanski and Chaudhuri for contributing the cfDNA monitoring data.
 - [[id:c6157337-5f4a-4216-abc8-93d1a84cdbb5][PNST MRD]] — post-surgical MRD detection in MPNST using EM-seq + WGS methylation, nucleosome positioning. Sample classification states: cNED, cMRD, cOP, pNED, pMRD, pOD.
 - [[id:771f19d4-cd99-4013-b5de-5ba5be6b6d5d][NF1 CAPP-seq]] — targeted sequencing of NF1 cfDNA, CTF publication expected by [2025-10-01]. Repo: [[file:~/repos/nf1-cappseq/nf1-cappseq.org]]
 - [[id:36873dd1-7fb7-414c-91b6-9867274a3fd9][cfDNA quantification of cNF burden]] — JHMI/Hopkins IRB, cNF natural history study (NCT04941027) collaboration with Carlos Romo and R. Taylor Sundby
 - [[id:aa6ddddd-02f9-448d-b081-218aae5a35e0][EM-seq low input validation]] — technical validation of EM-seq at low cfDNA inputs
 - [[id:5a924e28-76f7-4217-aa0f-a3c1d9081757][EM-seq WGS fragmentomics validation]] — combined EM-seq and WGS fragmentomics validation
-** External resources
+*** External resources
 - [[file:~/repos/nf1-cappseq/nf1-cappseq.org][NF1 CAPP-seq repo]]
 - [[id:4e0ba57c-5b29-4ef7-8f82-f84008cfe8ee][CTF Private Donor MPNST LDT]] — CTF-funded two-track clinical/research LDT using CHLA LBSeq4Kids assay
 - [[https://wustl.box.com/s/jdkh9q3cdh80abyk6983y2adc0gccn25][WashU Box — mouse plasma sample bank]]
-** Bibliography
+*** Bibliography
 #+BEGIN_SRC bibtex :tangle ./resources/nf1-mouse.bib :comments no
 @misc{magmax_manual,
   title        = {MagMAX Cell-Free DNA Isolation Kit User Guide},
@@ -1512,18 +1515,18 @@ Two sub-pipelines:
 }
 
 #+END_SRC
-* DONE PDX read handling evaluation (3-strategy pilot)          :bioinfo_dev:
+** DONE PDX read handling evaluation (3-strategy pilot)         :bioinfo_dev:
 CLOSED: [2026-03-18 Wed]
 :PROPERTIES:
 :header-args:bash: :dir /home/jeszyman/repos/nf1-mouse/dev/pdx-read-handling
 :END:
 Superseded by =* Direct vs Disambiguate PDX read assignment=. ICRG (Strategy 2) branched to [[id:6c50c6d9-a69f-4b5c-9800-59c4de37aacd][ICRG combined reference failure analysis]]. Strategies 1 and 3 carried forward with updated references (NCBI hg38 no-alt-plus-decoys + UCSC mm10). Test data here used Ensembl references (numeric chromosome naming) and is not valid for production comparison.
 
-** Background
+*** Background
 
 PDX cfDNA contains a mixture of human tumor-derived and mouse host-derived reads. No established best practice exists for separating species in EM-seq data, where enzymatic C-to-T conversion at unmethylated CpGs complicates k-mer and alignment-based classification. [cite:@bhandari2025] benchmarked 12 mouse read removal protocols for PDX WGS/WES/RNA-seq and found Xengsort (k-mer) outperforms alignment-based methods including Disambiguate, but Xengsort's k-mer identity breaks under bisulfite/EM-seq conversion. We evaluate three alignment-based strategies on two high-yield WU-487 terminal bleed samples.
 
-** Data
+*** Data
 
 | File                                                         | Contents                                         | Notes                                              |
 |--------------------------------------------------------------+--------------------------------------------------+----------------------------------------------------|
@@ -1534,8 +1537,8 @@ PDX cfDNA contains a mixture of human tumor-derived and mouse host-derived reads
 | =/mnt/data/projects/nf1-mouse/ref/biscuit/mm10/mm10.fa=      | mm10 mouse reference                             | Ensembl GRCm38 release 102, needs biscuit indexing |
 | =/mnt/data/projects/nf1-mouse/ref/bwa_meth/icrg_hg38_mm10/=  | Combined hg38+mm10 (mouse chroms prefixed mm10_) | built from above refs, bwa-meth indexed            |
 
-** Design: three strategies
-*** Strategy 1: Direct-to-human
+*** Design: three strategies
+**** Strategy 1: Direct-to-human
 Align all reads to hg38 with BISCUIT. Mouse reads fail to map or map with low MAPQ. Simplest approach, used by NCI pipeline. Risk: mouse reads with homologous human regions create false alignments.
 
 #+begin_src bash :tangle no
@@ -1562,7 +1565,7 @@ samtools flagstat "${OUTDIR}/${SAMPLE}.hg38.sorted.bam" > "${OUTDIR}/${SAMPLE}.h
 samtools idxstats "${OUTDIR}/${SAMPLE}.hg38.sorted.bam" > "${OUTDIR}/${SAMPLE}.hg38.idxstats.txt"
 #+end_src
 
-*** Strategy 2: ICRG combined reference
+**** Strategy 2: ICRG combined reference
 Align to a concatenated hg38+mm10 reference with BISCUIT. Post-alignment, filter to keep only reads mapping to human chromosomes. Mouse reads should preferentially map to mouse contigs and get removed.
 
 #+begin_src bash :tangle no
@@ -1598,7 +1601,7 @@ samtools flagstat "${OUTDIR}/${SAMPLE}.icrg.human_only.sorted.bam" > "${OUTDIR}/
 samtools idxstats "${OUTDIR}/${SAMPLE}.icrg.sorted.bam" > "${OUTDIR}/${SAMPLE}.icrg.idxstats.txt"
 #+end_src
 
-*** Strategy 3: Disambiguate
+**** Strategy 3: Disambiguate
 Align independently to hg38 and mm10 with BISCUIT (required — bwa-meth NM tags are not conversion-corrected, breaking alignment-score comparison). Compare NM tags to assign each read pair to the species with fewer true mismatches. BISCUIT separates conversion mismatches (ZC tag) from true mismatches (NM tag).
 
 #+begin_src bash :tangle no
@@ -1644,8 +1647,8 @@ samtools flagstat "${OUTDIR}/${SAMPLE}.mm10.sorted.bam" > "${OUTDIR}/${SAMPLE}.m
 samtools flagstat "${OUTDIR}/${SAMPLE}.disambig.human.bam" > "${OUTDIR}/${SAMPLE}.disambig.human.flagstat.txt"
 #+end_src
 
-** Reference setup
-*** hg38 (bwa-meth indexed)
+*** Reference setup
+**** hg38 (bwa-meth indexed)
 
 #+begin_src bash :tangle no
 #!/usr/bin/env bash
@@ -1694,7 +1697,7 @@ echo "  mm10 biscuit:  $MM10_DIR/"
 echo "  ICRG bwa-meth: $ICRG_DIR/"
 #+end_src
 
-** Comparison metrics
+*** Comparison metrics
 
 #+begin_src bash :tangle no
 #!/usr/bin/env bash
@@ -1744,14 +1747,14 @@ echo "Comparison written to $OUTFILE"
 cat "$OUTFILE" | column -t
 #+end_src
 
-** Result summary
+*** Result summary
 
-** Ideas
+*** Ideas
 - Divergence-vs-ambiguity QC: use reads classified differently between strategies as positive control for evaluating separation quality
 - Library complexity (preseq) as limiting factor for downstream ichorCNA — check after alignment
 - Extend to serial bleeds after terminal bleed evaluation settles
 
-* ICRG combined reference failure analysis                      :bioinfo_dev:
+** ICRG combined reference failure analysis                     :bioinfo_dev:
 :PROPERTIES:
 :ID:       6c50c6d9-a69f-4b5c-9800-59c4de37aacd
 :header-args:bash: :dir /home/jeszyman/repos/nf1-mouse/dev/icrg-analysis
@@ -1765,7 +1768,7 @@ cat "$OUTFILE" | column -t
 #+bibliography: resources/nf1-mouse.bib
 #+cite_export: csl resources/apa-numeric-superscript-brackets.csl
 
-** Background
+*** Background
 
 The ICRG (In silico Combined Reference Genome) approach concatenates human and mouse reference genomes, aligns reads once, then filters by chromosome to separate species. [cite:@callari2018] introduced ICRG and demonstrated 99.9% accuracy for WES, RRBS, and RNA-seq in breast cancer PDTXs using Bismark (Bowtie2-based). The RRBS result is notable because RRBS is bisulfite-converted data — but it only sequences CpG-island-enriched fragments (~1-3% of genome), avoiding the vast conserved intergenic regions where human-mouse orthology creates alignment ambiguity.
 
@@ -1773,7 +1776,7 @@ The ICRG (In silico Combined Reference Genome) approach concatenates human and m
 
 No published benchmark has tested ICRG on whole-genome bisulfite or EM-seq data. This analysis evaluates ICRG with BISCUIT (BWA-MEM-based, conversion-corrected NM/ZC tags) on whole-genome EM-seq cfDNA from NF1 MPNST PDX samples. The hypothesis is that EM-seq conversion collapses species-distinguishing sequence at orthologous loci, degrading ICRG performance relative to RRBS.
 
-** Data
+*** Data
 
 | File                                                                      | Contents                                              | Notes                                          |
 |---------------------------------------------------------------------------+-------------------------------------------------------+------------------------------------------------|
@@ -1783,7 +1786,7 @@ No published benchmark has tested ICRG on whole-genome bisulfite or EM-seq data.
 | =dev/icrg-analysis/icrg_mapq_by_species.tsv=                              | MAPQ by species for all reads                         | 6M reads from lib0625                          |
 | =/mnt/data/projects/nf1-mouse/ref/biscuit/icrg_hg38_mm10/=                | ICRG reference (Ensembl hg38 + mm10, BISCUIT-indexed) | 194 human + 66 mouse contigs (3.1 Gb + 2.7 Gb) |
 
-** Read assignment
+*** Read assignment
 
 ICRG assigns almost no reads to human chromosomes. Idxstats show 50K reads on human contigs vs 5.99M on mouse contigs for lib0625 (6M total mapped). Disambiguate (Strategy 3) on the same data assigns 505K reads as human (16.8%), 2.14M as mouse (71.4%), and 352K as ambiguous (11.7%). The ICRG approach loses ~90% of true human reads to mouse chromosome assignment.
 
@@ -1796,7 +1799,7 @@ echo "=== Mouse chromosomes ===" && grep "^mm10_" "$ICRG_BAM" | awk '{m+=$3+$4} 
 
 For lib0626, the pattern is similar but slightly less extreme: 119K human vs 5.91M mouse. Disambiguate assigns 615K human (20.5%), 2.02M mouse (67.4%), and 364K ambiguous (12.1%). The higher human fraction in lib0626 is consistent across both methods, suggesting real biological variation between the two terminal bleed samples.
 
-** MAPQ distribution
+*** MAPQ distribution
 
 #+begin_src jupyter-R :tangle no
 library(tidyverse)
@@ -1844,7 +1847,7 @@ ggplot(d, aes(x = mapq, fill = species)) +
 
 The log-scale view reveals structure hidden by the linear scale. Human reads show a smooth monotonic decay from MAPQ=0, with counts dropping from ~25K at MAPQ=0 to ~10 at MAPQ=55, then a small uptick at MAPQ=60 (~2K reads). The few MAPQ=60 human reads represent loci with sufficient human-mouse divergence that the aligner can confidently place them on human contigs even in the combined reference. Mouse reads show a flat floor of ~2-3K per MAPQ bin across the middle range, consistent with within-mouse multimapping unrelated to the cross-species problem.
 
-** AS-XS score analysis
+*** AS-XS score analysis
 
 The AS (alignment score) and XS (next-best hit score) tags quantify how much better the primary alignment is than the best alternative. For MAPQ=0 reads, AS-XS should be 0 or near-zero by definition. The question is whether tie-breaking between human and mouse contigs is symmetric.
 
@@ -1889,7 +1892,7 @@ ggplot(d_tags, aes(x = diff, fill = species)) +
 
 The massive spike at AS-XS=0 is almost entirely mouse-assigned (red); human reads (blue) are barely visible at the same x-position. When scores differ, the distribution is asymmetric: a longer positive tail (mouse wins by 1-3+ points) than negative tail (human wins). This asymmetry indicates that at orthologous loci, mouse contigs genuinely receive slightly higher alignment scores for a substantial fraction of reads — not random noise but a systematic scoring bias.
 
-** ZC conversion count association
+*** ZC conversion count association
 
 The ZC tag counts C→T conversions recognized by BISCUIT as bisulfite/EM-seq events (distinct from true C→T mismatches counted in NM). Higher ZC indicates more unmethylated CpGs in the aligned region. If EM-seq conversion is driving the ICRG failure, we expect reads with high ZC to be disproportionately affected.
 
@@ -1929,7 +1932,7 @@ ggplot(tied, aes(x = ZC, fill = species)) +
 
 For tied reads (AS==XS) specifically, the same pattern holds: 487K to mouse vs 22K to human, with the high-ZC peak almost exclusively mouse. This confirms the conversion-species assignment link persists even when alignment scores are identical. The tie-breaking mechanism in BISCUIT/BWA-MEM interacts with conversion state in a way that systematically favors mouse contigs.
 
-** Result summary
+*** Result summary
 
 ICRG fails catastrophically for whole-genome EM-seq PDX data, retaining <1% of reads on human chromosomes despite ~17-20% true human content. Two mechanisms drive the failure:
 
@@ -1941,7 +1944,7 @@ Both effects are amplified by EM-seq conversion: C→T conversion at unmethylate
 
 ICRG is not viable for whole-genome EM-seq PDX read handling. Disambiguate with BISCUIT (conversion-corrected NM tags) is the recommended approach for this data type.
 
-** TODO items
+*** TODO items
 - [ ] Fix reference inconsistencies before any future ICRG re-evaluation:
   - ICRG combined reference was built from NCBI hg38 (=ncbi_decoy_hg38.fa=, chr-prefixed: =chr1=, =chr2=) while Strategies 1/3 used Ensembl hg38 (=Homo_sapiens.GRCh38.dna.primary_assembly.fa=, numeric: =1=, =2=) — different assemblies with different contigs and naming
   - =00_setup_refs.sh= indexes the ICRG reference with =bwameth.py index= (produces =.bwameth.c2t=) but Strategy 2 script calls =biscuit align= which requires BISCUIT index files (=.bis.amb=, =.dau.bwt=, =.par.bwt=) — wrong index format
@@ -1957,24 +1960,24 @@ ICRG is not viable for whole-genome EM-seq PDX read handling. Disambiguate with 
 - [ ] Try limited/subsampled BISCUIT alignment on a second VM to validate rate and parallelize across machines. Current single-VM bottleneck is RAM (25 GB/process, 220 GB total → max 6-8 parallel). A second VM could cut total wall time in half.
 - [ ] Identify metadata for first-completing samples (lib0622–lib0625: WU-487 terminal bleeds, mou0001–mou0004) and prepare ichorCNA copy number analysis pipeline so CNA analysis can start immediately when BAMs are ready. Key metadata: sample IDs (sam0587–sam0590), mouse IDs (mou0001–mou0004), PDX line WU-487, Chr8q status WT, cfDNA concentrations (467, 536, 111, 1720 pg/µl).
 
-** Ideas
+*** Ideas
 - The ICRG approach may be rescuable with a post-hoc MAPQ=0 rescue step: for MAPQ=0 reads, check XA tag for cross-species alternative alignments and re-classify
 - Consider whether ICRG + Bismark would work for whole-genome EM-seq ([cite:@callari2018] only tested RRBS)
 
-** References
+*** References
 #+print_bibliography:
 
-* Direct vs Disambiguate PDX read assignment                    :bioinfo_dev:
+** Direct vs Disambiguate PDX read assignment                   :bioinfo_dev:
 :PROPERTIES:
 :header-args:bash: :dir /home/jeszyman/repos/nf1-mouse/dev/pdx-read-handling
 :header-args:jupyter-R: :session direct-vs-disambig :kernel biotools :async yes :dir /home/jeszyman/repos/nf1-mouse/dev/direct-vs-disambiguate
 :END:
 
-** Background
+*** Background
 
 PDX cfDNA contains a mixture of human tumor-derived and mouse host-derived reads. No established best practice exists for separating species in EM-seq data, where enzymatic C-to-T conversion at unmethylated CpGs complicates k-mer and alignment-based classification. [cite:@bhandari2025] benchmarked 12 mouse read removal protocols for PDX WGS/WES/RNA-seq and found Xengsort (k-mer) outperforms alignment-based methods including Disambiguate, but Xengsort's k-mer identity breaks under bisulfite/EM-seq conversion. ICRG (combined reference) fails catastrophically for whole-genome EM-seq (see [[id:6c50c6d9-a69f-4b5c-9800-59c4de37aacd][ICRG combined reference failure analysis]]). This analysis compares the two remaining viable alignment-based strategies on all 18 PDX mouse samples.
 
-** Data
+*** Data
 
 | File                                                        | Contents                                  | Notes                                          |
 |-------------------------------------------------------------+-------------------------------------------+------------------------------------------------|
@@ -1982,8 +1985,8 @@ PDX cfDNA contains a mixture of human tumor-derived and mouse host-derived reads
 | =/mnt/data/projects/nf1-mouse/ref/biscuit/ncbi_hg38_noalt/= | hg38 no-alt analysis set, BISCUIT indexed | NCBI GRCh38, chr-prefixed, no ALTs, no decoys  |
 | =/mnt/data/projects/nf1-mouse/ref/biscuit/ucsc_mm10/=       | mm10 primary assembly, BISCUIT indexed    | UCSC, chr-prefixed, 66 contigs, needs download |
 
-** Design: two strategies
-*** Strategy 1: Direct-to-human
+*** Design: two strategies
+**** Strategy 1: Direct-to-human
 Align all reads to hg38 with BISCUIT. Mouse reads fail to map or map with low MAPQ. Simplest approach, used by NCI pipeline. Risk: mouse reads with homologous human regions create false alignments.
 
 #+begin_src bash :tangle ./dev/pdx-read-handling/01_strategy1_direct.sh
@@ -2010,7 +2013,7 @@ samtools flagstat "${OUTDIR}/${SAMPLE}.hg38.sorted.bam" > "${OUTDIR}/${SAMPLE}.h
 samtools idxstats "${OUTDIR}/${SAMPLE}.hg38.sorted.bam" > "${OUTDIR}/${SAMPLE}.hg38.idxstats.txt"
 #+end_src
 
-*** Strategy 3: Disambiguate
+**** Strategy 3: Disambiguate
 Align independently to hg38 and mm10 with BISCUIT. Compare NM tags to assign each read pair to the species with fewer true mismatches. BISCUIT separates conversion mismatches (ZC tag) from true mismatches (NM tag).
 
 #+begin_src bash :tangle ./dev/pdx-read-handling/03_strategy3_disambiguate.sh
@@ -2053,21 +2056,21 @@ samtools flagstat "${OUTDIR}/${SAMPLE}.mm10.sorted.bam" > "${OUTDIR}/${SAMPLE}.m
 samtools flagstat "${OUTDIR}/${SAMPLE}.disambig.human.bam" > "${OUTDIR}/${SAMPLE}.disambig.human.flagstat.txt"
 #+end_src
 
-** Production run: alignment benchmarks
+*** Production run: alignment benchmarks
 
 BISCUIT 1.8.0 alignment on GCP n2-highmem (224 vCPU, 220 GB RAM), conda env =nf1-mouse=.
 
-*** Per-sample input scale
+**** Per-sample input scale
 Each EM-seq library is ~71 GB compressed (R1+R2), ~380M read pairs (PE150).
 BISCUIT processes reads in fixed batches of 529,802 sequences (264,901 read pairs), yielding ~1,430 batches per sample.
 
-*** Throughput
+**** Throughput
 - ~710 read pairs/sec/thread (bisulfite-aware alignment to hg38 no-alt, 195 contigs)
 - 8 threads per process: ~5,680 read pairs/sec, ~370 sec (6.2 min) wall time per batch
 - Pace is constant from batch 1 through batch 1,062+: mean 370 sec, range 305–438 sec
 - No degradation over multi-day runs
 
-*** Reference context
+**** Reference context
 | Aligner            | Typical rate (reads/sec/thread) | Notes                  |
 |--------------------+---------------------------------+------------------------|
 | BWA-MEM2 (genomic) | 3,000–5,000                     | Non-bisulfite          |
@@ -2076,21 +2079,21 @@ BISCUIT processes reads in fixed batches of 529,802 sequences (264,901 read pair
 
 BISCUIT at 710 reads/sec/thread is within expected range for bisulfite-aware whole-genome alignment. The ~5× slowdown relative to standard BWA-MEM reflects the additional cost of handling C→T converted reads on both strands.
 
-*** Resource usage per BISCUIT process
+**** Resource usage per BISCUIT process
 - RAM: ~25 GB (BWT + SA arrays for hg38 no-alt)
 - CPU: 800% (8 threads, fully saturated)
 - Sort temp files: ~1.4 GB each, ~15 files per sample at peak (samtools sort -T on /mnt/data)
 - Final sorted BAM: TBD (first sample completing)
 
-*** Wall time estimates (hg38 alignment, Strategy 1)
+**** Wall time estimates (hg38 alignment, Strategy 1)
 - Per sample: ~1,430 batches × 370 sec ÷ 3,600 = ~147 hrs (~6 days) at 8 threads
 - With 6 parallel processes (150 GB RAM): 18 samples ÷ 6 = 3 waves × ~6 days = ~18 days
 - Limiting factor: RAM (25 GB/process), not CPU (224 vCPUs available, using 48)
 
-*** BISCUIT header truncation bug (v1.8.0)
+**** BISCUIT header truncation bug (v1.8.0)
 BISCUIT 1.8.0 truncates =@SQ= header lines for references with long contig names (e.g., =chrUn_KI270302v1= → =chrUn_KI2=, missing =LN:= tag). Workaround: pipe through =samtools view -bS -t ref.fai= to inject correct =@SQ= lines from the =.fai= file before sorting. This bug affected the NCBI hg38 no-alt reference (195 contigs, many with names >10 chars); UCSC mm10 (66 contigs) may also be affected.
 
-** Comparison metrics
+*** Comparison metrics
 
 #+begin_src bash :tangle ./dev/pdx-read-handling/04_compare.sh
 #!/usr/bin/env bash
@@ -2141,9 +2144,9 @@ echo "Comparison written to $OUTFILE"
 cat "$OUTFILE" | column -t
 #+end_src
 
-** Result summary
+*** Result summary
 
-** Ideas
+*** Ideas
 - Divergence-vs-ambiguity QC: use reads classified differently between strategies as positive control for evaluating separation quality
 - Library complexity (preseq) as limiting factor for downstream ichorCNA — check after alignment
 - Extend to serial bleeds after terminal bleed evaluation settles
@@ -2151,7 +2154,7 @@ cat "$OUTFILE" | column -t
 - Overall CNA comparison across all three strategies (direct, disambiguate-discard, disambiguate-plus-ambiguous) to quantify how read assignment method affects copy number inference
 - LINE dPCR cross-validation: for JH-2-055 serial samples (where dPCR works), correlate EM-seq human fraction with dPCR human LINE fraction across strategies
 
-* Running results report
+** Running results report
 :PROPERTIES:
 :ID:       09de27fb-9be9-46d3-a1b3-db7bb11710e3
 :EXPORT_FILE_NAME: ./running_results
@@ -2163,22 +2166,22 @@ cat "$OUTFILE" | column -t
 :END:
 #+bibliography: resources/nf1-mouse.bib
 #+cite_export: csl resources/apa-numeric-superscript-brackets.csl
-** Document reference                                              :noexport:
+*** Document reference                                             :noexport:
 - [[file:running_results.html][Running Results Report HTML]]
 - Export: open this heading, =C-c C-e= then =h s= (HTML subtree export)
-** Background
-** Methods
-** Results
-*** ICRG combined reference failure
+*** Background
+*** Methods
+*** Results
+**** ICRG combined reference failure
 ICRG (concatenated hg38+mm10 reference, chromosome filtering) achieves 99.9% accuracy for WES, RRBS, and RNA-seq [cite:@callari2018] but fails catastrophically for whole-genome EM-seq. In two WU-487 terminal bleed PDX samples (lib0625, lib0626; 3M read pairs each), ICRG assigned <1% of reads to human chromosomes despite Disambiguate identifying 17-20% human content.
 
 The failure has two components: (1) mouse contigs score 1-3 points higher than human orthologs for ~30% of ambiguous reads, and (2) among reads with identical alignment scores (AS==XS), 96% are assigned to mouse chromosomes rather than the expected ~50% from random tie-breaking. Both effects correlate with bisulfite conversion count (ZC tag) — reads with heavy C→T conversion are almost exclusively routed to mouse.
 
 The likely mechanism is that EM-seq C→T conversion at unmethylated CpGs reduces the effective sequence alphabet, collapsing species-distinguishing variants at orthologous loci. RRBS avoids this by targeting only CpG-island-enriched fragments (~1-3% of genome). ICRG is not viable for whole-genome EM-seq PDX read handling; Disambiguate with BISCUIT (conversion-corrected NM tags) is the recommended approach.
-** References
+*** References
 #+print_bibliography:
 
-* Sub-50M cohort CNA analysis                                   :bioinfo_dev:
+** Sub-50M cohort CNA analysis                                  :bioinfo_dev:
 :PROPERTIES:
 :header-args:jupyter-R: :session cna-sub50M :kernel biotools :async yes :dir ./dev/cna-sub50M
 :EXPORT_FILE_NAME: ./cna-sub50M-analysis
@@ -2187,7 +2190,7 @@ The likely mechanism is that EM-seq C→T conversion at unmethylated CpGs reduce
 :EXPORT_HTML_HEAD: <link rel="stylesheet" type="text/css" href="resources/org.css"/>
 :END:
 
-** Background
+*** Background
 
 Patient-derived xenograft (PDX) models engraft human tumor tissue in immunocompromised mice, enabling translational studies of circulating cell-free DNA (cfDNA) as a biomarker for tumor monitoring. However, cfDNA isolated from PDX mouse plasma contains a mixture of human tumor-derived and mouse host-derived fragments. Because approximately 85% of the mouse and human genomes share sequence homology, mouse-origin reads can map to the human reference with high alignment scores and pass standard quality filters (MAPQ >= 20), creating systematic contamination in downstream copy number analysis.
 
@@ -2197,8 +2200,8 @@ Disambiguation classifies reads by comparing the NM tag (number of true mismatch
 
 The WU-487 PDX line is an NF1-associated malignant peripheral nerve sheath tumor (MPNST) characterized by biallelic NF1 loss and PRC2 inactivation (SUZ12 loss), resulting in loss of H3K27me3 [cite:@heidrich2022]. This line is Chr8q-WT (no Chr8q gain), providing a negative control for CNA detection at that locus. Key MPNST CNA loci include CDKN2A/B deletion (9p21), TP53 alteration (17p13), NF1 loss (17q11), and PRC2 component deletions (SUZ12 at 17q11, EED at 11q14, EZH2 at 7q36).
 
-** Data
-*** Sample cohort
+*** Data
+**** Sample cohort
 
 Six WU-487 terminal bleeds from NRG mice: 3 vehicle-treated (mou0001-mou0003, collected 2024-08-20, day 63 post-implant) and 3 mirdametinib-treated (mou0004-mou0006, collected 2024-08-30, day 72 post-implant). EM-seq libraries were prepared using NEBNext EM-seq and sequenced to approximately 380M read pairs each. For this evaluation, 50M read-pair subsets were extracted (no deduplication, 0% duplicate rate). At 50M input read pairs, the effective human coverage after disambiguation (S3A) is approximately 0.3-0.7x hg38, reflecting the ~18-22% human read fraction. ichorCNA operates at 1 Mb bins, where even sub-1x coverage provides sufficient read counts per bin (~10-20 reads/Mb) for copy number estimation.
 
@@ -2211,7 +2214,7 @@ Six WU-487 terminal bleeds from NRG mice: 3 vehicle-treated (mou0001-mou0003, co
 | lib0626 | mou0005  | mirdametinib | 2,380              |          21 |         2,380 |
 | lib0627 | mou0006  | mirdametinib | 2,551              |          27 |           387 |
 
-*** Tumor growth curves
+**** Tumor growth curves
 
 Longitudinal tumor volume measurements are available for all 6 mice from implantation to terminal bleed.
 
@@ -2225,13 +2228,13 @@ source("14_tumor_growth_curves.R")
 
 All tumors reached substantial volumes at endpoint (1,048-2,551 mm^{3}). The mirdametinib-treated mice were collected 9 days later than vehicle controls (day 72 vs day 63 post-implant), and their terminal tumor volumes are comparable to or larger than vehicle. This longer implantation period confounds any treatment effect interpretation — the larger mirdametinib-arm tumors may reflect additional growth time rather than treatment failure. Tumor volumes ranged 2.4-fold across the cohort.
 
-*** Data sources
+**** Data sources
 
 - BAMs (3 strategies x 6 samples = 18): =/mnt/gcs/jeszyman/projects/nf1-mouse/emseq/pdx-read-handling-sub50M/=
 - ichorCNA rerun (108 runs: 6 samples x 3 strategies x 3 presets x 2 PoN): =/mnt/data/projects/nf1-mouse/emseq/cna-sub50M-rerun/=
 - Metadata: =data/metadata.xlsx= (6 relational sheets)
 
-** Read assignment
+*** Read assignment
 
 Disambiguate classifies each read pair into human-assigned, mouse-assigned, or ambiguous based on alignment score comparison (NM tag) from dual-reference BISCUIT alignment. This section examines the species composition of the 50M read-pair input across all samples.
 
@@ -2245,7 +2248,7 @@ source("18_improved_figures.R")
 
 Across all 6 samples, 67-71% of read pairs are mouse-assigned and only 18-22% are human-assigned, with 11-12% ambiguous. This species composition is consistent across treatment arms and reflects the expected dominance of host-derived cfDNA in PDX plasma. The uniformity of species ratios across samples indicates that technical variability in library preparation and sequencing does not substantially affect species classification.
 
-*** Human fraction vs cfDNA concentration
+**** Human fraction vs cfDNA concentration
 
 #+begin_src jupyter-R :results output graphics file :file plots/human_pct_vs_cfdna.png :width 7 :height 5 :units in :res 150
 source("02_read_assignment.R")
@@ -2257,7 +2260,7 @@ source("02_read_assignment.R")
 
 lib0626 and lib0627 show slightly higher human read fractions (21.8% and 22.1%) compared to other samples (18.1-20.2%). These two samples also have the highest ichorCNA tumor fractions after disambiguation (see below), suggesting that elevated tumor-derived cfDNA contributes modestly more human reads to the total pool.
 
-** Alignment metrics
+*** Alignment metrics
 
 #+begin_src jupyter-R :results output graphics file :file plots/mapped_reads.png :width 10 :height 5 :units in :res 150
 source("03_alignment_metrics.R")
@@ -2269,7 +2272,7 @@ source("03_alignment_metrics.R")
 
 Strategy 1 retains approximately 117-120M mapped reads per sample (both reads of all 50M pairs that map anywhere to hg38). After disambiguation, S3A retains approximately 20-24M mapped reads (human-only), and S3B retains 31-35M (human + ambiguous). The 5-6-fold reduction from S1 to S3A reflects the removal of the ~67-71% mouse contamination plus the ~11% ambiguous reads.
 
-*** Read retention relative to S1
+**** Read retention relative to S1
 
 #+begin_src jupyter-R :results output graphics file :file plots/retention_vs_s1.png :width 10 :height 5 :units in :res 150
 source("03_alignment_metrics.R")
@@ -2281,7 +2284,7 @@ source("03_alignment_metrics.R")
 
 S3A retains 17-20% of S1's mapped reads. S3B retains 27-30%. The consistency across samples confirms that species classification is not sample-dependent and reflects the stable mouse-to-human ratio in PDX plasma cfDNA.
 
-** Read overlap analysis
+*** Read overlap analysis
 
 To directly quantify mouse contamination in Strategy 1, we performed exact read-name overlap analysis on lib0626. Every read passing MAPQ >= 20 in S1 was cross-referenced against disambiguate category assignments.
 
@@ -2295,7 +2298,7 @@ source("18_improved_figures.R")
 
 Of the 11.1M reads that pass S1's MAPQ >= 20 filter in lib0626, 68.6% are classified as mouse by disambiguate, 24.7% as human, and 6.6% as ambiguous. This demonstrates that mouse reads from conserved genomic regions produce hg38 alignment scores sufficient to pass standard quality filters, making MAPQ-based filtering alone inadequate for PDX cfDNA analysis.
 
-*** Comprehensive read mapping figure
+**** Comprehensive read mapping figure
 
 #+begin_src jupyter-R :results output graphics file :file plots/read_mapping_comprehensive.png :width 14 :height 12 :units in :res 150
 source("12_read_mapping_figure.R")
@@ -2307,11 +2310,11 @@ source("12_read_mapping_figure.R")
 
 The three-panel figure summarizes the PDX read handling comparison. Panel A shows that S1 retains 5-6 times more "human" read pairs than S3A, but this excess consists primarily of mouse contamination. Panel B shows the disambiguate species classification revealing that the majority of reads in every sample are mouse-origin. Panel C demonstrates for lib0626 that 68.6% of reads passing S1's MAPQ >= 20 quality filter are actually mouse reads.
 
-** Fragment length profiles
+*** Fragment length profiles
 
 Fragment length distributions distinguish cfDNA from genomic DNA: tumor-derived cfDNA produces a characteristic mono-nucleosomal peak near 167 bp, while mouse genomic DNA contamination produces a broader, non-periodic distribution.
 
-*** Raw count histograms
+**** Raw count histograms
 
 #+begin_src jupyter-R :results output graphics file :file plots/fragment_histograms.png :width 14 :height 12 :units in :res 150
 source("13_fragment_histograms.R")
@@ -2323,7 +2326,7 @@ source("13_fragment_histograms.R")
 
 In raw counts, S1 dominates all samples because it retains 5-6 times more reads. However, only lib0626 and lib0627 show a discernible mono-nucleosomal peak in the S3A distribution, consistent with their elevated tumor fractions. The remaining 4 samples show minimal structure after disambiguation, consistent with low tumor content.
 
-*** Percent-normalized histograms
+**** Percent-normalized histograms
 
 #+begin_src jupyter-R :results output graphics file :file plots/fragment_histograms_pct.png :width 14 :height 12 :units in :res 150
 source("13b_fragment_histograms_pct.R")
@@ -2335,7 +2338,7 @@ source("13b_fragment_histograms_pct.R")
 
 Normalizing each strategy to its own total reveals a key nuance. For the two high-TF samples (lib0626, lib0627), S3A shows a pronounced 167 bp mono-nucleosomal peak — S3A has 23-28% of reads in the 150-180 bp peak region vs 19% for S1, indicating that disambiguation enriches for the cfDNA nucleosomal signal by removing the mouse genomic background. However, for low-TF samples (lib0622-lib0625), the pattern reverses: S3A has a LOWER peak fraction (3-7%) than S1 (15-17%). This is because in low-TF samples, human reads surviving disambiguation are predominantly host white blood cell genomic DNA, not tumor cfDNA. Disambiguation removes mouse contamination but does not enrich for human tumor content — it simply reveals whatever human DNA is present, which in low-TF samples is mostly non-cfDNA.
 
-*** High-TF vs low-TF fragment comparison
+**** High-TF vs low-TF fragment comparison
 
 #+begin_src jupyter-R :results output graphics file :file dev/cna-sub50M/plots/fragment_pub.png :width 12 :height 12 :units in :res 300
 source("23_fragment_pub.R")
@@ -2347,11 +2350,11 @@ source("23_fragment_pub.R")
 
 This focused comparison isolates the key finding: for high-TF samples (lib0626, lib0627), S3A reveals a clear mono-nucleosomal peak at 167 bp that is hidden in S1 by the overwhelming mouse genomic DNA background. For low-TF samples, neither strategy produces a nucleosomal peak, confirming that the nucleosomal signature requires sufficient tumor-derived cfDNA to be detectable above the background. The 167 bp peak corresponds to the canonical cfDNA fragment length protected by a single nucleosome plus linker histone, a hallmark of apoptotic cell-free DNA release from tumor cells.
 
-** Tumor fraction estimation
+*** Tumor fraction estimation
 
 ichorCNA was run across all combinations of 3 strategies, 3 presets (default-low-input, aggressive, permissive), and 2 panel-of-normals settings (nopon, withpon), for a total of 108 runs on autosomes only.
 
-*** PoN effect
+**** PoN effect
 
 #+begin_src jupyter-R :results output graphics file :file plots/pon_effect.png :width 14 :height 5 :units in :res 150
 source("05_tumor_fraction.R")
@@ -2363,7 +2366,7 @@ source("05_tumor_fraction.R")
 
 The PoN has a large effect on S1 (vehicle arm CV drops from 0.33 to 0.11) but minimal effect on disambiguated strategies S3A and S3B. This is expected: PoN corrects for systematic bin-level coverage biases, but after disambiguation these biases are already reduced because the mouse contamination that contributed to them has been removed. The PoN is essential for S1 but largely redundant for S3A/S3B, which achieve comparable consistency without it.
 
-*** Tumor fraction by strategy
+**** Tumor fraction by strategy
 
 #+begin_src jupyter-R :results output graphics file :file plots/fig3_tf_comparison.png :width 10 :height 7 :units in :res 300
 source("18_improved_figures.R")
@@ -2375,7 +2378,7 @@ source("18_improved_figures.R")
 
 With the recommended settings (default-low-input preset, with PoN, autosomes only), disambiguation reveals the true tumor fraction landscape. lib0626 jumps from TF = 0.15 (S1) to 0.47 (S3A), a 3.1-fold increase. lib0627 jumps from 0.20 to 0.65, a 3.3-fold increase. The four low-TF samples (lib0622-lib0625) show TF = 0.09-0.12 across all strategies, indicating that disambiguation correctly identifies these as low tumor content rather than artificially depressing their estimates.
 
-*** Tumor fraction heatmap
+**** Tumor fraction heatmap
 
 #+begin_src jupyter-R :results output graphics file :file plots/tf_heatmap.png :width 16 :height 6 :units in :res 150
 source("05_tumor_fraction.R")
@@ -2387,7 +2390,7 @@ source("05_tumor_fraction.R")
 
 The heatmap reveals two distinct sample groups: lib0626 and lib0627 have elevated tumor fractions across all strategies and presets after disambiguation (S3A TF = 0.46 and 0.65 respectively with default-low-input/nopon), while the remaining 4 samples cluster at low TF (0.05-0.16) regardless of strategy. Critically, S1 fails to distinguish high-TF from low-TF samples because mouse contamination inflates baseline TF estimates for all samples. For S1, lib0626's TF is 0.08 (nopon) or 0.15 (withpon), masking the true 0.46-0.47 TF visible only after disambiguation.
 
-*** Preset robustness
+**** Preset robustness
 
 ichorCNA offers multiple presets tuned for different input types. We evaluated whether TF estimates are robust across presets for the recommended S3A + PoN configuration.
 
@@ -2401,9 +2404,9 @@ source("22_preset_robustness.R")
 
 For the two high-TF samples (lib0626, lib0627), TF estimates are consistent across all three presets (CV < 0.15), indicating that the CNA signal is strong enough to be detected regardless of preset sensitivity. For low-TF samples, the aggressive preset tends to report slightly lower TF values while the permissive preset reports lower values still, reflecting different regularization stringency. The default-low-input preset provides the best balance and is recommended for production use with cfDNA input.
 
-** CNA profiles
+*** CNA profiles
 
-*** Genome-wide CNA: S1 vs S3A side-by-side (lib0626)
+**** Genome-wide CNA: S1 vs S3A side-by-side (lib0626)
 
 #+begin_src jupyter-R :results output graphics file :file plots/cna_pub_lib0626.png :width 18 :height 6 :units in :res 300
 source("20_cna_comparison_pub.R")
@@ -2415,7 +2418,7 @@ source("20_cna_comparison_pub.R")
 
 For lib0626 (mirdametinib, TF = 0.46 by S3A), direct alignment (S1) shows a flat profile with minimal CNA signal because the 68.6% mouse contamination dampens all log2 ratio deviations. After disambiguation, S3A reveals clear gains and losses across multiple chromosomes that are consistent with the known MPNST CNA landscape. CNA events are color-coded by ichorCNA classification: gains (orange/red) and heterozygous deletions (blue) become visible only after species decontamination.
 
-*** Genome-wide CNA: S1 vs S3A side-by-side (lib0627)
+**** Genome-wide CNA: S1 vs S3A side-by-side (lib0627)
 
 #+begin_src jupyter-R :results output graphics file :file plots/cna_pub_lib0627.png :width 18 :height 6 :units in :res 300
 source("20_cna_comparison_pub.R")
@@ -2427,7 +2430,7 @@ source("20_cna_comparison_pub.R")
 
 lib0627 (mirdametinib, TF = 0.65 by S3A) shows the most pronounced CNA after disambiguation. The S3A profile reveals broad gains on chromosomes 1q, 7, and 15, and losses on chromosomes 1p, 9p, and 17. Even S1 begins to show some CNA signal for this high-TF sample, but the amplitudes are severely compressed compared to S3A. At this tumor fraction, S1 detects a TF of 0.38, approximately 40% lower than the true value. Note: WU-487 is classified as Chr8q-WT; the Chr8q region negative control analysis (Section 8.5) confirms neutral log2 ratios at this locus, consistent with the known genotype.
 
-*** Per-chromosome CNA analysis
+**** Per-chromosome CNA analysis
 
 To understand how contamination affects CNA detection at the chromosome level, we computed weighted median log2 ratios per chromosome for each strategy.
 
@@ -2441,7 +2444,7 @@ source("21_per_chr_analysis.R")
 
 The per-chromosome heatmap (Panel A) for lib0626 reveals that S1 shows uniformly near-zero log2 ratios across all chromosomes due to mouse contamination dampening the CNA signal. S3A unmasks chromosome-specific gains and losses. Panel B confirms a systematic signal compression: most chromosomes fall below the identity line, indicating that S1 underestimates the true CNA magnitude. Panel C quantifies the signal amplification ratio (S3A/S1) per chromosome, showing that disambiguation amplifies CNA signal by 2-8 fold at chromosomes with true alterations.
 
-*** MPNST-specific loci
+**** MPNST-specific loci
 
 #+begin_src jupyter-R :results output graphics file :file plots/cna_mpnst_loci.png :width 14 :height 8 :units in :res 150
 source("06_cna_profiles.R")
@@ -2453,7 +2456,7 @@ source("06_cna_profiles.R")
 
 CNA values at MPNST-specific loci (CDKN2A, CDKN2B, TP53, NF1, SUZ12, EED, EZH2) are examined across all samples and strategies. For high-TF samples (lib0626, lib0627), disambiguation reveals losses at expected tumor suppressor and PRC2 loci that are attenuated or absent in S1. For low-TF samples, CNA signal at these loci is near the noise floor regardless of strategy, consistent with the limited statistical power to detect focal events at TF < 0.10. Independent WGS/WES characterization of the WU-487 PDX line would provide ground-truth CNA calls for validation of the S3A profiles; this is not available for the current analysis.
 
-*** Chr8q region (negative control)
+**** Chr8q region (negative control)
 
 #+begin_src jupyter-R :results output graphics file :file plots/cna_chr8q.png :width 14 :height 8 :units in :res 150
 source("06_cna_profiles.R")
@@ -2465,9 +2468,9 @@ source("06_cna_profiles.R")
 
 WU-487 is Chr8q-WT, so this region serves as a negative control. Across all samples and strategies, the Chr8q 50-145 Mb region shows neutral log2 ratios (near zero), confirming that disambiguation does not introduce artifactual CNA calls and that the WU-487 line indeed lacks the Chr8q gain seen in other MPNST PDX lines.
 
-** Cross-variable correlations
+*** Cross-variable correlations
 
-*** Tumor fraction vs tumor volume (corrected)
+**** Tumor fraction vs tumor volume (corrected)
 
 #+begin_src jupyter-R :results output graphics file :file plots/fig4_tf_vs_tumor.png :width 8 :height 7 :units in :res 300
 source("18_improved_figures.R")
@@ -2479,7 +2482,7 @@ source("18_improved_figures.R")
 
 Using corrected terminal tumor volumes (1,048-2,551 mm^{3}, previously incorrectly recorded as body weights of 23-27 g), the relationship between tumor burden and cfDNA tumor fraction becomes interpretable. With S3A (default-low-input, with PoN), mou0006 (2,551 mm^{3}) has TF = 0.65 and mou0005 (1,868 mm^{3}) has TF = 0.47. However, the correlation across all 6 samples is not significant (Spearman rho = 0.26, p = 0.66), driven by the vehicle arm tumors (1,048-1,823 mm^{3}) all having low TF (0.05-0.12) regardless of volume. At n=6, statistical power to detect a correlation is very limited (Spearman on 6 data points can detect only very strong monotonic relationships). The non-significant correlation does not rule out a tumor volume-TF relationship; it indicates that other factors contribute. The confounding of treatment arm with collection day (vehicle day 63, mirdametinib day 72) further complicates interpretation. Possible explanations for the high TF in the mirdametinib arm include: (a) treatment-induced tumor cell death increasing cfDNA shedding, (b) larger tumors from 9 additional days of growth, (c) biological variation between individual mice, or (d) a combination of these factors.
 
-*** Short-to-long fragment ratio
+**** Short-to-long fragment ratio
 
 The ratio of short (<150 bp) to long (>250 bp) cfDNA fragments is a marker of tumor-derived cfDNA enrichment. Tumor cfDNA fragments are preferentially shorter due to nucleosomal protection differences between tumor and normal cells.
 
@@ -2493,7 +2496,7 @@ source("19_short_long_ratio.R")
 
 After disambiguation (S3A), the short-to-long ratio increases for lib0626 and lib0627, consistent with enrichment of tumor-derived cfDNA fragments. For low-TF samples, the ratio remains similar across strategies, confirming that the fragment size distribution shift is driven by tumor content rather than a systematic bias introduced by the disambiguation procedure. The correlation between short-to-long ratio and tumor fraction provides an orthogonal validation of ichorCNA tumor fraction estimates.
 
-*** Strategy concordance
+**** Strategy concordance
 
 #+begin_src jupyter-R :results output graphics file :file plots/strategy_concordance.png :width 16 :height 7 :units in :res 200
 source("16_strategy_concordance.R")
@@ -2505,7 +2508,7 @@ source("16_strategy_concordance.R")
 
 The concordance matrix shows high Spearman correlations (rho > 0.9) between S3A and S3B across PoN settings, confirming that including ambiguous reads does not substantially alter rank ordering of tumor fractions. S1 correlations with disambiguated strategies are lower (rho approximately 0.7-0.8), reflecting the confounding effect of mouse contamination on S1 estimates. The scatter plot shows that S1 severely underestimates tumor fraction for high-TF samples (lib0626, lib0627) while overestimating for low-TF samples, making S1 unreliable for quantitative tumor fraction assessment.
 
-*** TF vs cfDNA concentration
+**** TF vs cfDNA concentration
 
 #+begin_src jupyter-R :results output graphics file :file plots/tf_vs_cfdna.png :width 9 :height 5 :units in :res 150
 source("05_tumor_fraction.R")
@@ -2517,7 +2520,7 @@ source("05_tumor_fraction.R")
 
 cfDNA concentration does not predict tumor fraction. lib0625 has the second-highest cfDNA concentration (1,720 pg/uL) but low TF across all strategies, while lib0627 has moderate cfDNA (387 pg/uL) but the highest TF (0.65). This dissociation indicates that total cfDNA yield reflects host biology (blood volume, processing) rather than tumor content, and that tumor fraction estimation requires sequence-based approaches such as ichorCNA.
 
-*** Summary multi-panel figure
+**** Summary multi-panel figure
 
 #+begin_src jupyter-R :results output graphics file :file plots/fig5_summary_multipanel.png :width 18 :height 14 :units in :res 300
 source("18_improved_figures.R")
@@ -2529,9 +2532,9 @@ source("18_improved_figures.R")
 
 The four-panel summary captures the core findings: (A) species classification shows 67-71% mouse reads across all samples; (B) tumor fraction estimates diverge sharply between strategies for the two high-TF samples; (C) the TF-tumor volume relationship after disambiguation is biologically plausible but not statistically significant at n = 6; (D) direct quantification of contamination in S1 demonstrates that the majority of reads passing quality filters are mouse-origin.
 
-** Result summary
+*** Result summary
 
-*** Integrated sample summary
+**** Integrated sample summary
 
 #+begin_src jupyter-R :results output graphics file :file dev/cna-sub50M/plots/waterfall_summary.png :width 14 :height 10 :units in :res 300
 source("24_waterfall_summary.R")
@@ -2543,7 +2546,7 @@ source("24_waterfall_summary.R")
 
 Samples sorted by S3A tumor fraction reveal a clear bimodal distribution: lib0627 (TF = 0.65) and lib0626 (TF = 0.47) separate cleanly from the four low-TF samples (TF = 0.08-0.12). The X marks show the corresponding S1 estimates, which compress the dynamic range by failing to distinguish high-TF from low-TF samples. Tumor volume, human read fraction, and cfDNA concentration are shown for context. While the two highest-TF samples have the largest tumors, neither cfDNA concentration nor tumor volume alone explains the TF variation, emphasizing the need for computational tumor fraction estimation through CNA-based methods.
 
-*** Key findings
+**** Key findings
 
 1. *Mouse contamination dominates S1*: 67-71% of reads are mouse-origin, and 68.6% of S1 MAPQ >= 20 reads in lib0626 are mouse contamination. Direct alignment to hg38 without species filtering is unsuitable for PDX cfDNA CNA analysis.
 
@@ -2557,7 +2560,7 @@ Samples sorted by S3A tumor fraction reveal a clear bimodal distribution: lib062
 
 6. *Tumor volume alone does not explain TF variation*: Despite a 2.4-fold range in tumor volume, the vehicle arm shows uniformly low TF. This suggests that factors beyond bulk tumor size — such as tumor vascularity, necrosis, or treatment-induced apoptosis — contribute to cfDNA shedding. The two high-TF samples are both from the mirdametinib arm; whether MEK inhibition promotes tumor cell death and cfDNA release in WU-487 cannot be determined at n=3 per arm but warrants investigation.
 
-*** Production pipeline recommendation
+**** Production pipeline recommendation
 
 Based on these findings, the production pipeline should use:
 - *Disambiguate (S3A)*: Human-only reads with NM-tag comparison
@@ -2567,7 +2570,7 @@ Based on these findings, the production pipeline should use:
 
 S3B (including ambiguous reads) provides marginally more coverage but dilutes tumor signal; S3A is preferred for CNA analysis where signal purity outweighs depth.
 
-** Limitations
+*** Limitations
 
 1. *Small sample size (n = 6)*: Statistical power is limited for correlation analyses. The Spearman correlation between tumor volume and TF is not significant, but the biological trend is consistent with expectations.
 
@@ -2587,8 +2590,9 @@ S3B (including ambiguous reads) provides marginally more coverage but dilutes tu
 
 8. *Fragment enrichment is TF-dependent*: Disambiguation enriches the cfDNA nucleosomal peak only in high-TF samples (23-28% of reads in 150-180 bp region for S3A vs 19% for S1). In low-TF samples, S3A actually shows a LOWER peak fraction (3-7%) than S1 (15-17%), because human reads surviving disambiguation are predominantly host genomic DNA rather than tumor cfDNA.
 
-* Ideas                                                               :ideas:
-** Methylation-aware Xengsort for EM-seq PDX read classification [#Y]
+** Ideas                                                              :ideas:
+- in silico pooling experiment- pool human reads from multiple animals of same cohort- see [cite:@fu2025frag]
+*** Methylation-aware Xengsort for EM-seq PDX read classification [#Y]
 :PROPERTIES:
 :ID:       A1835C32-1FEB-4902-8127-DCF343353E83
 :END:
@@ -2605,4 +2609,4 @@ Key questions:
 - Does this outperform Disambiguate on real EM-seq data, or does Disambiguate's alignment-score comparison remain superior?
 
 For the current PDX read handling evaluation, Xengsort is dropped in favor of Disambiguate (alignment-score comparison handles conversion naturally via bwa-meth). This idea is for potential future tool development.
-* [[id:14780b6a-e3d7-44b1-bb04-0272f9466166][Makefile]]
+** [[id:14780b6a-e3d7-44b1-bb04-0272f9466166][Makefile]]

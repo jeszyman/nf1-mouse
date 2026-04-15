@@ -1,0 +1,458 @@
+# Frictionless datapackage for nf1-mouse metadata.xlsx
+# Tangled from nf1-mouse.org. Do not edit directly.
+
+name: nf1-mouse-metadata
+title: NF1 Mouse K08 Aim 2 Metadata
+description: Relational metadata for PDX cfDNA monitoring study (6 sheets in data/metadata.xlsx)
+
+resources:
+# Mice
+# Mice table contains mouse-specific metadata for research subjects
+  # Primary key also serves as foreign key to subjects table
+  # Includes strain, genotype, and housing information
+  - name: mice
+    title: Mouse Research Subjects
+    description: Mouse subjects used in research
+    path: metadata.xlsx
+    dialect:
+      excel:
+        sheet: mice
+    schema:
+      missingValues: &mv ["", "unknown", "UNK", "unk", "n/a", "NA", "GET", "None"]
+      fields:
+        # PRIMARY KEY - also serves as foreign key to subjects table
+        # Three-letter prefix: 'mou' + 4 digits
+        - name: mouse_id
+          title: Mouse Identifier
+          description: Unique identifier for mouse subject. Format is 'mou' followed by 4 digits. Links directly to subject_id in subjects table.
+          example: mou0001
+          type: string
+          constraints:
+            required: true
+            unique: true
+            pattern: '^mou\d{4}$'
+
+        # MOUSE-SPECIFIC FIELDS
+
+        - name: strain
+          title: Mouse Strain
+          description: Genetic background strain of the mouse
+          example: nod
+          type: string
+          constraints:
+            required: true
+            maxLength: 50
+
+        - name: stock
+          title: Mouse Stock
+          description: Full stock designation including genetic modifications, lowercase with underscores
+          example: nod_cg_rag1_null_il2rg_null
+          type: string
+          constraints:
+            required: true
+            maxLength: 100
+
+        - name: sex
+          title: Mouse Sex
+          description: Biological sex of the mouse
+          example: m
+          type: string
+          constraints:
+            required: true
+            enum: [m, f]
+          enumDescriptions:
+            m: Male
+            f: Female
+
+        - name: birth_date
+          title: Birth Date
+          description: Date of birth in ISO8601 format (YYYY-MM-DD)
+          example: 2024-01-15
+          type: date
+          constraints:
+            required: false
+            minimum: "2020-01-01"
+            maximum: "2026-12-31"
+
+        - name: institution_housed
+          title: Institution Housed
+          description: The institution where the mouse was housed for experiments
+          example: washu
+          type: string
+          constraints:
+            enum: [washu, nci]
+          enumDescriptions:
+            washu: Washington University in St. Louis
+            nci: National Cancer Institute
+
+        - name: study_protocol_id
+          title: Study Protocol
+          description: Identifier for institution research protocol
+          example: 99-CC-0168
+          type: string
+          constraints:
+            required: false
+
+        - name: pdx_line_id
+          title: PDX Line
+          description: Foreign key to pdx_lines table
+          type: string
+          constraints:
+            required: false
+
+        - name: alt_subj
+          title: Alternate Subject ID
+          description: Lab-assigned mouse identifier from source institution
+          example: WU487 2-1
+          type: string
+          constraints:
+            required: false
+
+        # OPTIONAL NOTES
+        - name: notes
+          title: Notes
+          description: Free-text notes about this mouse
+          type: string
+          constraints:
+            required: false
+            maxLength: 500
+
+        - name: treatment
+          title: Treatment Arm
+          description: Drug treatment assignment for this mouse
+          type: string
+          constraints:
+            required: false
+            enum: [vehicle, mirdametinib, volasertib, mirdametinib_volasertib, untreated]
+
+        - name: tumor_injection_date
+          title: Tumor Injection Date
+          description: Date of tumor implantation
+          type: date
+          constraints:
+            required: false
+
+    primaryKey: mouse_id
+    foreignKeys:
+      - fields: pdx_line_id
+        reference:
+          resource: pdx_lines
+          fields: pdx_line_id
+  - name: pdx_lines
+    title: PDX Lines
+    description: Patient-derived xenograft lines used in the study
+    path: metadata.xlsx
+    dialect:
+      excel:
+        sheet: pdx_lines
+    schema:
+      missingValues: *mv
+      fields:
+        - name: pdx_line_id
+          title: PDX Line Identifier
+          description: Unique identifier for PDX line
+          example: JH-2-002
+          type: string
+          constraints:
+            required: true
+            unique: true
+
+        - name: source_tumor
+          title: Source Tumor
+          description: Original patient tumor identifier
+          type: string
+          constraints:
+            required: false
+
+        - name: chr8q_status
+          title: Chromosome 8q Status
+          description: Chr8q copy number status
+          type: string
+          constraints:
+            required: false
+            enum: [gain, wt]
+
+        - name: institution
+          title: Source Institution
+          description: Institution providing the PDX line
+          type: string
+          constraints:
+            required: true
+            enum: [washu, jhu]
+
+    primaryKey: pdx_line_id
+  - name: samples
+    title: Blood Samples
+    description: Blood samples collected from mice
+    path: metadata.xlsx
+    dialect:
+      excel:
+        sheet: samples
+    schema:
+      missingValues: *mv
+      fields:
+        - name: sample_id
+          title: Sample Identifier
+          description: Unique identifier for blood sample
+          example: smp0001
+          type: string
+          constraints:
+            required: true
+            unique: true
+            pattern: '^smp\d{4}$'
+
+        - name: mouse_id
+          title: Mouse Identifier
+          description: Foreign key to mice table
+          type: string
+          constraints:
+            required: true
+
+        - name: bleed_type
+          title: Bleed Type
+          description: Type of blood collection
+          type: string
+          constraints:
+            required: true
+            enum: [serial, terminal]
+
+        - name: timepoint_day
+          title: Timepoint Day
+          description: Day of collection relative to treatment start
+          type: integer
+          constraints:
+            required: false
+
+        - name: collection_date
+          title: Collection Date
+          description: Date of blood collection in ISO8601 format
+          example: 2024-08-20
+          type: date
+          constraints:
+            required: false
+
+        - name: volume_ul
+          title: Volume (uL)
+          description: Collected blood volume in microliters
+          type: number
+          constraints:
+            required: false
+
+        - name: visual_hemolysis
+          title: Visual Hemolysis
+          description: Whether sample shows visible hemolysis
+          type: boolean
+          constraints:
+            required: false
+
+        - name: alt_spec_id
+          title: Alternate Specimen ID
+          description: Lab-assigned specimen identifier from source institution
+          type: string
+          constraints:
+            required: false
+
+        - name: notes
+          title: Notes
+          description: Free-text notes about this sample
+          type: string
+          constraints:
+            required: false
+            maxLength: 500
+
+    primaryKey: sample_id
+    foreignKeys:
+      - fields: mouse_id
+        reference:
+          resource: mice
+          fields: mouse_id
+  - name: cfdna_isolations
+    title: cfDNA Isolations
+    description: Cell-free DNA isolation records
+    path: metadata.xlsx
+    dialect:
+      excel:
+        sheet: cfdna_isolations
+    schema:
+      missingValues: *mv
+      fields:
+        - name: cfdna_iso_id
+          title: cfDNA Isolation Identifier
+          description: Unique identifier for cfDNA isolation
+          example: iso0001
+          type: string
+          constraints:
+            required: true
+            unique: true
+            pattern: '^iso\d{4}$'
+
+        - name: sample_id
+          title: Sample Identifier
+          description: Foreign key to samples table
+          type: string
+          constraints:
+            required: true
+
+        - name: kit
+          title: Isolation Kit
+          description: Kit used for cfDNA isolation
+          type: string
+          constraints:
+            required: true
+
+        - name: spri_cleanup
+          title: SPRI Bead Cleanup
+          description: Whether right-sided SPRI bead selection was performed
+          type: boolean
+          constraints:
+            required: false
+
+        - name: input_ul
+          title: Input Volume (uL)
+          description: Plasma input volume in microliters
+          type: number
+          constraints:
+            required: true
+
+        - name: elution_ul
+          title: Elution Volume (uL)
+          description: Elution volume in microliters
+          type: number
+          constraints:
+            required: false
+
+        - name: qubit_conc_pg_ul
+          title: Qubit Concentration (pg/uL)
+          description: cfDNA concentration measured by Qubit HS dsDNA assay
+          type: number
+          constraints:
+            required: false
+
+        - name: bioanalyzer_conc_pg_ul
+          title: Bioanalyzer Concentration (pg/uL)
+          description: cfDNA concentration from Agilent Bioanalyzer HS DNA assay
+          type: number
+          constraints:
+            required: false
+            minimum: 0
+
+    primaryKey: cfdna_iso_id
+    foreignKeys:
+      - fields: sample_id
+        reference:
+          resource: samples
+          fields: sample_id
+  - name: sequencing_libraries
+    title: Sequencing Libraries
+    description: EM-seq library preparation and sequencing records
+    path: metadata.xlsx
+    dialect:
+      excel:
+        sheet: sequencing_libraries
+    schema:
+      missingValues: *mv
+      fields:
+        - name: library_id
+          title: Library Identifier
+          description: Unique identifier for sequencing library
+          example: lib0001
+          type: string
+          constraints:
+            required: true
+            unique: true
+            pattern: '^lib\d{4}$'
+
+        - name: cfdna_iso_id
+          title: cfDNA Isolation Identifier
+          description: Foreign key to cfdna_isolations table
+          type: string
+          constraints:
+            required: true
+
+        - name: prep_kit
+          title: Library Prep Kit
+          description: Kit used for library preparation
+          type: string
+          constraints:
+            required: true
+
+        - name: sequencing_platform
+          title: Sequencing Platform
+          description: Sequencing platform used
+          type: string
+          constraints:
+            required: false
+
+        - name: read_length
+          title: Read Length
+          description: Sequencing read length in base pairs
+          type: integer
+          constraints:
+            required: false
+
+        - name: lib_conc_ng_ul
+          title: Library Concentration (ng/uL)
+          description: Post-prep library concentration
+          type: number
+          constraints:
+            required: false
+
+    primaryKey: library_id
+    foreignKeys:
+      - fields: cfdna_iso_id
+        reference:
+          resource: cfdna_isolations
+          fields: cfdna_iso_id
+  - name: tumor_measurements
+    title: Tumor Measurements
+    description: Longitudinal tumor volume and body weight measurements
+    path: metadata.xlsx
+    dialect:
+      excel:
+        sheet: tumor_measurements
+    schema:
+      missingValues: *mv
+      fields:
+        - name: mouse_id
+          title: Mouse ID
+          description: Foreign key to mice table
+          type: string
+          constraints:
+            required: true
+
+        - name: measurement_date
+          title: Measurement Date
+          description: Date of measurement in ISO8601 format
+          type: date
+          constraints:
+            required: true
+
+        - name: days_post_implant
+          title: Days Post Implantation
+          description: Number of days after tumor implantation
+          type: integer
+          constraints:
+            required: false
+            minimum: 0
+
+        - name: tumor_volume_mm3
+          title: Tumor Volume (mm3)
+          description: Tumor volume in cubic millimeters
+          type: number
+          constraints:
+            required: false
+            minimum: 0
+
+        - name: body_weight_g
+          title: Body Weight (g)
+          description: Mouse body weight in grams
+          type: number
+          constraints:
+            required: false
+            minimum: 0
+
+    foreignKeys:
+      - fields: mouse_id
+        reference:
+          resource: mice
+          fields: mouse_id
