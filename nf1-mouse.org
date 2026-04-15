@@ -2,8 +2,6 @@
 #+title: NF1 Mouse
 #+author: Jeffrey Szymanski
 
-- [ ] implant site consistent or as a variable?
-
 - [cite:@mouliere2018a]
 
 - mouse chr8 samples- https://mail.google.com/mail/u/0/#inbox/FMfcgzQgKvKNWDpjskqzJTvLfWKwTpDx
@@ -485,6 +483,14 @@ resources:
             required: true
             enum: [washu, jhu]
 
+        - name: donor_sex
+          title: PDX Donor Sex
+          description: Biological sex of the patient from whom the PDX line was derived. Enables Y-chromosome-based tumor fraction cross-check in female host mice.
+          type: string
+          constraints:
+            required: false
+            enum: [m, f]
+
     primaryKey: pdx_line_id
 #+end_src
 
@@ -779,7 +785,13 @@ resources:
           fields: mouse_id
 #+end_src
 
-** Methods
+**** TODO Resolve PDX donor sex for JH-2-002, JH-2-055, MN2
+Three PDX lines in =pdx_lines= lack donor sex annotation. WashU lines (WU-225, WU-356, WU-487) resolved as male via the Sarcoma Banking Subjects List (WUSM) on 2026-04-15. Remaining:
+- =JH-2-002= — participant records (par0307/par0308) exist in mpnst metadata but sex is =None=; no match in WashU banking list
+- =JH-2-055= — participant records (par0003 jhh, par0328 nci) exist but sex is =UNK=/=None=; no match in WashU banking list
+- =MN2= — no participant record found in mpnst metadata, manual_inputs, or WashU banking list (origin Mayo per name convention but institution column shows =washu=)
+
+Ask Hirbe lab / Pratilas lab for donor sex on these three lines. Needed for Y-chromosome tumor-fraction cross-check (all 140 host mice are female).
 
 *** cfDNA isolation
 cfDNA is isolated from mouse plasma using the MagMAX Cell-Free DNA Isolation Kit (Thermo Fisher, MAN0015629) following the manual protocol option 2 for small volumes. For 50 μL samples, plasma is diluted to 100 μL with PBS before isolation.

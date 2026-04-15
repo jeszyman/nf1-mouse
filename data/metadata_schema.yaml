@@ -188,6 +188,14 @@ resources:
             required: true
             enum: [washu, jhu]
 
+        - name: donor_sex
+          title: PDX Donor Sex
+          description: Biological sex of the patient from whom the PDX line was derived. Enables Y-chromosome-based tumor fraction cross-check in female host mice.
+          type: string
+          constraints:
+            required: false
+            enum: [m, f]
+
     primaryKey: pdx_line_id
   - name: samples
     title: Blood Samples
