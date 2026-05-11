@@ -2,40 +2,20 @@
 #+title: NF1 Mouse
 #+author: Jeffrey Szymanski
 
-- [cite:@mouliere2018a]
-
-- mouse chr8 samples- https://mail.google.com/mail/u/0/#inbox/FMfcgzQgKvKNWDpjskqzJTvLfWKwTpDx
-
-mouse plan in /docs/superpowers/   subsample- see batch-test-results-collection
-
-https://mail.google.com/mail/u/0/#inbox/FMfcgzQgKvKNWDpjskqzJTvLfWKwTpDx
-
-  Settled:
-  - Two strategies: Direct-to-human (Strategy 1) vs Disambiguate (Strategy 3), bo
-  - ICRG is closed (fundamental EM-seq incompatibility, not a setup error)
-  - Xengsort excluded (k-mer classification breaks on EM-seq conversion)
-  - Scripts exist, 2-sample pilot done, disambiguate.py rewritten to streaming
-  - VM spec decided, full plan exists at docs/superpowers/plans/2026-03-18-direct
-
-  Immediately actionable on jeff-beast:
-  1. Pull remaining 16 FASTQs from GCS
-  2. Run Phase A R analysis (MAPQ, overlap, chromosome distribution) on existing
-  3. Validate scripts on one more sample (lib0622)
+- https://mail.google.com/mail/u/0/#inbox/FMfcgzQgKvKNWDpjskqzJTvLfWKwTpDx
 
 
-- [ ] extract visuals from [cite:@bhandari2025]
-bleed dates =/= tumro volumne dates!!
+- are ms3/4 low vol actaul isolation inputs 50 or 25?
+- what are MN2 #1-3 extra Terminal 100uL 0.2 PCR tube (2)?
+- ms1 and ms2 different pdxs?
 
-are ms3/4 low vol actaul isolation inputs 50 or 25?
 
-what are MN2 #1-3 extra Terminal 100uL 0.2 PCR tube (2)?
-
-separation of concerns- seq1uential numbering
-
-good practice shared box links
-
-ms1 and ms2 different pdxs?
 * NF1 Mouse PDX cfDNA Studies
+** TODO Mouse EM-seq set 2 download
+SCHEDULED: <2026-05-08 Fri>
+https://mail.google.com/mail/u/0/#inbox/FMfcgzQgLjWRnfJJMWLDffMLhdSqzHXq
+https://mail.google.com/mail/u/0/#inbox/FMfcgzQgLjWRnfHzMFMVJlrnQvhJvJnF
+https://mail.google.com/mail/u/0/#inbox/FMfcgzQgKvKNWDpjskqzJTvLfWKwTpDx
 ** .TODO Search nf1-mouse for needed manual updates?
 ** README
 
@@ -254,6 +234,36 @@ dependencies:
   - [[mu4e:msgid:BN7PR01MB3715C4DC359FE6778A42FA509641A@BN7PR01MB3715.prod.exchangelabs.com][CTF Progress Report — likely CNA data for Guangfeng timeline (2026-03-17)]]
   - [[mu4e:msgid:BN7PR01MB3715A87513CC83EB65A6032D964EA@BN7PR01MB3715.prod.exchangelabs.com][CTF Progress Report — Chr8q-gain sequencing gap identified (2026-03-18)]]
   - [[mu4e:msgid:BN7PR01MB3715A87513CC83EB65A6032D964EA@BN7PR01MB3715.prod.exchangelabs.com][CTF Progress Report — EM-seq confirmed, NIH sequencing, sample plan (2026-03-20 through 2026-03-24)]]
+- [2026-03-30 Mon] Shipment sent to NCI. Manifest, tumor volume xlsx, bioanalyzer PDF, and shipment-position PDF were sent by Mark Zoberi. Sample selection criteria: cfDNA total ≥0.1 ng with a discernible 167 bp peak. WashU shipper: Xiaochun Zhang; NCI receiver: Chloe Sachs.
+- [2026-05-11 Sun] Metadata schema updates from the March 30 shipment thread (this session):
+  - Added =mice.treatment_start_date= and =mice.treatment_end_date= as the anchor for =samples.timepoint_day=.
+  - Added =cfdna_isolations.bioanalyzer_conc_pg_ul= (already in schema, now in xlsx), =cfdna_isolations.bioanalyzer_167bp_peak_pg_ul=, =cfdna_isolations.shipment_batch=, and =cfdna_isolations.shipment_position=.
+  - Added =pdx_lines.notes= to match existing xlsx column; added missing =pdx_lines.source_tumor= column to xlsx.
+  - Populated =treatment_start_date = 2024-09-12= for 32 JH-2-055 treated mice (cross-validated: email's day-4 tumor measurements at 167.71 / 251.90 / 179.56 / 301.81 mm^{3} match =tumor_measurements= on 2024-09-16 and 2024-09-30 for mou0034 and mou0024, with sample collections on 2024-09-17 day-5 and 2024-10-01 day-19).
+  - Computed =timepoint_day= for 224 samples (all samples with known =treatment_start_date= and =collection_date=).
+  - Ingested all 14 samples from =data/sources/Guangfeng Revisions Murine cfDNA Manifest.xlsx= into =cfdna_isolations= with =shipment_batch = 2026-03-30_NCI=, =shipment_position=, and =bioanalyzer_conc_pg_ul=. Full shipment roster (position-ordered):
+    | pos | iso     | sample  | mouse              | line     | tx                      | draw date  | bio conc (pg/uL) |
+    |-----+---------+---------+--------------------+----------+-------------------------+------------+------------------|
+    |   1 | iso0021 | smp0746 | mou0034 (4-4)      | JH-2-055 | mirdametinib_volasertib | 2024-09-17 |           229.56 |
+    |   2 | iso0019 | smp0747 | mou0024 (2-2)      | JH-2-055 | mirdametinib_volasertib | 2024-09-17 |           159.44 |
+    |   3 | iso0022 | smp0775 | mou0034 (4-4)      | JH-2-055 | mirdametinib_volasertib | 2024-10-01 |            81.70 |
+    |   4 | iso0020 | smp0776 | mou0024 (2-2)      | JH-2-055 | mirdametinib_volasertib | 2024-10-01 |           114.49 |
+    |   5 | iso0023 | smp0927 | mou0141 (MN2 4-5)  | MN2      | mirdametinib_volasertib | 2026-02-12 |           251.43 |
+    |   6 | iso0024 | smp0928 | mou0142 (MN2 3-4)  | MN2      | mirdametinib_volasertib | 2026-02-12 |           183.58 |
+    |   7 | iso0025 | smp0929 | mou0141 (MN2 4-5)  | MN2      | mirdametinib_volasertib | 2026-02-19 |            95.63 |
+    |   8 | iso0026 | smp0930 | mou0142 (MN2 3-4)  | MN2      | mirdametinib_volasertib | 2026-02-19 |           176.57 |
+    |   9 | iso0027 | smp0931 | mou0143 (MN2 3-3)  | MN2      | vehicle                 | 2026-02-12 |            30.23 |
+    |  10 | iso0028 | smp0932 | mou0144 (MN2 3-2)  | MN2      | vehicle                 | 2026-02-12 |            14.61 |
+    |  11 | iso0029 | smp0933 | mou0145 (MN2 4-2)  | MN2      | vehicle                 | 2026-02-12 |            15.87 |
+    |  12 | iso0030 | smp0934 | mou0143 (MN2 3-3)  | MN2      | vehicle                 | 2026-02-19 |            56.75 |
+    |  13 | iso0031 | smp0935 | mou0144 (MN2 3-2)  | MN2      | vehicle                 | 2026-02-19 |            43.62 |
+    |  14 | iso0032 | smp0936 | mou0145 (MN2 4-2)  | MN2      | vehicle                 | 2026-02-19 |            52.59 |
+  - Added 5 new MN2 cohort-2 mice (mou0141–mou0145) — Guangfeng repeat experiment, =treatment_end_date = 2026-02-19= set for the combo arm only.
+  - Added 10 new MN2 samples (smp0927–smp0936), both timepoints × 5 mice.
+  - Added 10 tumor measurements for the new MN2 cohort from =Guangfeng Revisions Tumor Volume Data.xlsx= (measurement dates 2026-02-13 and 2026-02-19).
+  - =bioanalyzer_167bp_peak_pg_ul= remains 35 pg/uL for iso0022 only (sourced from the 2026-03-24 org note about the 167 bp peak metric specifically). The manifest's "Bioanalyzer cfDNA Concentration" column was treated as the broader =bioanalyzer_conc_pg_ul=, not the 167 bp peak-gated value — these are different metrics.
+**** TODO Confirm treatment_start_date for MN2 cohort-2
+The 5 new MN2 cohort-2 mice (mou0141–mou0145) have =treatment_end_date= populated (2026-02-19 for the combo arm) but =treatment_start_date= remains blank — the email says samples collected on 2/12 were drawn during "first week of treatment", which implies =treatment_start_date ≤ 2026-02-12= but does not pin it. Ask Mark Zoberi / Guangfeng for the exact dosing schedule. Once confirmed, the =timepoint_day= for smp0927–smp0936 can be backfilled.
 *** NF1 MPNST PDX model system
 NF1 (neurofibromatosis type 1) affects ~1 in 2,500 individuals worldwide. Plexiform neurofibromas (PNs) can progress through atypical neurofibroma (AN) to malignant peripheral nerve sheath tumor (MPNST), the leading cause of cancer death in NF1. Lifetime MPNST risk is 8–13%; 5-year disease-specific survival is ~30%. Molecular progression follows NF1 biallelic loss → CDKN2A/B deletion → TP53 and PRC2 (SUZ12/EED) loss, with MPNST subtypes distinguished by H3K27me3-loss vs H3K27me3-retained status. Patient-derived xenograft (PDX) models recapitulate tumor histology and molecular features, enabling controlled /in vivo/ studies of cfDNA dynamics.
 
@@ -279,8 +289,22 @@ cfDNA from PDX mouse plasma provides a real-time, systemic measure of tumor biol
 - Tissue-level orthogonal assays: ATAC-seq and RNA-seq on matched tumor, with possible CUT&RUN follow-up for transcription factor binding
 - [[id:c6157337-5f4a-4216-abc8-93d1a84cdbb5][PNST MRD]] and [[id:771f19d4-cd99-4013-b5de-5ba5be6b6d5d][NF1 CAPP-seq]] are related human cfDNA projects using overlapping analytical approaches
 - [[id:57a06d7a-302b-488f-94af-c41a98684555][NF1-associated tissue of origin]] uses cfDNA tissue-of-origin inference across NCI, Hopkins, Mayo, WashU, and U of M samples
+** Xengraft model read disambiguation bioinformatics
+- [ ] extract visuals from [cite:@bhandari2025]
+- Xenograft experiment and bioinformatics are not documented in [cite:@mouliere2018a]
+
+- [[file:resources/media/mouliere2018a-fig2a.png]]
+- [[file:resources/media/mouliere2018a-fig2b.png]]
+
+
 ** Data
+- bleed dates =/= tumro volumne dates!!
 - [ ] ingest https://mail.google.com/mail/u/0/#inbox/FMfcgzQgKvKNWDpjskqzJTvLfWKwTpDx
+- NCI to Mayo transfers
+  - Globus personal must be active on aclm350
+  - Check free storage on aclm350, from cyberark, create a [[id:b06cd426-f20b-4827-98b0-e31ba058324c][cyberark reverse tunnel]]
+  - Initiate transfer in globus web interface on Mayo macbook
+  - Upon transfer completion, gsutil rsync data to Chaudhuri lab bucket
 
 *** Data model
 **** Datapackage header
@@ -431,6 +455,20 @@ resources:
             required: false
             enum: [flank, sciatic_nerve, intramuscular, subcutaneous, other]
 
+        - name: treatment_start_date
+          title: Treatment Start Date
+          description: Date of first treatment dose. Anchor for samples.timepoint_day. Required to compute "days post treatment start" used in serial bleed designations.
+          type: date
+          constraints:
+            required: false
+
+        - name: treatment_end_date
+          title: Treatment End Date
+          description: Date treatment was terminated. Anchors the second timepoint for designs with a defined treatment-termination bleed (e.g., MN2 double-therapy cohort).
+          type: date
+          constraints:
+            required: false
+
     primaryKey: mouse_id
     foreignKeys:
       - fields: pdx_line_id
@@ -490,6 +528,14 @@ resources:
           constraints:
             required: false
             enum: [m, f]
+
+        - name: notes
+          title: Notes
+          description: Free-text notes about this PDX line
+          type: string
+          constraints:
+            required: false
+            maxLength: 500
 
     primaryKey: pdx_line_id
 #+end_src
@@ -649,11 +695,33 @@ resources:
 
         - name: bioanalyzer_conc_pg_ul
           title: Bioanalyzer Concentration (pg/uL)
-          description: cfDNA concentration from Agilent Bioanalyzer HS DNA assay
+          description: Total cfDNA concentration from Agilent Bioanalyzer HS DNA assay (full electropherogram area)
           type: number
           constraints:
             required: false
             minimum: 0
+
+        - name: bioanalyzer_167bp_peak_pg_ul
+          title: Bioanalyzer 167 bp Peak Concentration (pg/uL)
+          description: cfDNA concentration within the 167 bp mono-nucleosomal peak region only (area under the electropherogram curve gated around that peak). QC criterion for EM-seq library suitability — presence of a discernible 167 bp peak is gated alongside total cfDNA >= 0.1 ng input minimum.
+          type: number
+          constraints:
+            required: false
+            minimum: 0
+
+        - name: shipment_batch
+          title: Shipment Batch
+          description: Identifier for the shipment cohort in which this isolation was sent for downstream library preparation. Format YYYY-MM-DD_DESTINATION (e.g., 2026-03-30_NCI).
+          type: string
+          constraints:
+            required: false
+
+        - name: shipment_position
+          title: Shipment Position
+          description: Position label within the shipment box (corresponds to the position labels on the shipment manifest).
+          type: string
+          constraints:
+            required: false
 
     primaryKey: cfdna_iso_id
     foreignKeys:
@@ -1387,22 +1455,30 @@ qc.electrophoresis(ba_run, "length")
 Xenograft plasma contains cfDNA from both human tumor and mouse host. Species-specific quantification uses dPCR/qPCR targeting human and mouse LINE repetitive elements. TapeStation HSD1000 QC accompanies each dPCR batch to verify cfDNA size distribution and total concentration. Batch 2 (2025-03-21) characterized 12 samples from WU487 terminal, MN2 terminal, and JH-2-055 serial bleeds, with TapeStation concentrations ranging from 2.84 to 1500 pg/uL. Input: [[file:/mnt/gcs/jeszyman/projects/nf1-mouse/inputs/metadata/nf1_murine_dpcr_batch2_3_21_25.pdf][TapeStation batch 2 report]].
 
 Note: LINE dPCR worked well for serial bleed samples but produced unreliable or discordant results for terminal bleed samples. The root cause was never identified. If cross-sample validation of EM-seq read assignment is attempted using LINE dPCR species fractions, this discrepancy limits comparison to serial bleeds only.
+** Methods
+  Settled:
+  - Two strategies: Direct-to-human (Strategy 1) vs Disambiguate (Strategy 3), bo
+  - ICRG is closed (fundamental EM-seq incompatibility, not a setup error)
+  - Xengsort excluded (k-mer classification breaks on EM-seq conversion)
+  - Scripts exist, 2-sample pilot done, disambiguate.py rewritten to streaming
+  - VM spec decided, full plan exists at docs/superpowers/plans/2026-03-18-direct
 
-** Workflows
-*** Configuration
-**** Data
-**** Results
-*** Preamble named blocks
-*** [[file:workflows/data.smk][Data pipeline]]
-**** make_data_model.R
-*** [[file:workflows/results.smk][Results pipeline]]
-**** Preamble
-**** LINK to Load packages
-**** LINK to Load configuration
-**** LINK to variable naming
-**** Functions
-**** All rule
-**** On success
+
+*** Workflows
+**** Configuration
+***** Data
+***** Results
+**** Preamble named blocks
+**** [[file:workflows/data.smk][Data pipeline]]
+***** make_data_model.R
+**** [[file:workflows/results.smk][Results pipeline]]
+***** Preamble
+***** LINK to Load packages
+***** LINK to Load configuration
+***** LINK to variable naming
+***** Functions
+***** All rule
+***** On success
 ** Results
 - mou0067-76 are nopdx- check frag vs mouse pdx reads
 
@@ -2612,6 +2688,7 @@ S3B (including ambiguous reads) provides marginally more coverage but dilutes tu
 
 ** Ideas                                                              :ideas:
 - in silico pooling experiment- pool human reads from multiple animals of same cohort- see [cite:@fu2025frag]
+- blacklist approach for PDX cfDNA analysis- exclude genomic regions with systematic mouse/human read misassignment- see [cite:@fu2025frag]
 *** Methylation-aware Xengsort for EM-seq PDX read classification [#Y]
 :PROPERTIES:
 :ID:       A1835C32-1FEB-4902-8127-DCF343353E83

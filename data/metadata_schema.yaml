@@ -140,6 +140,20 @@ resources:
             required: false
             enum: [flank, sciatic_nerve, intramuscular, subcutaneous, other]
 
+        - name: treatment_start_date
+          title: Treatment Start Date
+          description: Date of first treatment dose. Anchor for samples.timepoint_day. Required to compute "days post treatment start" used in serial bleed designations.
+          type: date
+          constraints:
+            required: false
+
+        - name: treatment_end_date
+          title: Treatment End Date
+          description: Date treatment was terminated. Anchors the second timepoint for designs with a defined treatment-termination bleed (e.g., MN2 double-therapy cohort).
+          type: date
+          constraints:
+            required: false
+
     primaryKey: mouse_id
     foreignKeys:
       - fields: pdx_line_id
@@ -195,6 +209,14 @@ resources:
           constraints:
             required: false
             enum: [m, f]
+
+        - name: notes
+          title: Notes
+          description: Free-text notes about this PDX line
+          type: string
+          constraints:
+            required: false
+            maxLength: 500
 
     primaryKey: pdx_line_id
   - name: samples
@@ -346,11 +368,33 @@ resources:
 
         - name: bioanalyzer_conc_pg_ul
           title: Bioanalyzer Concentration (pg/uL)
-          description: cfDNA concentration from Agilent Bioanalyzer HS DNA assay
+          description: Total cfDNA concentration from Agilent Bioanalyzer HS DNA assay (full electropherogram area)
           type: number
           constraints:
             required: false
             minimum: 0
+
+        - name: bioanalyzer_167bp_peak_pg_ul
+          title: Bioanalyzer 167 bp Peak Concentration (pg/uL)
+          description: cfDNA concentration within the 167 bp mono-nucleosomal peak region only (area under the electropherogram curve gated around that peak). QC criterion for EM-seq library suitability — presence of a discernible 167 bp peak is gated alongside total cfDNA >= 0.1 ng input minimum.
+          type: number
+          constraints:
+            required: false
+            minimum: 0
+
+        - name: shipment_batch
+          title: Shipment Batch
+          description: Identifier for the shipment cohort in which this isolation was sent for downstream library preparation. Format YYYY-MM-DD_DESTINATION (e.g., 2026-03-30_NCI).
+          type: string
+          constraints:
+            required: false
+
+        - name: shipment_position
+          title: Shipment Position
+          description: Position label within the shipment box (corresponds to the position labels on the shipment manifest).
+          type: string
+          constraints:
+            required: false
 
     primaryKey: cfdna_iso_id
     foreignKeys:
