@@ -1,4 +1,8 @@
 * NF1 Mouse PDX cfDNA Studies
+
+hg38 and mm10 with BISCUIT (required — bwa-meth NM tags are not conversion-corrected, breaking alignment-score comparison).
+
+ BISCUIT separates conversion mismatches (ZC tag) from true mismatches (NM tag).
 ** README
 
 *** Project overview
@@ -272,12 +276,19 @@ cfDNA from PDX mouse plasma provides a real-time, systemic measure of tumor biol
 - [[id:c6157337-5f4a-4216-abc8-93d1a84cdbb5][PNST MRD]] and [[id:771f19d4-cd99-4013-b5de-5ba5be6b6d5d][NF1 CAPP-seq]] are related human cfDNA projects using overlapping analytical approaches
 - [[id:57a06d7a-302b-488f-94af-c41a98684555][NF1-associated tissue of origin]] uses cfDNA tissue-of-origin inference across NCI, Hopkins, Mayo, WashU, and U of M samples
 ** Xengraft model read disambiguation bioinformatics
+
+PDX plasma cfDNA contains a mixture of human tumor-derived and mouse host-derived reads. No established best practice exists for separating species in EM-seq data, where enzymatic C-to-T conversion at unmethylated CpGs precludes direct k-mer classification. Bhandari, et al. benchmarked 12 mouse read removal protocols for PDX WGS/WES/RNA-seq and found Xengsort (k-mer) outperforms alignment-based methods including Disambiguate, but also that "all protocols were effective at removing mouse reads" and "performance difference was minor, usually within 5% of the human reads"  [cite:@bhandari2025]. Xengsort's k-mer identity breaks under bisulfite/EM-seq conversion.
+
 - [ ] extract visuals from [cite:@bhandari2025]
 - Xenograft experiment and bioinformatics are not documented in [cite:@mouliere2018a]
 
 - [[file:resources/media/mouliere2018a-fig2a.png]]
 - [[file:resources/media/mouliere2018a-fig2b.png]]
 
+- Possible alignment strategies
+  - Direct to human
+  - Combined reference
+  - Disambiguate [cite:@ahdesmaki2017] - Align independently to each species and assign each read pair to the species with fewer true mismatches.
 
 ** Data
 - bleed dates =/= tumro volumne dates!!
@@ -1445,6 +1456,7 @@ SCHEDULED: <2026-05-08 Fri>
 https://mail.google.com/mail/u/0/#inbox/FMfcgzQgLjWRnfJJMWLDffMLhdSqzHXq
 https://mail.google.com/mail/u/0/#inbox/FMfcgzQgLjWRnfHzMFMVJlrnQvhJvJnF
 https://mail.google.com/mail/u/0/#inbox/FMfcgzQgKvKNWDpjskqzJTvLfWKwTpDx
+** Analysis map
 ** Methods
   Settled:
   - Two strategies: Direct-to-human (Strategy 1) vs Disambiguate (Strategy 3), bo
@@ -1602,467 +1614,11 @@ Two sub-pipelines:
 }
 
 #+END_SRC
-** DONE PDX read handling evaluation (3-strategy pilot)         :bioinfo_dev:
-CLOSED: [2026-03-18 Wed]
-:PROPERTIES:
-:header-args:bash: :dir /home/jeszyman/repos/nf1-mouse/dev/pdx-read-handling
-:END:
-Superseded by =* Direct vs Disambiguate PDX read assignment=. ICRG (Strategy 2) branched to [[id:6c50c6d9-a69f-4b5c-9800-59c4de37aacd][ICRG combined reference failure analysis]]. Strategies 1 and 3 carried forward with updated references (NCBI hg38 no-alt-plus-decoys + UCSC mm10). Test data here used Ensembl references (numeric chromosome naming) and is not valid for production comparison.
-
-*** Background
-
-PDX cfDNA contains a mixture of human tumor-derived and mouse host-derived reads. No established best practice exists for separating species in EM-seq data, where enzymatic C-to-T conversion at unmethylated CpGs complicates k-mer and alignment-based classification. [cite:@bhandari2025] benchmarked 12 mouse read removal protocols for PDX WGS/WES/RNA-seq and found Xengsort (k-mer) outperforms alignment-based methods including Disambiguate, but Xengsort's k-mer identity breaks under bisulfite/EM-seq conversion. We evaluate three alignment-based strategies on two high-yield WU-487 terminal bleed samples.
-
-*** Data
-
-| File                                                         | Contents                                         | Notes                                              |
-|--------------------------------------------------------------+--------------------------------------------------+----------------------------------------------------|
-| =/mnt/data/projects/nf1-mouse/emseq/fastqs/lib0625/=         | PE150 EM-seq FASTQs, WU-487 terminal (mou0004)   | NCI name: nf1_lib98, cfDNA 1720 pg/ul, ~58 GB      |
-| =/mnt/data/projects/nf1-mouse/emseq/fastqs/lib0626/=         | PE150 EM-seq FASTQs, WU-487 terminal (mou0005)   | NCI name: nf1_lib99, cfDNA 2380 pg/ul, ~52 GB      |
-| =/mnt/data/projects/nf1-mouse/ref/bwa_meth/ncbi_decoy_hg38/= | hg38 + decoys, bwa-meth indexed                  | symlink → breast project                           |
-| =/mnt/data/projects/nf1-mouse/ref/biscuit_hg38/=             | hg38, biscuit indexed                            | symlink → breast project                           |
-| =/mnt/data/projects/nf1-mouse/ref/biscuit/mm10/mm10.fa=      | mm10 mouse reference                             | Ensembl GRCm38 release 102, needs biscuit indexing |
-| =/mnt/data/projects/nf1-mouse/ref/bwa_meth/icrg_hg38_mm10/=  | Combined hg38+mm10 (mouse chroms prefixed mm10_) | built from above refs, bwa-meth indexed            |
-
-*** Design: three strategies
-**** Strategy 1: Direct-to-human
-Align all reads to hg38 with BISCUIT. Mouse reads fail to map or map with low MAPQ. Simplest approach, used by NCI pipeline. Risk: mouse reads with homologous human regions create false alignments.
-
-#+begin_src bash :tangle no
-#!/usr/bin/env bash
-set -euo pipefail
-# Strategy 1: Direct BISCUIT alignment to hg38
-# Env: emseq (biscuit + samtools)
-
-SAMPLE=$1
-THREADS=${2:-8}
-REF="/mnt/data/projects/nf1-mouse/ref/biscuit_hg38/Homo_sapiens.GRCh38.dna.primary_assembly.fa"
-FASTQ_DIR="/mnt/data/projects/nf1-mouse/emseq/fastqs/${SAMPLE}"
-OUTDIR="/mnt/data/projects/nf1-mouse/emseq/pdx-read-handling/strategy1/${SAMPLE}"
-mkdir -p "$OUTDIR"
-
-R1=$(ls "${FASTQ_DIR}"/*_R1_001.fastq.gz)
-R2=$(ls "${FASTQ_DIR}"/*_R2_001.fastq.gz)
-
-biscuit align -@ "$THREADS" "$REF" "$R1" "$R2" \
-  | samtools sort -@ "$THREADS" -o "${OUTDIR}/${SAMPLE}.hg38.sorted.bam"
-
-samtools index "${OUTDIR}/${SAMPLE}.hg38.sorted.bam"
-samtools flagstat "${OUTDIR}/${SAMPLE}.hg38.sorted.bam" > "${OUTDIR}/${SAMPLE}.hg38.flagstat.txt"
-samtools idxstats "${OUTDIR}/${SAMPLE}.hg38.sorted.bam" > "${OUTDIR}/${SAMPLE}.hg38.idxstats.txt"
-#+end_src
-
-**** Strategy 2: ICRG combined reference
-Align to a concatenated hg38+mm10 reference with BISCUIT. Post-alignment, filter to keep only reads mapping to human chromosomes. Mouse reads should preferentially map to mouse contigs and get removed.
-
-#+begin_src bash :tangle no
-#!/usr/bin/env bash
-set -euo pipefail
-# Strategy 2: ICRG combined hg38+mm10 reference
-# Env: emseq (biscuit + samtools)
-
-SAMPLE=$1
-THREADS=${2:-8}
-REF="/mnt/data/projects/nf1-mouse/ref/biscuit/icrg_hg38_mm10/icrg_hg38_mm10.fa"
-FASTQ_DIR="/mnt/data/projects/nf1-mouse/emseq/fastqs/${SAMPLE}"
-OUTDIR="/mnt/data/projects/nf1-mouse/emseq/pdx-read-handling/strategy2/${SAMPLE}"
-mkdir -p "$OUTDIR"
-
-R1=$(ls "${FASTQ_DIR}"/*_R1_001.fastq.gz)
-R2=$(ls "${FASTQ_DIR}"/*_R2_001.fastq.gz)
-
-# Align to combined reference
-biscuit align -@ "$THREADS" "$REF" "$R1" "$R2" \
-  | samtools sort -@ "$THREADS" -o "${OUTDIR}/${SAMPLE}.icrg.sorted.bam"
-
-samtools index "${OUTDIR}/${SAMPLE}.icrg.sorted.bam"
-
-# Extract human chromosomes (those without mm10_ prefix)
-samtools view -@ "$THREADS" -b "${OUTDIR}/${SAMPLE}.icrg.sorted.bam" \
-  $(samtools idxstats "${OUTDIR}/${SAMPLE}.icrg.sorted.bam" | cut -f1 | grep -v "^mm10_" | grep -v "^\*" | tr '\n' ' ') \
-  > "${OUTDIR}/${SAMPLE}.icrg.human_only.sorted.bam"
-
-samtools index "${OUTDIR}/${SAMPLE}.icrg.human_only.sorted.bam"
-samtools flagstat "${OUTDIR}/${SAMPLE}.icrg.sorted.bam" > "${OUTDIR}/${SAMPLE}.icrg.flagstat.txt"
-samtools flagstat "${OUTDIR}/${SAMPLE}.icrg.human_only.sorted.bam" > "${OUTDIR}/${SAMPLE}.icrg.human_only.flagstat.txt"
-samtools idxstats "${OUTDIR}/${SAMPLE}.icrg.sorted.bam" > "${OUTDIR}/${SAMPLE}.icrg.idxstats.txt"
-#+end_src
-
-**** Strategy 3: Disambiguate
-Align independently to hg38 and mm10 with BISCUIT (required — bwa-meth NM tags are not conversion-corrected, breaking alignment-score comparison). Compare NM tags to assign each read pair to the species with fewer true mismatches. BISCUIT separates conversion mismatches (ZC tag) from true mismatches (NM tag).
-
-#+begin_src bash :tangle no
-#!/usr/bin/env bash
-set -euo pipefail
-# Strategy 3: Disambiguate via dual BISCUIT alignment
-# Env: emseq (biscuit + samtools)
-# BISCUIT NM tag = true mismatches only (conversion in ZC tag)
-
-SAMPLE=$1
-THREADS=${2:-8}
-HG38_REF="/mnt/data/projects/nf1-mouse/ref/biscuit_hg38/Homo_sapiens.GRCh38.dna.primary_assembly.fa"
-MM10_REF="/mnt/data/projects/nf1-mouse/ref/biscuit/mm10/mm10.fa"
-FASTQ_DIR="/mnt/data/projects/nf1-mouse/emseq/fastqs/${SAMPLE}"
-OUTDIR="/mnt/data/projects/nf1-mouse/emseq/pdx-read-handling/strategy3/${SAMPLE}"
-mkdir -p "$OUTDIR"
-
-R1=$(ls "${FASTQ_DIR}"/*_R1_001.fastq.gz)
-R2=$(ls "${FASTQ_DIR}"/*_R2_001.fastq.gz)
-
-# Align to human
-biscuit align -@ "$THREADS" "$HG38_REF" "$R1" "$R2" \
-  | samtools sort -@ "$THREADS" -o "${OUTDIR}/${SAMPLE}.hg38.sorted.bam"
-samtools index "${OUTDIR}/${SAMPLE}.hg38.sorted.bam"
-
-# Align to mouse
-biscuit align -@ "$THREADS" "$MM10_REF" "$R1" "$R2" \
-  | samtools sort -@ "$THREADS" -o "${OUTDIR}/${SAMPLE}.mm10.sorted.bam"
-samtools index "${OUTDIR}/${SAMPLE}.mm10.sorted.bam"
-
-# Disambiguate: compare NM tags, assign to species with fewer mismatches
-# For each read pair, extract NM from both BAMs, keep the one with lower NM
-# Reads where both NM are equal go to "ambiguous"
-# Disambiguate step requires pysam (in biotools env, not emseq)
-conda run -n biotools python3 /home/jeszyman/repos/nf1-mouse/dev/pdx-read-handling/disambiguate.py \
-  --human-bam "${OUTDIR}/${SAMPLE}.hg38.sorted.bam" \
-  --mouse-bam "${OUTDIR}/${SAMPLE}.mm10.sorted.bam" \
-  --out-prefix "${OUTDIR}/${SAMPLE}" \
-  --threads "$THREADS"
-
-samtools flagstat "${OUTDIR}/${SAMPLE}.hg38.sorted.bam" > "${OUTDIR}/${SAMPLE}.hg38.flagstat.txt"
-samtools flagstat "${OUTDIR}/${SAMPLE}.mm10.sorted.bam" > "${OUTDIR}/${SAMPLE}.mm10.flagstat.txt"
-samtools flagstat "${OUTDIR}/${SAMPLE}.disambig.human.bam" > "${OUTDIR}/${SAMPLE}.disambig.human.flagstat.txt"
-#+end_src
-
-*** Reference setup
-**** hg38 (bwa-meth indexed)
-
-#+begin_src bash :tangle no
-#!/usr/bin/env bash
-set -euo pipefail
-# Setup references on local disk at /mnt/data/projects/nf1-mouse/ref/
-# Env: emseq (bwameth.py + biscuit)
-# hg38 refs already symlinked from breast project; this script handles mm10 + ICRG
-REFDIR="/mnt/data/projects/nf1-mouse/ref"
-
-# -- mm10: download Ensembl GRCm38 primary assembly if not present
-MM10_DIR="$REFDIR/biscuit/mm10"
-mkdir -p "$MM10_DIR"
-if [ ! -f "$MM10_DIR/mm10.fa" ]; then
-  echo "Downloading mm10 (Ensembl GRCm38 release 102)..."
-  wget -q -O "$MM10_DIR/mm10.fa.gz" \
-    "https://ftp.ensembl.org/pub/release-102/fasta/mus_musculus/dna/Mus_musculus.GRCm38.dna.primary_assembly.fa.gz"
-  gunzip "$MM10_DIR/mm10.fa.gz"
-fi
-
-# -- Index mm10 for BISCUIT (Strategy 3)
-if [ ! -f "$MM10_DIR/mm10.fa.bis.amb" ]; then
-  echo "Indexing mm10 for BISCUIT..."
-  biscuit index "$MM10_DIR/mm10.fa"
-fi
-samtools faidx "$MM10_DIR/mm10.fa" 2>/dev/null || true
-
-# -- ICRG combined reference: hg38 + mm10 with mouse chroms prefixed mm10_ (Strategy 2)
-ICRG_DIR="$REFDIR/bwa_meth/icrg_hg38_mm10"
-HG38_FA="$REFDIR/bwa_meth/ncbi_decoy_hg38/ncbi_decoy_hg38.fa"
-mkdir -p "$ICRG_DIR"
-if [ ! -f "$ICRG_DIR/icrg_hg38_mm10.fa" ]; then
-  echo "Building ICRG combined reference (hg38 + mm10_ prefixed mouse)..."
-  cp "$HG38_FA" "$ICRG_DIR/icrg_hg38_mm10.fa"
-  sed 's/^>/>mm10_/' "$MM10_DIR/mm10.fa" >> "$ICRG_DIR/icrg_hg38_mm10.fa"
-fi
-if [ ! -f "$ICRG_DIR/icrg_hg38_mm10.fa.bwameth.c2t" ]; then
-  echo "Indexing ICRG combined reference for bwa-meth..."
-  bwameth.py index "$ICRG_DIR/icrg_hg38_mm10.fa"
-fi
-samtools faidx "$ICRG_DIR/icrg_hg38_mm10.fa" 2>/dev/null || true
-
-echo "Reference setup complete."
-echo "  hg38 bwa-meth: $REFDIR/bwa_meth/ncbi_decoy_hg38/"
-echo "  hg38 biscuit:  $REFDIR/biscuit_hg38/"
-echo "  mm10 biscuit:  $MM10_DIR/"
-echo "  ICRG bwa-meth: $ICRG_DIR/"
-#+end_src
-
-*** Comparison metrics
-
-#+begin_src bash :tangle no
-#!/usr/bin/env bash
-set -euo pipefail
-# Compare strategies across both samples
-# Collect: total reads, mapped reads, MAPQ>=30, human-assigned reads
-
-BASEDIR="/mnt/data/projects/nf1-mouse/emseq/pdx-read-handling"
-OUTFILE="/mnt/data/projects/nf1-mouse/emseq/pdx-read-handling/comparison.tsv"
-
-echo -e "sample\tstrategy\ttotal_reads\tmapped_reads\tmapq30_reads\thuman_reads" > "$OUTFILE"
-
-for SAMPLE in lib0625 lib0626; do
-  # Strategy 1
-  S1_BAM="$BASEDIR/strategy1/${SAMPLE}/${SAMPLE}.hg38.sorted.bam"
-  if [ -f "$S1_BAM" ]; then
-    TOTAL=$(samtools view -c "$S1_BAM")
-    MAPPED=$(samtools view -c -F 4 "$S1_BAM")
-    MAPQ30=$(samtools view -c -F 4 -q 30 "$S1_BAM")
-    echo -e "${SAMPLE}\tstrategy1_direct\t${TOTAL}\t${MAPPED}\t${MAPQ30}\t${MAPQ30}" >> "$OUTFILE"
-  fi
-
-  # Strategy 2
-  S2_BAM="$BASEDIR/strategy2/${SAMPLE}/${SAMPLE}.icrg.human_only.sorted.bam"
-  S2_FULL="$BASEDIR/strategy2/${SAMPLE}/${SAMPLE}.icrg.sorted.bam"
-  if [ -f "$S2_BAM" ]; then
-    TOTAL=$(samtools view -c "$S2_FULL")
-    MAPPED=$(samtools view -c -F 4 "$S2_FULL")
-    HUMAN=$(samtools view -c "$S2_BAM")
-    MAPQ30=$(samtools view -c -F 4 -q 30 "$S2_BAM")
-    echo -e "${SAMPLE}\tstrategy2_icrg\t${TOTAL}\t${MAPPED}\t${MAPQ30}\t${HUMAN}" >> "$OUTFILE"
-  fi
-
-  # Strategy 3
-  S3_BAM="$BASEDIR/strategy3/${SAMPLE}/${SAMPLE}.disambig.human.bam"
-  S3_HG38="$BASEDIR/strategy3/${SAMPLE}/${SAMPLE}.hg38.sorted.bam"
-  if [ -f "$S3_BAM" ]; then
-    TOTAL=$(samtools view -c "$S3_HG38")
-    MAPPED=$(samtools view -c -F 4 "$S3_HG38")
-    HUMAN=$(samtools view -c "$S3_BAM")
-    MAPQ30=$(samtools view -c -F 4 -q 30 "$S3_BAM")
-    echo -e "${SAMPLE}\tstrategy3_disambig\t${TOTAL}\t${MAPPED}\t${MAPQ30}\t${HUMAN}" >> "$OUTFILE"
-  fi
-done
-
-echo "Comparison written to $OUTFILE"
-cat "$OUTFILE" | column -t
-#+end_src
-
-*** Result summary
-
-*** Ideas
-- Divergence-vs-ambiguity QC: use reads classified differently between strategies as positive control for evaluating separation quality
-- Library complexity (preseq) as limiting factor for downstream ichorCNA — check after alignment
-- Extend to serial bleeds after terminal bleed evaluation settles
-
-** ICRG combined reference failure analysis                     :bioinfo_dev:
-:PROPERTIES:
-:ID:       6c50c6d9-a69f-4b5c-9800-59c4de37aacd
-:header-args:bash: :dir /home/jeszyman/repos/nf1-mouse/dev/icrg-analysis
-:header-args:jupyter-R: :session icrg :kernel biotools :async yes :exports code :dir /home/jeszyman/repos/nf1-mouse/dev/icrg-analysis
-:EXPORT_FILE_NAME: dev/icrg-analysis/icrg_failure_analysis
-:EXPORT_TITLE: ICRG Combined Reference Failure Analysis for EM-seq PDX Data
-:EXPORT_OPTIONS: toc:t num:t html-style:nil html-postamble:"<hr/><p style='text-align:right; color:#888; font-size:0.9em;'>Last compiled %T</p>"
-:EXPORT_HTML_HEAD: <link rel="stylesheet" type="text/css" href="../../resources/org.css"/>
-:EXPORT_HTML_HEAD_EXTRA: <script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/MathJax.js?config=TeX-MML-AM_CHTML"></script> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"/> <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script> <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/r.min.js"></script> <script>document.addEventListener('DOMContentLoaded',function(){document.querySelectorAll('pre.src').forEach(function(b){b.classList.add('language-r');hljs.highlightElement(b)})});</script>
-:END:
-#+bibliography: resources/nf1-mouse.bib
-#+cite_export: csl resources/apa-numeric-superscript-brackets.csl
-
-*** Background
-
-The ICRG (In silico Combined Reference Genome) approach concatenates human and mouse reference genomes, aligns reads once, then filters by chromosome to separate species. [cite:@callari2018] introduced ICRG and demonstrated 99.9% accuracy for WES, RRBS, and RNA-seq in breast cancer PDTXs using Bismark (Bowtie2-based). The RRBS result is notable because RRBS is bisulfite-converted data — but it only sequences CpG-island-enriched fragments (~1-3% of genome), avoiding the vast conserved intergenic regions where human-mouse orthology creates alignment ambiguity.
-
-[cite:@bhandari2025] benchmarked 12 mouse read removal protocols for PDX WGS/WES/RNA-seq. They did not test a combined reference approach; all alignment-based methods used dual-genome strategies (Disambiguate, XenofilteR, Bamcmp). Xengsort (k-mer classification) was the top performer overall but is incompatible with bisulfite/EM-seq data because C→T conversion breaks k-mer identity.
-
-No published benchmark has tested ICRG on whole-genome bisulfite or EM-seq data. This analysis evaluates ICRG with BISCUIT (BWA-MEM-based, conversion-corrected NM/ZC tags) on whole-genome EM-seq cfDNA from NF1 MPNST PDX samples. The hypothesis is that EM-seq conversion collapses species-distinguishing sequence at orthologous loci, degrading ICRG performance relative to RRBS.
-
-*** Data
-
-| File                                                                      | Contents                                              | Notes                                          |
-|---------------------------------------------------------------------------+-------------------------------------------------------+------------------------------------------------|
-| =/mnt/data/projects/nf1-mouse/emseq/pdx-read-handling/strategy2/lib0625/= | ICRG BAMs + flagstat + idxstats                       | WU-487 terminal (mou0004), 3M read pairs       |
-| =/mnt/data/projects/nf1-mouse/emseq/pdx-read-handling/strategy2/lib0626/= | ICRG BAMs + flagstat + idxstats                       | WU-487 terminal (mou0005), 3M read pairs       |
-| =dev/icrg-analysis/icrg_mapq0_tags.tsv=                                   | MAPQ=0 read tags (species, AS, XS, diff, ZC)          | 772K reads from lib0625                        |
-| =dev/icrg-analysis/icrg_mapq_by_species.tsv=                              | MAPQ by species for all reads                         | 6M reads from lib0625                          |
-| =/mnt/data/projects/nf1-mouse/ref/biscuit/icrg_hg38_mm10/=                | ICRG reference (Ensembl hg38 + mm10, BISCUIT-indexed) | 194 human + 66 mouse contigs (3.1 Gb + 2.7 Gb) |
-
-*** Read assignment
-
-ICRG assigns almost no reads to human chromosomes. Idxstats show 50K reads on human contigs vs 5.99M on mouse contigs for lib0625 (6M total mapped). Disambiguate (Strategy 3) on the same data assigns 505K reads as human (16.8%), 2.14M as mouse (71.4%), and 352K as ambiguous (11.7%). The ICRG approach loses ~90% of true human reads to mouse chromosome assignment.
-
-#+begin_src bash :tangle no
-# Chromosome-level read counts from idxstats
-ICRG_BAM="/mnt/data/projects/nf1-mouse/emseq/pdx-read-handling/strategy2/lib0625/lib0625.icrg.idxstats.txt"
-echo "=== Human chromosomes ===" && grep -v "^mm10_" "$ICRG_BAM" | awk '{h+=$3+$4} END {print "Human-mapped reads: " h}'
-echo "=== Mouse chromosomes ===" && grep "^mm10_" "$ICRG_BAM" | awk '{m+=$3+$4} END {print "Mouse-mapped reads: " m}'
-#+end_src
-
-For lib0626, the pattern is similar but slightly less extreme: 119K human vs 5.91M mouse. Disambiguate assigns 615K human (20.5%), 2.02M mouse (67.4%), and 364K ambiguous (12.1%). The higher human fraction in lib0626 is consistent across both methods, suggesting real biological variation between the two terminal bleed samples.
-
-*** MAPQ distribution
-
-#+begin_src jupyter-R :tangle no
-library(tidyverse)
-
-d <- read_tsv("icrg_mapq_by_species.tsv",
-              col_names = c("species", "mapq"),
-              col_types = "ci") %>%
-  filter(species != "unmapped")
-
-theme_white <- theme_minimal(base_size = 14) +
-  theme(plot.background = element_rect(fill = "white", color = NA),
-        panel.background = element_rect(fill = "white", color = NA))
-
-dir.create("plots", showWarnings = FALSE)
-
-ggplot(d, aes(x = mapq, fill = species)) +
-  geom_histogram(binwidth = 1, alpha = 0.8) +
-  scale_fill_manual(values = c(human = "#2166ac", mouse = "#b2182b")) +
-  facet_wrap(~species, scales = "free_y", ncol = 1) +
-  labs(x = "MAPQ", y = "Read count",
-       title = "ICRG MAPQ distribution by assigned species",
-       subtitle = "lib0625 — all mapped reads") +
-  theme_white
-#+end_src
-
-#+ATTR_ORG: :width 800
-[[file:plots/icrg_mapq_hist.png]]
-
-Human-assigned reads are overwhelmingly MAPQ=0 (67% for lib0625). Mouse-assigned reads are bimodal: a large MAPQ=0 peak (~750K) representing reads with cross-species alternative alignments, and a dominant MAPQ=60 peak (~4.7M) representing reads that map uniquely to mouse. Only ~2,600 human reads pass MAPQ>=30 — ICRG produces effectively zero usable human reads at any reasonable quality threshold.
-
-#+begin_src jupyter-R :tangle no
-ggplot(d, aes(x = mapq, fill = species)) +
-  geom_histogram(binwidth = 1, alpha = 0.8) +
-  scale_fill_manual(values = c(human = "#2166ac", mouse = "#b2182b")) +
-  scale_y_log10() +
-  facet_wrap(~species, ncol = 1) +
-  labs(x = "MAPQ", y = "Read count (log10)",
-       title = "ICRG MAPQ distribution by assigned species (log scale)",
-       subtitle = "lib0625 — all mapped reads") +
-  theme_white
-#+end_src
-
-#+ATTR_ORG: :width 800
-[[file:plots/icrg_mapq_hist_log.png]]
-
-The log-scale view reveals structure hidden by the linear scale. Human reads show a smooth monotonic decay from MAPQ=0, with counts dropping from ~25K at MAPQ=0 to ~10 at MAPQ=55, then a small uptick at MAPQ=60 (~2K reads). The few MAPQ=60 human reads represent loci with sufficient human-mouse divergence that the aligner can confidently place them on human contigs even in the combined reference. Mouse reads show a flat floor of ~2-3K per MAPQ bin across the middle range, consistent with within-mouse multimapping unrelated to the cross-species problem.
-
-*** AS-XS score analysis
-
-The AS (alignment score) and XS (next-best hit score) tags quantify how much better the primary alignment is than the best alternative. For MAPQ=0 reads, AS-XS should be 0 or near-zero by definition. The question is whether tie-breaking between human and mouse contigs is symmetric.
-
-#+begin_src jupyter-R :tangle no
-d_tags <- read_tsv("icrg_mapq0_tags.tsv",
-                   col_names = c("species", "AS", "XS", "diff", "ZC"),
-                   col_types = "cidii")
-
-# Summary statistics
-cat("=== MAPQ=0 reads by species ===\n")
-cat("Mouse-landing:", sum(d_tags$species == "mouse"), "\n")
-cat("Human-landing:", sum(d_tags$species == "human"), "\n")
-
-mouse_tags <- d_tags %>% filter(species == "mouse")
-cat("\n=== Mouse-landing score margins ===\n")
-cat("Tied (AS==XS):", sum(mouse_tags$diff == 0), "\n")
-cat("Mouse wins (AS>XS):", sum(mouse_tags$diff > 0), "\n")
-cat("Human was better (AS<XS):", sum(mouse_tags$diff < 0), "\n")
-
-tied <- d_tags %>% filter(diff == 0)
-cat("\n=== Tied reads (AS==XS) ===\n")
-cat("To mouse:", sum(tied$species == "mouse"), "\n")
-cat("To human:", sum(tied$species == "human"), "\n")
-cat("Ratio:", round(sum(tied$species == "mouse") / sum(tied$species == "human"), 1), ":1\n")
-#+end_src
-
-Of 772K MAPQ=0 reads in lib0625, 734K land on mouse chromosomes and 38K on human. Among mouse-landing reads: 487K are tied (AS==XS), 220K have mouse winning on score (AS>XS by 1-3 points), and 27K have human actually scoring better despite the read landing on mouse. Among tied reads, 96% go to mouse (487K vs 22K). BWA-MEM documentation describes hash-based pseudo-random tie-breaking [cite:@li2013bwa], which should produce approximately 50/50 splits; the 22:1 bias toward mouse is unexplained.
-
-#+begin_src jupyter-R :tangle no
-ggplot(d_tags, aes(x = diff, fill = species)) +
-  geom_histogram(binwidth = 1, position = "identity", alpha = 0.6) +
-  scale_fill_manual(values = c(human = "#2166ac", mouse = "#b2182b")) +
-  coord_cartesian(xlim = c(-20, 30)) +
-  labs(x = "AS - XS (score margin)", y = "Read count",
-       title = "ICRG MAPQ=0 reads: alignment score margin",
-       subtitle = "lib0625 — positive = primary hit wins over next-best") +
-  theme_white
-#+end_src
-
-#+ATTR_ORG: :width 800
-[[file:plots/icrg_as_xs_margin.png]]
-
-The massive spike at AS-XS=0 is almost entirely mouse-assigned (red); human reads (blue) are barely visible at the same x-position. When scores differ, the distribution is asymmetric: a longer positive tail (mouse wins by 1-3+ points) than negative tail (human wins). This asymmetry indicates that at orthologous loci, mouse contigs genuinely receive slightly higher alignment scores for a substantial fraction of reads — not random noise but a systematic scoring bias.
-
-*** ZC conversion count association
-
-The ZC tag counts C→T conversions recognized by BISCUIT as bisulfite/EM-seq events (distinct from true C→T mismatches counted in NM). Higher ZC indicates more unmethylated CpGs in the aligned region. If EM-seq conversion is driving the ICRG failure, we expect reads with high ZC to be disproportionately affected.
-
-#+begin_src jupyter-R :tangle no
-cat("Mean ZC — mouse-landing:", round(mean(filter(d_tags, species=="mouse")$ZC, na.rm=TRUE), 1), "\n")
-cat("Mean ZC — human-landing:", round(mean(filter(d_tags, species=="human")$ZC, na.rm=TRUE), 1), "\n")
-
-ggplot(d_tags, aes(x = ZC, fill = species)) +
-  geom_histogram(binwidth = 1, position = "identity", alpha = 0.6) +
-  scale_fill_manual(values = c(human = "#2166ac", mouse = "#b2182b")) +
-  labs(x = "ZC (conversion count)", y = "Read count",
-       title = "ICRG MAPQ=0 reads: bisulfite conversion count",
-       subtitle = "lib0625 — higher ZC = more C→T conversions in alignment") +
-  theme_white
-#+end_src
-
-#+ATTR_ORG: :width 800
-[[file:plots/icrg_zc_by_species.png]]
-
-Mouse-landing MAPQ=0 reads have mean ZC=25.9 vs 13.7 for human-landing reads. The distribution is bimodal with peaks at ~12 and ~30 conversions per read, likely reflecting methylated (protected, low ZC) vs unmethylated (converted, high ZC) genomic regions. Human-assigned reads cluster exclusively at the low-ZC peak. Reads with heavy conversion (ZC>20) are almost entirely routed to mouse — precisely the reads from CpG-rich unmethylated regions that are most affected by EM-seq conversion.
-
-#+begin_src jupyter-R :tangle no
-tied <- d_tags %>% filter(diff == 0)
-
-ggplot(tied, aes(x = ZC, fill = species)) +
-  geom_histogram(binwidth = 1, position = "identity", alpha = 0.6) +
-  scale_fill_manual(values = c(human = "#2166ac", mouse = "#b2182b")) +
-  labs(x = "ZC (conversion count)", y = "Read count",
-       title = "ICRG tied reads (AS == XS): conversion count by assigned species",
-       subtitle = sprintf("lib0625 — %d mouse vs %d human",
-                          sum(tied$species=="mouse"), sum(tied$species=="human"))) +
-  theme_white
-#+end_src
-
-#+ATTR_ORG: :width 800
-[[file:plots/icrg_tied_zc.png]]
-
-For tied reads (AS==XS) specifically, the same pattern holds: 487K to mouse vs 22K to human, with the high-ZC peak almost exclusively mouse. This confirms the conversion-species assignment link persists even when alignment scores are identical. The tie-breaking mechanism in BISCUIT/BWA-MEM interacts with conversion state in a way that systematically favors mouse contigs.
-
-*** Result summary
-
-ICRG fails catastrophically for whole-genome EM-seq PDX data, retaining <1% of reads on human chromosomes despite ~17-20% true human content. Two mechanisms drive the failure:
-
-1. *Score asymmetry*: At orthologous loci, mouse contigs score 1-3 points better than human for ~30% of ambiguous reads. The mechanism likely involves BISCUIT's conversion-aware scoring interacting with species-specific CpG density differences at orthologous positions.
-
-2. *Tied-read bias*: For the 66% of ambiguous reads with identical alignment scores (AS==XS), 96% are assigned to mouse contigs — far from the ~50% expected from BWA-MEM's documented hash-based pseudo-random tie-breaking. The bias correlates strongly with conversion count (ZC tag).
-
-Both effects are amplified by EM-seq conversion: C→T conversion at unmethylated CpGs reduces the effective sequence alphabet from 4 to 3 bases, collapsing species-distinguishing variants at orthologous loci. [cite:@callari2018] achieved 99.9% accuracy with ICRG on RRBS because RRBS targets only CpG-island-enriched fragments (~1-3% of genome), avoiding the vast conserved intergenic regions where ties occur. Whole-genome EM-seq exposes the full ~40% of the genome with human-mouse orthology, and the reduced sequence complexity from conversion makes these regions indistinguishable.
-
-ICRG is not viable for whole-genome EM-seq PDX read handling. Disambiguate with BISCUIT (conversion-corrected NM tags) is the recommended approach for this data type.
-
-*** TODO items
-- [ ] Fix reference inconsistencies before any future ICRG re-evaluation:
-  - ICRG combined reference was built from NCBI hg38 (=ncbi_decoy_hg38.fa=, chr-prefixed: =chr1=, =chr2=) while Strategies 1/3 used Ensembl hg38 (=Homo_sapiens.GRCh38.dna.primary_assembly.fa=, numeric: =1=, =2=) — different assemblies with different contigs and naming
-  - =00_setup_refs.sh= indexes the ICRG reference with =bwameth.py index= (produces =.bwameth.c2t=) but Strategy 2 script calls =biscuit align= which requires BISCUIT index files (=.bis.amb=, =.dau.bwt=, =.par.bwt=) — wrong index format
-  - Setup script writes ICRG to =ref/bwa_meth/icrg_hg38_mm10/= but Strategy 2 org block references =ref/biscuit/icrg_hg38_mm10/= — path mismatch
-  - Production refs should standardize on NCBI GRCh38 no-alt-plus-decoys (human) and UCSC mm10 primary assembly (mouse), both chr-prefixed
-- [ ] Investigate BISCUIT source code for tie-breaking implementation vs upstream BWA-MEM
-- [ ] Test whether FASTA order (human-first vs mouse-first) affects tied-read species assignment
-- [ ] Compare ICRG performance with Bismark aligner (as used in [cite:@callari2018]) vs BISCUIT to determine if failure is aligner-specific
-- [ ] Quantify fraction of human-origin reads (per Disambiguate) that ICRG sends to mouse chroms, by genomic region (conserved vs divergent)
-- [ ] Sequence EM-seq libraries for Chr8q-gain PDX lines (MN2, WU-225, JH-2-002, WU-356). Currently all 18 EM-seq libraries are from Chr8q-WT lines (WU-487, JH-2-055). Chr8q monitoring for JCI Reviewer A response requires data from gain lines.
-- [ ] Re-evaluate ICRG strategy: prior failure (<1% human reads) root cause still unresolved. Known issues from prior sessions: wrong index format (bwa-meth index used with BISCUIT), path mismatches, Ensembl vs NCBI assembly inconsistencies. Chromosome naming was already handled (=mm10_= prefix). See GavinHaLab/PDX_mouseSubtraction for reference implementation including mate-pair filter and realignment to hg38-only.
-- [ ] General: when building concatenated multi-species references, always verify chromosome names are distinct between species before indexing. Collision (e.g., both using =chr1=) silently breaks chromosome-based filtering.
-- [ ] Try limited/subsampled BISCUIT alignment on a second VM to validate rate and parallelize across machines. Current single-VM bottleneck is RAM (25 GB/process, 220 GB total → max 6-8 parallel). A second VM could cut total wall time in half.
-- [ ] Identify metadata for first-completing samples (lib0622–lib0625: WU-487 terminal bleeds, mou0001–mou0004) and prepare ichorCNA copy number analysis pipeline so CNA analysis can start immediately when BAMs are ready. Key metadata: sample IDs (sam0587–sam0590), mouse IDs (mou0001–mou0004), PDX line WU-487, Chr8q status WT, cfDNA concentrations (467, 536, 111, 1720 pg/µl).
-
-*** Ideas
-- The ICRG approach may be rescuable with a post-hoc MAPQ=0 rescue step: for MAPQ=0 reads, check XA tag for cross-species alternative alignments and re-classify
-- Consider whether ICRG + Bismark would work for whole-genome EM-seq ([cite:@callari2018] only tested RRBS)
-
-*** References
-#+print_bibliography:
-
 ** Direct vs Disambiguate PDX read assignment                   :bioinfo_dev:
 :PROPERTIES:
 :header-args:bash: :dir /home/jeszyman/repos/nf1-mouse/dev/pdx-read-handling
 :header-args:jupyter-R: :session direct-vs-disambig :kernel biotools :async yes :dir /home/jeszyman/repos/nf1-mouse/dev/direct-vs-disambiguate
 :END:
-
-*** Background
-
-PDX cfDNA contains a mixture of human tumor-derived and mouse host-derived reads. No established best practice exists for separating species in EM-seq data, where enzymatic C-to-T conversion at unmethylated CpGs complicates k-mer and alignment-based classification. [cite:@bhandari2025] benchmarked 12 mouse read removal protocols for PDX WGS/WES/RNA-seq and found Xengsort (k-mer) outperforms alignment-based methods including Disambiguate, but Xengsort's k-mer identity breaks under bisulfite/EM-seq conversion. ICRG (combined reference) fails catastrophically for whole-genome EM-seq (see [[id:6c50c6d9-a69f-4b5c-9800-59c4de37aacd][ICRG combined reference failure analysis]]). This analysis compares the two remaining viable alignment-based strategies on all 18 PDX mouse samples.
 
 *** Data
 
@@ -2680,6 +2236,7 @@ S3B (including ambiguous reads) provides marginally more coverage but dilutes tu
 ** Ideas                                                              :ideas:
 - in silico pooling experiment- pool human reads from multiple animals of same cohort- see [cite:@fu2025frag]
 - blacklist approach for PDX cfDNA analysis- exclude genomic regions with systematic mouse/human read misassignment- see [cite:@fu2025frag]
+- ICRG re-test across aligners and full cohort. Pilot used 2 samples only (lib0625, lib0626; WU-487 terminal, 3M read pairs each) with BISCUIT, giving <1% reads to human (50K vs 5.99M mouse for lib0625) vs Disambiguate ground truth ~17-20% human / 71% mouse / 12% ambiguous on the same data. Run ICRG on all 18 EM-seq samples with multiple aligners (BISCUIT, bwa-meth, Bismark/Bowtie2 — the one used by [cite:@callari2018]) to test whether the failure is BWA-MEM-specific or universal across methylation-aware aligners.
 *** Methylation-aware Xengsort for EM-seq PDX read classification [#Y]
 :PROPERTIES:
 :ID:       A1835C32-1FEB-4902-8127-DCF343353E83
@@ -2697,3 +2254,7 @@ Key questions:
 - Does this outperform Disambiguate on real EM-seq data, or does Disambiguate's alignment-score comparison remain superior?
 
 For the current PDX read handling evaluation, Xengsort is dropped in favor of Disambiguate (alignment-score comparison handles conversion naturally via bwa-meth). This idea is for potential future tool development.
+*** Ideas
+- Divergence-vs-ambiguity QC: use reads classified differently between strategies as positive control for evaluating separation quality
+- Library complexity (preseq) as limiting factor for downstream ichorCNA — check after alignment
+- Extend to serial bleeds after terminal bleed evaluation settles
