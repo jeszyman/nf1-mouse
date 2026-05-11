@@ -1,22 +1,4 @@
-# Created 2026-03-03 Tue 12:39
-#+title: NF1 Mouse
-#+author: Jeffrey Szymanski
-
-- https://mail.google.com/mail/u/0/#inbox/FMfcgzQgKvKNWDpjskqzJTvLfWKwTpDx
-
-
-- are ms3/4 low vol actaul isolation inputs 50 or 25?
-- what are MN2 #1-3 extra Terminal 100uL 0.2 PCR tube (2)?
-- ms1 and ms2 different pdxs?
-
-
 * NF1 Mouse PDX cfDNA Studies
-** TODO Mouse EM-seq set 2 download
-SCHEDULED: <2026-05-08 Fri>
-https://mail.google.com/mail/u/0/#inbox/FMfcgzQgLjWRnfJJMWLDffMLhdSqzHXq
-https://mail.google.com/mail/u/0/#inbox/FMfcgzQgLjWRnfHzMFMVJlrnQvhJvJnF
-https://mail.google.com/mail/u/0/#inbox/FMfcgzQgKvKNWDpjskqzJTvLfWKwTpDx
-** .TODO Search nf1-mouse for needed manual updates?
 ** README
 
 *** Project overview
@@ -242,22 +224,22 @@ dependencies:
   - Populated =treatment_start_date = 2024-09-12= for 32 JH-2-055 treated mice (cross-validated: email's day-4 tumor measurements at 167.71 / 251.90 / 179.56 / 301.81 mm^{3} match =tumor_measurements= on 2024-09-16 and 2024-09-30 for mou0034 and mou0024, with sample collections on 2024-09-17 day-5 and 2024-10-01 day-19).
   - Computed =timepoint_day= for 224 samples (all samples with known =treatment_start_date= and =collection_date=).
   - Ingested all 14 samples from =data/sources/Guangfeng Revisions Murine cfDNA Manifest.xlsx= into =cfdna_isolations= with =shipment_batch = 2026-03-30_NCI=, =shipment_position=, and =bioanalyzer_conc_pg_ul=. Full shipment roster (position-ordered):
-    | pos | iso     | sample  | mouse              | line     | tx                      | draw date  | bio conc (pg/uL) |
-    |-----+---------+---------+--------------------+----------+-------------------------+------------+------------------|
-    |   1 | iso0021 | smp0746 | mou0034 (4-4)      | JH-2-055 | mirdametinib_volasertib | 2024-09-17 |           229.56 |
-    |   2 | iso0019 | smp0747 | mou0024 (2-2)      | JH-2-055 | mirdametinib_volasertib | 2024-09-17 |           159.44 |
-    |   3 | iso0022 | smp0775 | mou0034 (4-4)      | JH-2-055 | mirdametinib_volasertib | 2024-10-01 |            81.70 |
-    |   4 | iso0020 | smp0776 | mou0024 (2-2)      | JH-2-055 | mirdametinib_volasertib | 2024-10-01 |           114.49 |
-    |   5 | iso0023 | smp0927 | mou0141 (MN2 4-5)  | MN2      | mirdametinib_volasertib | 2026-02-12 |           251.43 |
-    |   6 | iso0024 | smp0928 | mou0142 (MN2 3-4)  | MN2      | mirdametinib_volasertib | 2026-02-12 |           183.58 |
-    |   7 | iso0025 | smp0929 | mou0141 (MN2 4-5)  | MN2      | mirdametinib_volasertib | 2026-02-19 |            95.63 |
-    |   8 | iso0026 | smp0930 | mou0142 (MN2 3-4)  | MN2      | mirdametinib_volasertib | 2026-02-19 |           176.57 |
-    |   9 | iso0027 | smp0931 | mou0143 (MN2 3-3)  | MN2      | vehicle                 | 2026-02-12 |            30.23 |
-    |  10 | iso0028 | smp0932 | mou0144 (MN2 3-2)  | MN2      | vehicle                 | 2026-02-12 |            14.61 |
-    |  11 | iso0029 | smp0933 | mou0145 (MN2 4-2)  | MN2      | vehicle                 | 2026-02-12 |            15.87 |
-    |  12 | iso0030 | smp0934 | mou0143 (MN2 3-3)  | MN2      | vehicle                 | 2026-02-19 |            56.75 |
-    |  13 | iso0031 | smp0935 | mou0144 (MN2 3-2)  | MN2      | vehicle                 | 2026-02-19 |            43.62 |
-    |  14 | iso0032 | smp0936 | mou0145 (MN2 4-2)  | MN2      | vehicle                 | 2026-02-19 |            52.59 |
+    | pos | iso     | sample  | mouse             | line     | tx                      |  draw date | bio conc (pg/uL) |
+    |-----+---------+---------+-------------------+----------+-------------------------+------------+------------------|
+    |   1 | iso0021 | smp0746 | mou0034 (4-4)     | JH-2-055 | mirdametinib_volasertib | 2024-09-17 |           229.56 |
+    |   2 | iso0019 | smp0747 | mou0024 (2-2)     | JH-2-055 | mirdametinib_volasertib | 2024-09-17 |           159.44 |
+    |   3 | iso0022 | smp0775 | mou0034 (4-4)     | JH-2-055 | mirdametinib_volasertib | 2024-10-01 |            81.70 |
+    |   4 | iso0020 | smp0776 | mou0024 (2-2)     | JH-2-055 | mirdametinib_volasertib | 2024-10-01 |           114.49 |
+    |   5 | iso0023 | smp0927 | mou0141 (MN2 4-5) | MN2      | mirdametinib_volasertib | 2026-02-12 |           251.43 |
+    |   6 | iso0024 | smp0928 | mou0142 (MN2 3-4) | MN2      | mirdametinib_volasertib | 2026-02-12 |           183.58 |
+    |   7 | iso0025 | smp0929 | mou0141 (MN2 4-5) | MN2      | mirdametinib_volasertib | 2026-02-19 |            95.63 |
+    |   8 | iso0026 | smp0930 | mou0142 (MN2 3-4) | MN2      | mirdametinib_volasertib | 2026-02-19 |           176.57 |
+    |   9 | iso0027 | smp0931 | mou0143 (MN2 3-3) | MN2      | vehicle                 | 2026-02-12 |            30.23 |
+    |  10 | iso0028 | smp0932 | mou0144 (MN2 3-2) | MN2      | vehicle                 | 2026-02-12 |            14.61 |
+    |  11 | iso0029 | smp0933 | mou0145 (MN2 4-2) | MN2      | vehicle                 | 2026-02-12 |            15.87 |
+    |  12 | iso0030 | smp0934 | mou0143 (MN2 3-3) | MN2      | vehicle                 | 2026-02-19 |            56.75 |
+    |  13 | iso0031 | smp0935 | mou0144 (MN2 3-2) | MN2      | vehicle                 | 2026-02-19 |            43.62 |
+    |  14 | iso0032 | smp0936 | mou0145 (MN2 4-2) | MN2      | vehicle                 | 2026-02-19 |            52.59 |
   - Added 5 new MN2 cohort-2 mice (mou0141–mou0145) — Guangfeng repeat experiment, =treatment_end_date = 2026-02-19= set for the combo arm only.
   - Added 10 new MN2 samples (smp0927–smp0936), both timepoints × 5 mice.
   - Added 10 tumor measurements for the new MN2 cohort from =Guangfeng Revisions Tumor Volume Data.xlsx= (measurement dates 2026-02-13 and 2026-02-19).
@@ -1310,7 +1292,7 @@ The experiment workflow is summarized in Figure [[fig_workflow]].
 #+ATTR_LATEX: :placement [H]
 [[file:../resources/media/workflow.pdf]]
 
-Inputs necessary for the protocol are described in Table [[tab_inputs]]]. All inputs should be from untreated mice. Note ms1, ms2, ms5, and ms6 should have the same PDX. Ideally, all PDX mice should have large tumors at each time point sampled.
+Inputs necessary for the protocol are described in Table [[tab_inputs]]]. All inputs should be from untreated mice. Note ms1 and ms2 share PDX1 (WU-255) so their terminal plasma can be pooled; ms5 and ms6 share PDX2 (JH-2-055) for the serial-bleed arm (per Version 2 of the protocol). Ideally, all PDX mice should have large tumors at each time point sampled.
 
 #+NAME: tab_inputs
 #+CAPTION: Isolation workflow inputs.
@@ -1455,6 +1437,14 @@ qc.electrophoresis(ba_run, "length")
 Xenograft plasma contains cfDNA from both human tumor and mouse host. Species-specific quantification uses dPCR/qPCR targeting human and mouse LINE repetitive elements. TapeStation HSD1000 QC accompanies each dPCR batch to verify cfDNA size distribution and total concentration. Batch 2 (2025-03-21) characterized 12 samples from WU487 terminal, MN2 terminal, and JH-2-055 serial bleeds, with TapeStation concentrations ranging from 2.84 to 1500 pg/uL. Input: [[file:/mnt/gcs/jeszyman/projects/nf1-mouse/inputs/metadata/nf1_murine_dpcr_batch2_3_21_25.pdf][TapeStation batch 2 report]].
 
 Note: LINE dPCR worked well for serial bleed samples but produced unreliable or discordant results for terminal bleed samples. The root cause was never identified. If cross-sample validation of EM-seq read assignment is attempted using LINE dPCR species fractions, this discrepancy limits comparison to serial bleeds only.
+** INPROCESS Mouse EM-seq set 2 download
+SCHEDULED: <2026-05-08 Fri>
+:LOGBOOK:
+- State "INPROCESS"  from "TODO"       [2026-05-11 Mon 09:33]
+:END:
+https://mail.google.com/mail/u/0/#inbox/FMfcgzQgLjWRnfJJMWLDffMLhdSqzHXq
+https://mail.google.com/mail/u/0/#inbox/FMfcgzQgLjWRnfHzMFMVJlrnQvhJvJnF
+https://mail.google.com/mail/u/0/#inbox/FMfcgzQgKvKNWDpjskqzJTvLfWKwTpDx
 ** Methods
   Settled:
   - Two strategies: Direct-to-human (Strategy 1) vs Disambiguate (Strategy 3), bo
@@ -1554,6 +1544,7 @@ Two sub-pipelines:
 \setcounter{tocdepth}{2}
 \tableofcontents
 ** Reference
+- [[id:14780b6a-e3d7-44b1-bb04-0272f9466166][Makefile]]
 *** People and contacts
 - Angela Hirbe, M.D., Ph.D. — Associate Professor of Medicine and Pediatrics, Director Adult Neurofibromatosis Clinical Program, Division of Oncology/Sarcoma, WashU. CTF grant PI. Manages PDX models and mouse experiments. hirbea@wustl.edu, 314-362-8965.
 - Aadel Chaudhuri, M.D., Ph.D. — Mayo Clinic. K08 mentor, cfDNA expertise, co-investigator on NF1 cfDNA projects. Chaudhuri.Aadel@mayo.edu.
@@ -2706,4 +2697,3 @@ Key questions:
 - Does this outperform Disambiguate on real EM-seq data, or does Disambiguate's alignment-score comparison remain superior?
 
 For the current PDX read handling evaluation, Xengsort is dropped in favor of Disambiguate (alignment-score comparison handles conversion naturally via bwa-meth). This idea is for potential future tool development.
-** [[id:14780b6a-e3d7-44b1-bb04-0272f9466166][Makefile]]
