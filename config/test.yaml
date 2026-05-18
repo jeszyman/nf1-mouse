@@ -1,0 +1,17 @@
+# nf1-mouse test config — restrict the active library set + aligner set for
+# smoke-testing the workflow on jeff-beast before running full-depth on big-boy.
+#
+# Usage:
+#   snakemake -s workflows/Snakefile --configfile config/test.yaml --cores 4 -p
+#
+# Only sets override keys; common.yaml is left intact. The Snakefile uses
+# *_subset keys if present, otherwise defaults to the full set from common.yaml.
+
+# Two pilot libs locally on beast (3M-pair subsamples).
+libraries_subset:
+  - lib0625
+  - lib0626
+
+# Initial bring-up: only bwa-meth aligner (biscuit + bismark added later).
+align_methods_subset:
+  - bwameth
