@@ -1,0 +1,3 @@
+library_id	nci_alt_id	processing_stage	r1_n_reads	r2_n_reads	r1_mean_len	r2_mean_len	r1_pct_gc	r2_pct_gc	r1_mean_q	r2_mean_q	pct_dup	naive_depth_x
+lib0625	nf1_lib98	raw-fastq	3000000	3000000	151.0	151.0	22.0	22.0	39.37	38.78	11.8	0.29
+lib0626	nf1_lib99	raw-fastq	3000000	3000000	151.0	151.0	22.0	22.0	39.4	38.85	9.75	0.29

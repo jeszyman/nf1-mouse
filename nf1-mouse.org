@@ -190,8 +190,15 @@ channels:
 
 dependencies:
   - biscuit
+  - bwameth
+  - bismark
+  - bowtie2
   - samtools
   - pysam
+  - fastqc
+  - fastp
+  - python>=3.10
+  - snakemake-minimal
 #+end_src
 ** Biological model
 :PROPERTIES:
@@ -292,6 +299,8 @@ PDX plasma cfDNA contains a mixture of human tumor-derived and mouse host-derive
 
 ** Data
 - bleed dates =/= tumro volumne dates!!
+- [2026-05-11 Mon] Globus transferred from /rawdata/ccrtegs44/Project_JohnShern_CS041084_14EMseqlib_042826 to aclm350:/aclm350-zpool1/
+- [2026-05-12 Tue] gsutil_rsync from aclm350:/aclm350-zpool1/Project_JohnShern_CS041084_14EMseqlib_042826 to gs://chaudhuri-lab-bucket1/jeszyman/data/Flowcell_235NHYLT3/
 - [ ] ingest https://mail.google.com/mail/u/0/#inbox/FMfcgzQgKvKNWDpjskqzJTvLfWKwTpDx
 - NCI to Mayo transfers
   - Globus personal must be active on aclm350
@@ -1448,8 +1457,8 @@ qc.electrophoresis(ba_run, "length")
 Xenograft plasma contains cfDNA from both human tumor and mouse host. Species-specific quantification uses dPCR/qPCR targeting human and mouse LINE repetitive elements. TapeStation HSD1000 QC accompanies each dPCR batch to verify cfDNA size distribution and total concentration. Batch 2 (2025-03-21) characterized 12 samples from WU487 terminal, MN2 terminal, and JH-2-055 serial bleeds, with TapeStation concentrations ranging from 2.84 to 1500 pg/uL. Input: [[file:/mnt/gcs/jeszyman/projects/nf1-mouse/inputs/metadata/nf1_murine_dpcr_batch2_3_21_25.pdf][TapeStation batch 2 report]].
 
 Note: LINE dPCR worked well for serial bleed samples but produced unreliable or discordant results for terminal bleed samples. The root cause was never identified. If cross-sample validation of EM-seq read assignment is attempted using LINE dPCR species fractions, this discrepancy limits comparison to serial bleeds only.
-** INPROCESS Mouse EM-seq set 2 download
-SCHEDULED: <2026-05-08 Fri>
+** DONE Mouse EM-seq set 2 download
+CLOSED: [2026-05-12 Tue 10:49] SCHEDULED: <2026-05-08 Fri>
 :LOGBOOK:
 - State "INPROCESS"  from "TODO"       [2026-05-11 Mon 09:33]
 :END:
@@ -1457,30 +1466,119 @@ https://mail.google.com/mail/u/0/#inbox/FMfcgzQgLjWRnfJJMWLDffMLhdSqzHXq
 https://mail.google.com/mail/u/0/#inbox/FMfcgzQgLjWRnfHzMFMVJlrnQvhJvJnF
 https://mail.google.com/mail/u/0/#inbox/FMfcgzQgKvKNWDpjskqzJTvLfWKwTpDx
 ** Analysis map
+
+*Design principle 1 — canonical path layout with sparse replicas* (a.k.a. namespace-coherent partial mirroring / path-isomorphic subset replication; conceptually a /conformed namespace/ across stores). Every file sits at the same relative path on every store that holds it, but no single store is required to hold the complete tree — each host or bucket contains a subset of the canonical namespace. This makes any analysis script portable across hosts by changing only the root prefix. Implication: when adding a new path, choose its canonical location once and use that exact relative path everywhere it appears; never store the same logical data at different paths on different stores.
+
+*Design principle 2 — immutable raw + per-project inputs duplication for vendor-delivered data* (FASTQs, raw sequencer outputs, third-party deliveries). Every externally delivered file lives at *two* bucket paths, with filenames preserved verbatim between them:
+- *Immutable raw delivery*: =gs://chaudhuri-lab-bucket1/jeszyman/data/<vendor-group>/<delivery-name>/<flowcell-or-batch>/<sample-dir>/<filename>=. Written once at delivery time and never modified or deleted. Authoritative provenance.
+- *Per-project working copy*: =gs://chaudhuri-lab-bucket1/jeszyman/projects/<PROJECT>/inputs/<asset-class>/<local-id>/<filename>=. Scoped to one analysis project, with project-local identifiers (e.g. =lib0622/= rather than =Sample_95_nf1_lib95/=) but the same leaf filenames as the raw delivery for traceability. Bucket-internal =gsutil cp= = server-side, no compute, no egress, no rewriting.
+Rationale: the raw archive can never be corrupted by an analysis pipeline, and any project can be wholly torn down (or its inputs re-pulled from scratch) without touching the raw layer. Forward policy: when a new vendor delivery lands at the raw path, mint local IDs in =sequencing_libraries=/=cfdna_isolations= and run a bucket-internal =gsutil -m cp -n= to populate the project's =inputs/= mirror before any analysis host pulls a working copy.
+
+Stores in use:
+- =jeff-beast:/mnt/data/projects/nf1-mouse/= — local working store (heavy intermediates, 130 GB)
+- =/mnt/gcs/jeszyman/projects/nf1-mouse/= — GCS bucket =chaudhuri-lab-bucket1= (source-of-truth inputs + production analysis outputs)
+- =big-boy:/mnt/data/projects/nf1-mouse/= — ephemeral GCE VM (3 TB local disk, currently 98% full; spun up for full-depth alignment of all 18 Run-1 libraries, torn down after outputs are rsynced to bucket)
+- =gs://chaudhuri-lab-bucket1/jeszyman/data/nf1/Project_JohnShern_CS039619_112EMseqlib_061225/= — source-of-truth raw FASTQs (Run 1, nf1_lib1–lib112; Run-1 mouse libs are nf1_lib95–nf1_lib112 = lib0622–lib0639). =emseq/fastqs/= working copies derive from here.
+- jeff-pad, jeff-ubuntu8 — not analysis hosts (Syncthing of org files only / small one-off jobs); no nf1-mouse data tree
+
+*Design principle 3 — workflow data flow must not touch the FUSE bucket mount.* All inter-store transfers use =gsutil rsync= (or =gsutil cp -r= with explicit =gs://= URIs), never =cp= to/from =/mnt/gcs/=. This extends to /reads/ as well as writes: snakemake rules, pipeline scripts, and any automated data path must use a local working copy (localized first via =gsutil -m cp -r=) rather than dereferencing through the FUSE mount. The mount is for interactive one-off human browsing only. Rationale: FUSE-mediated reads have caused silent partial reads, hangs, and surprise latency in prior pipeline runs; gsutil-localized copies are checksum-verified and reliable.
+
+*** jeff-beast: =/mnt/data/projects/nf1-mouse/=
+#+begin_src text
+/mnt/data/projects/nf1-mouse/
+├── data/                                       (empty placeholder)
+├── inputs/                                     (empty placeholder)
+├── qc/                                         (empty placeholder)
+├── tmp/                                        (empty placeholder)
+├── emseq/                                      (98 GB)
+│   ├── fastqs/
+│   │   ├── lib0625/                            2 PE150 FASTQs (WU-487 terminal, mou0004)
+│   │   └── lib0626/                            2 PE150 FASTQs (WU-487 terminal, mou0005)
+│   ├── pdx-read-handling/                      2-sample pilot
+│   │   ├── strategy1/{lib0625,lib0626}/
+│   │   ├── strategy2/{lib0625,lib0626}/        ICRG failure
+│   │   ├── strategy3/{lib0622..lib0627}/       Disambiguate (6 libs)
+│   │   └── comparison.tsv
+│   ├── cna-sub50M-rerun/                       sub-50M ichorCNA rerun
+│   │   ├── bams/lib0626/                       5 BAMs (hg38, disambig human/mouse/ambig)
+│   │   ├── nopon/                              54 dirs (6 libs × {s1,s3a,s3b} × {agg,low,perm})
+│   │   ├── withpon/                            54 dirs (same matrix)
+│   │   └── ichor_rerun_summary.tsv
+│   ├── bams/                                   (empty)
+│   └── logs/                                   (empty)
+└── ref/                                        (35 GB, pilot references)
+    ├── biscuit/
+    │   ├── icrg_hg38_mm10/                     concatenated ref (pilot, ICRG)
+    │   └── mm10/                               Ensembl GRCm38 release 102
+    ├── biscuit_hg38 -> /mnt/data/projects/breast/ref/biscuit
+    └── bwa_meth/
+        └── ncbi_decoy_hg38 -> /mnt/data/projects/breast/ref/bwa_meth/ncbi_decoy_hg38
+#+end_src
+
+*** big-boy (GCE VM): =/mnt/data/projects/nf1-mouse/=
+Ephemeral VM (3 TB local disk, 98% full at 2026-05-11). Holds the full-depth alignment outputs for all 18 Run-1 libraries plus a partial sub-50M ichorCNA run. Source-of-truth FASTQs live in the bucket; the local =fastqs/= subtree is a working copy that goes away with the VM.
+#+begin_src text
+/mnt/data/projects/nf1-mouse/                              (≈2.9 TB total)
+├── emseq/fastqs/                                          (967 GB working copy)
+│   └── lib0622 … lib0639/                                 18 libs, PE150 EM-seq FASTQs (Run 1, all)
+├── emseq/pdx-read-handling/                               full-depth alignment outputs (1.9 TB)
+│   ├── strategy1/lib0622 … lib0639/                       18 libs, hg38 BAMs (930 GB)
+│   ├── strategy3/lib0622 … lib0638/                       17 libs, hg38 + mm10 + disambig BAMs (959 GB; lib0639 unfinished)
+│   ├── run_all_strategy1.sh, run_remaining_strategy1.sh,
+│   ├── run_strategy1_fixed.sh, run_strategy3_fixed.sh,
+│   ├── run_mm10_wave1.sh, run_wave2_optimized.sh,
+│   ├── disambiguate.py, update_progress.sh,
+│   └── *.log                                              master / nohup / progress logs
+├── emseq/pdx-read-handling-sub50M/                        195 MB
+│   ├── ichorcna/lib062{2..5,7}_s1.* + lib062{8,9}_s1.* + lib063{0..3}_s1.*  Strategy-1 ichorCNA only (11 libs × 3 presets = 33 dirs; lib0626 + lib0634..lib0639 not run)
+│   ├── ichorcna/filt_bam/, ichorcna/wig/
+│   ├── benchmark/                                         per-config TSV stamps
+│   ├── logs/
+│   └── ichor_run.log
+├── R_libs/                                                26 MB (R env cache)
+└── ref/biscuit/{ncbi_hg38_noalt, ucsc_mm10}/              24 GB (production refs; matches bucket)
+#+end_src
+
+*** GCS bucket: =/mnt/gcs/jeszyman/projects/nf1-mouse/=
+#+begin_src text
+/mnt/gcs/jeszyman/projects/nf1-mouse/
+├── inputs/
+│   ├── bioanalyzer/                            362 MB, 26 dated run folders (2025-06-03 → 2025-07-25 + 2026-03-29 GF MN2)
+│   ├── bioanalyzer_pilot/                      25 MB, 2 pilot runs (2024-12-10, 2025-05-01)
+│   ├── metadata/                               1.3 MB (protocols, dPCR report, screenshots, slide deck)
+│   └── fastqs/                                 Run-1 FASTQ working copies (per design principle 2: filename-preserved mirror of immutable raw delivery at gs://chaudhuri-lab-bucket1/jeszyman/data/nf1/Project_JohnShern_CS039619_112EMseqlib_061225/Flowcell_22WFNNLT4/Sample_<N>_nf1_lib<N>/)
+│       ├── lib0622/95_nf1_lib95_S55_R{1,2}_001.fastq.gz(.md5)   ~70 GB / lib
+│       ├── lib0623/96_nf1_lib96_S*_R{1,2}_001.fastq.gz(.md5)
+│       ├── ...                                                  18 libs total (lib0622 ← nf1_lib95 … lib0639 ← nf1_lib112)
+│       └── lib0639/112_nf1_lib112_S8_R{1,2}_001.fastq.gz(.md5)
+├── emseq/
+│   ├── pdx-read-handling/                      12 small files (legacy test set, no strategy split)
+│   └── pdx-read-handling-sub50M/               production sub-50M cohort
+│       ├── strategy1/{lib0622..lib0627}/       24 files, 64 GB (direct-to-hg38 BAMs)
+│       ├── strategy3/{lib0622..lib0627}/       78 files, 179 GB (disambig BAMs ± ambig)
+│       ├── ichorcna/                           72 configs, 2178 files (6 libs × {s1,s3a,s3b} × {nopon,wig} × {agg,low,perm})
+│       ├── results_summary/                    43 files, 2.7 MB (per-lib disambig + ichor seg files + ichor_summary.tsv)
+│       ├── nf1-mouse-sub50M.patch
+│       ├── run_overnight.sh / run_overnight.log
+│       └── run_downstream.sh / run_downstream.log
+└── ref/                                        production references
+    └── biscuit/
+        ├── ncbi_hg38_noalt/                    NCBI GRCh38 no-alt analysis set
+        └── ucsc_mm10/                          UCSC mm10 primary assembly
+#+end_src
+
+*** Layout-consistency notes
+- *Path-canonical violation at =ref/biscuit/=*: beast and bucket both have a =ref/biscuit/= directory, but the subdirectories underneath are different references (=icrg_hg38_mm10 + mm10= on beast vs =ncbi_hg38_noalt + ucsc_mm10= in bucket). Scripts that resolve =ref/biscuit/<name>= via a host-prefix swap will silently behave differently. Fix: rename to =ref/biscuit/pilot/{icrg_hg38_mm10,mm10}= on beast and =ref/biscuit/production/{ncbi_hg38_noalt,ucsc_mm10}= on both, or drop the pilot refs from beast since they're no longer the canonical references.
+- *Production analysis lives on the bucket*: the sub-50M production tree (=emseq/pdx-read-handling-sub50M/=) is bucket-only. The beast counterpart =emseq/cna-sub50M-rerun/= is a rerun of selected libs with different ichorCNA configs (=nopon + withpon=) and lives only on beast — it sits at a different canonical path, which is correct.
+- *Raw FASTQs are beast-only*: =emseq/fastqs/= holds only lib0625 + lib0626 PE150 reads. All other libs (lib0622, lib0623, lib0624, lib0627, sub-50M cohort) are accessed from already-aligned BAMs in the bucket, not re-aligned locally.
+- *Empty skeleton on beast*: =data/=, =inputs/=, =qc/=, =tmp/= exist as empty placeholders. This is intentional canonical-layout discipline so scripts can mkdir into known locations even when no data lives there yet.
+
 ** Methods
-  Settled:
-  - Two strategies: Direct-to-human (Strategy 1) vs Disambiguate (Strategy 3), bo
-  - ICRG is closed (fundamental EM-seq incompatibility, not a setup error)
-  - Xengsort excluded (k-mer classification breaks on EM-seq conversion)
-  - Scripts exist, 2-sample pilot done, disambiguate.py rewritten to streaming
-  - VM spec decided, full plan exists at docs/superpowers/plans/2026-03-18-direct
+*** Bioinformatics
+**** Fastq processing and QC
+**** Genome references
+**** EM-seq read alignments
 
-
-*** Workflows
-**** Configuration
-***** Data
-***** Results
-**** Preamble named blocks
-**** [[file:workflows/data.smk][Data pipeline]]
-***** make_data_model.R
-**** [[file:workflows/results.smk][Results pipeline]]
-***** Preamble
-***** LINK to Load packages
-***** LINK to Load configuration
-***** LINK to variable naming
-***** Functions
-***** All rule
-***** On success
 ** Results
 - mou0067-76 are nopdx- check frag vs mouse pdx reads
 
@@ -1704,6 +1802,7 @@ samtools flagstat "${OUTDIR}/${SAMPLE}.disambig.human.bam" > "${OUTDIR}/${SAMPLE
 BISCUIT 1.8.0 alignment on GCP n2-highmem (224 vCPU, 220 GB RAM), conda env =nf1-mouse=.
 
 **** Per-sample input scale
+
 Each EM-seq library is ~71 GB compressed (R1+R2), ~380M read pairs (PE150).
 BISCUIT processes reads in fixed batches of 529,802 sequences (264,901 read pairs), yielding ~1,430 batches per sample.
 

@@ -1,13 +1,4 @@
 #!/usr/bin/env bash
-# ============================================================
-# AUTO-GENERATED — DO NOT EDIT DIRECTLY
-# Edits will be overwritten on next org-babel tangle.
-# 
-# Source:  /home/jeszyman/repos/nf1-mouse/nf1-mouse.org
-# Author:  Jeffrey Szymanski
-# Tangled: 2026-03-24 11:06:46
-# ============================================================
-
 set -euo pipefail
 # Compare strategies across all samples
 # Collect: total read pairs (from FASTQ), mapped, MAPQ>=30, human-assigned, ambiguous rate

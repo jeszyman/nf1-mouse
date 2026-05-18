@@ -1,2 +1,57 @@
+# nf1-mouse common workflow configuration.
+# Override at runtime with --configfile config/test.yaml or similar.
+
 project: nf1-mouse
 conda-env: nf1-mouse
+
+# Local working store. Never a FUSE mount path (see design principle 3
+# in the org file).
+data_root: /mnt/data/projects/nf1-mouse
+
+# References for alignment. FASTA path convention follows emseq biopipe:
+# <D_REF>/<aligner>/<ref_name>/<ref_name>.fa. Each aligner gets its own
+# subdir; index files (biscuit/bwameth/bismark) live alongside the FASTA.
+references:
+  ncbi_hg38_noalt:
+    species: human
+    # Source FASTA path (relative to data_root). ref_stage_fasta symlinks this
+    # into ref/<aligner>/<ref_name>/<ref_name>.fa so all aligners share one
+    # canonical name. Big-boy + bucket layout uses the original GCA name.
+    source_path: ref/biscuit/ncbi_hg38_noalt/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna
+  ucsc_mm10:
+    species: mouse
+    source_path: ref/biscuit/ucsc_mm10/mm10.fa
+
+# Active aligners. Override via align_methods_subset in test.yaml to restrict.
+# bwameth = bwa-meth (BWA-MEM-based, methylation-aware)
+# biscuit = BISCUIT (BWA-MEM-based with conversion-aware scoring)
+# bismark = Bismark (Bowtie2-based, used by Callari 2018)
+align_methods:
+  - bwameth
+  - biscuit
+  - bismark
+
+# Run-1 mouse PDX library IDs and their NCI alt_spec_ids.
+# Raw delivery at gs://chaudhuri-lab-bucket1/jeszyman/data/nf1/
+# Project_JohnShern_CS039619_112EMseqlib_061225/Flowcell_22WFNNLT4/Sample_<N>_nf1_lib<N>/
+# Long-term should source from data/metadata.xlsx (sequencing_libraries.alt_spec_id);
+# explicit map keeps the smoke test deterministic and decouples from xlsx parsing.
+libraries:
+  lib0622: nf1_lib95
+  lib0623: nf1_lib96
+  lib0624: nf1_lib97
+  lib0625: nf1_lib98
+  lib0626: nf1_lib99
+  lib0627: nf1_lib100
+  lib0628: nf1_lib101
+  lib0629: nf1_lib102
+  lib0630: nf1_lib103
+  lib0631: nf1_lib104
+  lib0632: nf1_lib105
+  lib0633: nf1_lib106
+  lib0634: nf1_lib107
+  lib0635: nf1_lib108
+  lib0636: nf1_lib109
+  lib0637: nf1_lib110
+  lib0638: nf1_lib111
+  lib0639: nf1_lib112

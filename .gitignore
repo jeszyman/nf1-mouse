@@ -353,3 +353,4 @@ running_results.html
 dev/icrg-analysis/*.tsv
 dev/icrg-analysis/icrg_failure_analysis.html
 dev/cna-sub50M/data/mouse_reads_hg38_mapq.tsv
+.claude/worktrees/

@@ -1,0 +1,75 @@
+#########1#########2#########3#########4#########5#########6#########7#########8
+#
+# nf1-mouse project Snakefile (wrapper).
+#
+# Loads common config, derives D_/R_/CONDA_ constants, includes modular
+# rule files, and defines `rule all` as the single human-readable manifest
+# of project deliverables.
+#
+# Run:
+#   snakemake -s workflows/Snakefile --use-conda --cores 8 [--configfile ...]
+#
+#########1#########2#########3#########4#########5#########6#########7#########8
+
+import os
+
+configfile: "config/common.yaml"
+
+# ── Repository + data root ─────────────────────────────────────────────────
+R_NF1_MOUSE = os.path.abspath(os.path.dirname(workflow.snakefile) + "/..")
+D_DATA      = config["data_root"]
+D_INPUTS    = f"{D_DATA}/inputs"
+D_REF       = f"{D_DATA}/ref"
+D_LOGS      = f"{D_DATA}/logs"
+D_BENCHMARK = f"{D_DATA}/benchmark"
+D_EMSEQ     = f"{D_DATA}/emseq"
+
+# ── Conda environment yamls ────────────────────────────────────────────────
+CONDA_NF1_MOUSE = f"{R_NF1_MOUSE}/config/nf1-mouse-conda-env.yaml"
+
+# ── Workflow units ─────────────────────────────────────────────────────────
+# config["libraries"] is a dict {library_id: nci_alt_id} — the canonical Run-1
+# cohort. config["libraries_subset"] (optional, override-only) restricts the
+# active set for test runs.
+ALL_LIBS      = dict(config["libraries"])
+LIBRARIES     = list(config.get("libraries_subset") or ALL_LIBS.keys())
+NCI_ALT_IDS   = {lib: ALL_LIBS[lib] for lib in LIBRARIES}
+
+# References + aligners. *_subset overrides restrict the active set.
+REFERENCES    = list(config.get("references_subset")
+                     or config["references"].keys())
+ALIGN_METHODS = list(config.get("align_methods_subset") or config["align_methods"])
+REF_META      = config["references"]
+
+# ── Modules ────────────────────────────────────────────────────────────────
+include: "data.smk"
+include: "qc.smk"
+include: "ref.smk"
+include: "align.smk"
+
+# ── Deliverables ───────────────────────────────────────────────────────────
+rule all:
+    input:
+        # Raw FASTQ symlinks under lib-named convention
+        expand(f"{D_EMSEQ}/fastqs/{{library_id}}/{{library_id}}.raw_R1.fastq.gz",
+               library_id=LIBRARIES),
+        expand(f"{D_EMSEQ}/fastqs/{{library_id}}/{{library_id}}.raw_R2.fastq.gz",
+               library_id=LIBRARIES),
+        # Per-lib QC outputs
+        expand(f"{D_EMSEQ}/qc/raw-fastq/{{library_id}}/{{library_id}}.raw_R1_fastqc.zip",
+               library_id=LIBRARIES),
+        expand(f"{D_EMSEQ}/qc/raw-fastq/{{library_id}}/{{library_id}}.raw_R2_fastqc.zip",
+               library_id=LIBRARIES),
+        expand(f"{D_EMSEQ}/qc/raw-fastq/{{library_id}}/fastp.json",
+               library_id=LIBRARIES),
+        expand(f"{D_EMSEQ}/qc/raw-fastq/{{library_id}}/qc-raw-fastq.tsv",
+               library_id=LIBRARIES),
+        # Repo-committed summary view
+        f"{R_NF1_MOUSE}/results/qc/fastqc-summary.tsv",
+        # Per-(library, aligner, ref) sorted BAMs
+        expand(f"{D_EMSEQ}/align/{{align_method}}/{{ref_name}}/{{library_id}}.{{ref_name}}.{{align_method}}.sorted.bam",
+               library_id=LIBRARIES, ref_name=REFERENCES, align_method=ALIGN_METHODS),
+        expand(f"{D_EMSEQ}/align/{{align_method}}/{{ref_name}}/{{library_id}}.{{ref_name}}.{{align_method}}.flagstat.txt",
+               library_id=LIBRARIES, ref_name=REFERENCES, align_method=ALIGN_METHODS),
+        expand(f"{D_EMSEQ}/align/{{align_method}}/{{ref_name}}/{{library_id}}.{{ref_name}}.{{align_method}}.idxstats.txt",
+               library_id=LIBRARIES, ref_name=REFERENCES, align_method=ALIGN_METHODS),

@@ -56,7 +56,11 @@
       "WebFetch(domain:huishenlab.github.io)",
       "WebFetch(domain:lh3.github.io)",
       "WebFetch(domain:en.wikipedia.org)",
-      "WebFetch(domain:ftp.ncbi.nlm.nih.gov)"
+      "WebFetch(domain:ftp.ncbi.nlm.nih.gov)",
+      "Bash(mkdir -p /home/jeszyman/.claude/skills/domain-expert-pdx-cfdna)",
+      "Read(//home/jeszyman/.claude/skills/domain-expert-cfdna/**)",
+      "Bash(echo '__TRACKED_VAR__  paper-ingest  __CMDSUB_OUTPUT__  enriched')",
+      "Read(//home/jeszyman/.claude/**)"
     ]
   }
 }
