@@ -133,7 +133,7 @@ Caveat noted during Phase 0: the bioanalyzer numbers cited above
 cfDNA), not `bioanalyzer_167bp_peak_pg_ul` (which is only populated
 for a single sample). The MN2 ranking is unchanged.
 
-### Phase 1 — VM and reference setup
+### Phase 1 — VM and reference setup (DONE 2026-05-19)
 
 1. Provision GCE VM (240-300 vCPU, ~250 GB RAM, ~4 TB local disk for
    FASTQs + BAMs + ichorCNA intermediates). VM type TBD; n2-highmem
@@ -146,7 +146,11 @@ for a single sample). The MN2 ranking is unchanged.
 4. Build bwa-meth index: `bwameth.py index <ref.fa>` — one-time,
    runs in background while Phase 2 proceeds.
 
-### Phase 2 — FASTQ subsample
+Done on `big-boy` VM (the jupyter-owned GCP image). Reference at
+`/mnt/data/projects/nf1-mouse/ref/biscuit/ncbi_hg38_noalt/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna`
+with bwa-meth index alongside.
+
+### Phase 2 — FASTQ subsample (DONE 2026-05-19)
 
 1. `gsutil rsync` 4 sample FASTQ pairs to VM local disk:
    - 2 MN2 from `Flowcell_235NHYLT3/` (lib IDs from Phase 0)
@@ -156,7 +160,10 @@ for a single sample). The MN2 ranking is unchanged.
 3. Verify each subsampled fastq has 50,000,000 reads
    (`zcat | awk 'NR%4==1' | wc -l`) and R1/R2 have matched IDs.
 
-### Phase 3 — bwa-meth alignment
+Outputs at `/mnt/data/projects/nf1-mouse/chr8-amp-detect/subsampled/`
+(`lib0626`, `lib0627`, `lib0644`, `lib0645` × R1/R2 × 50M).
+
+### Phase 3 — bwa-meth alignment (DONE 2026-05-20, serial after VM crash)
 
 For each of 4 samples in parallel:
 
@@ -174,12 +181,49 @@ QC outputs: alignment rate, MAPQ distribution, duplication rate,
 per-chromosome read counts. Flag any sample with <10% reads mapping
 to hg38 or >40% duplication.
 
+Implemented in `dev/chr8-amp-detect/02_bwameth_align.sh` (per-sample)
+and `02_resume_serial.sh` (serial driver, after a 4-way-parallel
+attempt crashed the VM on 2026-05-18). All 4 dedup BAMs produced at
+`/mnt/data/projects/nf1-mouse/chr8-amp-detect/bams/<lib>.hg38.dedup.bam`;
+primary-mapped reads 8.5M–11.5M per sample (≥16% of 50M pairs as
+specified). Files are owned by the `jupyter` group — use
+`sudo -n -u jupyter` for any write into that subtree.
+
 ### Phase 4 — ichorCNA (no-PoN)
 
 1. HMMcopy `readCounter` → wig (1 Mb bins, autosomes only) for each
    of the 4 dedup BAMs.
 2. ichorCNA with `default-low-input` preset, autosomes only, **no
    PoN**. 4 ichorCNA runs total.
+
+**Tooling install — DONE 2026-05-22:**
+
+- Patched ichorCNA fork installed: `/mnt/data/projects/nf1-mouse/R_libs/ichorCNA`
+  (v0.3.2 from `https://github.com/jeszyman/ichorCNA-patched`). All
+  required R deps colocated in the same `R_libs/` tree (HMMcopy,
+  GenomicRanges, GenomeInfoDb, plyr, optparse, Rcpp, and a **local
+  `data.table`** that bypasses the broken system-R 4.6.0 data.table
+  with its `SETLENGTH` ABI mismatch). The patched fork was required
+  because upstream ichorCNA fails to build under R 4.6.0 due to that
+  same data.table ABI issue during byte-compile/lazy-load.
+- `readCounter` binary installed: `/opt/conda/envs/hmmcopy-bin/bin/readCounter`
+  (bioconda `hmmcopy` package; also provides `mapCounter`, `gcCounter`).
+- Verified load: `sudo -n -u jupyter R_LIBS=/mnt/data/projects/nf1-mouse/R_libs /usr/bin/Rscript -e 'suppressMessages(library(ichorCNA))'`
+  reports `ichorCNA loaded OK, version: 0.3.2`.
+
+**Invocation conventions (must use):**
+
+- Run any R that touches ichorCNA as the `jupyter` user with
+  `R_LIBS=/mnt/data/projects/nf1-mouse/R_libs` exported. The `R_libs/`
+  directory is `drwxrws---` jupyter-only; system R is `/usr/bin/Rscript`
+  (4.6.0). `R_LIBS` (not `R_LIBS_USER`) is what the prior session
+  found honored.
+- `readCounter` must be invoked via its absolute path
+  (`/opt/conda/envs/hmmcopy-bin/bin/readCounter`) since it lives in
+  a dedicated conda env and is not on the default `PATH`.
+- The runIchorCNA driver script is staged at `/tmp/runIchorCNA.R`
+  (the ichorCNA package's bundled scripts/runIchorCNA.R, copied for
+  convenience).
 
 ### Phase 5 — Chr8 coverage plots and TF table
 
