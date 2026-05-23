@@ -104,7 +104,10 @@ FASTQ naming convention on bucket: ={num}_nf1_lib{num}_S{lane}_R{1,2}_001.fastq.
 
 *** Working in this repo
 *** Change log
-- [2026-03-30 Mon]
+:PROPERTIES:
+:ID:       1ddcef09-b9d9-430e-be6d-d0194a186e85
+:END:
+- [2026-03-30 Mon] [[https://github.com/jeszyman/nf1-mouse/commit/14cbdac][14cbdac]]
   - Production alignment status: Strategy 1 (hg38 direct) running on GCP VM (224 vCPU, 220 GB RAM)
   - BISCUIT 1.8.0 header truncation bug fixed via =samtools view -bS -t ref.fai= workaround
   - Alignment rate: 9.7 batches/hr, perfectly linear across 133 hrs of runtime (range 9.5–10.0, no degradation)
@@ -116,20 +119,20 @@ FASTQ naming convention on bucket: ={num}_nf1_lib{num}_S{lane}_R{1,2}_001.fastq.
   - Updated Strategy 3 script to reuse Strategy 1 hg38 BAMs — only runs mm10 alignment + disambiguate
   - Added alignment benchmarks section to =* Direct vs Disambiguate= heading
   - Total pipeline projection: ~36 days remaining (Strategy 1 + Strategy 3 mm10)
-- [2026-03-24 Mon]
+- [2026-03-24 Mon] [[https://github.com/jeszyman/nf1-mouse/commit/1d2dbc1][1d2dbc1]]
   - Updated CTF grant section with Chr8q-gain sequencing gap details from email thread (2026-03-14 through 2026-03-18): all 18 libs are Chr8q-WT, need MN2/WU-225 sequencing for JCI, Jeff offered to prep more plasma
   - Added mu4e message links to CTF email thread for traceability
   - Updated contacts: added Aadel and Paul emails, added Tiffany Redden (WashU grant specialist)
   - Created project conda env =nf1-mouse= (biscuit, samtools, pysam) at =config/nf1-mouse-conda-env.yaml=, tangled from org; removed dependency on shared biotools/emseq envs
   - Updated disambiguate.py call to relative path via =$(dirname "$0")= instead of hardcoded repo path
   - Updated =common.yaml= to use =nf1-mouse= as project conda env
-- [2026-03-19 Wed]
+- [2026-03-19 Wed] [[https://github.com/jeszyman/nf1-mouse/commit/bd3e79b][bd3e79b]]
   - Updated spec to align with actual project state: 2 strategies (direct + disambiguate), ICRG closed
   - Corrected false ICRG chromosome collision narrative — verified mm10_ prefix was already in place; real failure is EM-seq conversion collapse + tied-read bias
   - Found GavinHaLab/PDX_mouseSubtraction pipeline (combined ref + chr suffixing + mate-pair filter + realign); useful reference even though ICRG is dead for EM-seq
   - Added TODO: sequence Chr8q-gain lines for JCI Reviewer A response
   - Added general TODO: always verify chromosome names distinct when building multi-species references
-- [2026-03-18 Tue]
+- [2026-03-18 Tue] [[https://github.com/jeszyman/nf1-mouse/commit/327af61][327af61]]
   - Pulled 3M-read-pair FASTQ subsets for lib0625/lib0626 via GCS mount (zcat | head | gzip)
   - Ran all 3 PDX read handling strategies to completion (sequential, ~5.5 hrs total); OOM crash from parallel run informed resource optimization
   - ICRG (Strategy 2) catastrophic failure: <1% human reads retained; diagnosed MAPQ collapse, 96% tied-read mouse bias, ZC conversion correlation
@@ -169,6 +172,82 @@ FASTQ naming convention on bucket: ={num}_nf1_lib{num}_S{lane}_R{1,2}_001.fastq.
   - Project init: transferred content from mouse-cfdna repo, populated for K08 Aim 2 scope
 - [2026-03-03 Mon]
   - Initial setup from sci-repo template
+** Project Map
+:PROPERTIES:
+:ID:       f0d82730-36ef-44dc-8556-fd29585eab26
+:END:
+
+Forward-looking dashboard for this project. Convention defined under [[id:f9628d19-7816-45ba-aef4-a9ab766aaf3f][sci_proj_repo Project Map]]. Past progress lives in [[id:1ddcef09-b9d9-430e-be6d-d0194a186e85][Change log]].
+
+*** Visualization
+
+#+begin_src dot :file project-map.svg :results file :exports results
+digraph nf1_mouse {
+  rankdir=LR;
+  node [shape=box, style=filled, fillcolor=white, fontname="Helvetica", fontsize=11];
+  edge [fontname="Helvetica", fontsize=9];
+
+  // Inputs
+  fastqs [label="Run-1 EM-seq\n18 libs (lib0622-lib0639)", style="filled,bold", fillcolor=lightgray];
+  chr8q_seq [label="Chr8q-gain seq\n(WU-225/MN2)", style="dashed", color=red, fontcolor=red];
+
+  // Methods / analysis branches
+  direct_disambig [label="Direct vs Disambiguate\n(pilot + production align)", style="filled,bold", fillcolor=lightgray];
+  sub50m_cna [label="Sub-50M cohort CNA\n(INPROCESS)", style="bold"];
+  tumor_frac [label="Tumor fraction\nestimation", style="bold"];
+
+  // Deliverables
+  running_report [label="Running results report\n(HTML)", style="bold"];
+  jci_response [label="JCI Reviewer A response\n(Chr8q figure)", style="dashed", color=red, fontcolor=red];
+  ctf_grant [label="CTF grant resub\n(Chr8q context)", style="bold"];
+
+  // Decisions
+  strategy_decision [label="Decision:\nS1 vs S3 for\nproduction CNA", shape=diamond, style="dashed"];
+
+  // Flow
+  fastqs -> direct_disambig;
+  direct_disambig -> sub50m_cna;
+  sub50m_cna -> tumor_frac;
+  sub50m_cna -> running_report;
+  tumor_frac -> running_report;
+  direct_disambig -> strategy_decision;
+  strategy_decision -> sub50m_cna [style=dashed];
+  chr8q_seq -> jci_response [color=red];
+  chr8q_seq -> ctf_grant [color=red];
+  running_report -> jci_response;
+}
+#+end_src
+
+*** Current focus
+
+Sub-50M cohort CNA analysis is the active analytical thread, iterating on tumor fraction estimation and CNA profiles across Strategies 1 and 3. Production alignment of 18 Run-1 EM-seq libraries continues on the big-boy GCE VM (~36 days projected from 2026-03-30). External thread: arranging Chr8q-gain sequencing on WU-225/MN2 lines for the JCI Reviewer A response.
+
+*** Branches
+
+- [[id:46aa7d0a-577a-4d6d-85d0-122ad93bbd9e][Direct vs Disambiguate PDX read assignment]] — *goal*: settle the production PDX read-handling strategy for EM-seq · *deps*: Run-1 FASTQs (have) · *status*: pilot complete, production alignment running on big-boy VM (Strategy 1 lib0622-lib0626 ~80% complete; Strategy 3 mm10 + disambig scaled to all 18 libs) · *blockers*: none, awaiting wall-clock
+- [[id:36229d93-58ae-4aec-8100-0465fed46a6a][Sub-50M cohort CNA analysis]] — *goal*: CNA + tumor-fraction profiles across the 6-lib sub-50M cohort for both S1 and S3 strategies · *deps*: Strategy 1 + Strategy 3 BAMs (have at sub-50M depth) · *status*: INPROCESS, iterating on PoN effect, preset robustness, tumor-fraction heatmap · *blockers*: none
+- [[id:09de27fb-9be9-46d3-a1b3-db7bb11710e3][Running results report]] — *goal*: standing HTML deliverable summarizing PDX read handling + CNA results · *deps*: Sub-50M CNA outputs · *status*: scaffold in place, populating Results section as analyses land · *blockers*: none
+- [[id:3b09d020-bbe8-4a0e-9379-a6de86d47852][Xengraft read disambiguation bioinformatics]] — *goal*: documented method reference for PDX cfDNA read assignment under EM-seq conversion constraints · *deps*: literature (Bhandari 2025) ingested · *status*: background prose + method comparison documented · *blockers*: none
+
+**** Past
+
+- Mouse EM-seq set 2 download — DONE 2026-03 (Run-1 18 libs landed in bucket and beast)
+- 3-strategy pilot (Direct, ICRG, Disambiguate) — closed 2026-03-18 (ICRG failed under EM-seq; collapsed to 2-strategy production)
+
+*** Open decisions
+
+- *S1 (Direct) vs S3 (Disambiguate) for production CNA*: pending S3 completion on remaining libs and tumor-fraction crosshatch comparison. Default leans S1 (no mouse-call overhead) unless S3 shows materially better human-read retention on Chr8q-WT lines.
+- *Chr8q-gain sequencing scope*: how many additional MN2 / WU-225 libraries to prep to enable a Chr8q-amplification cohort for the JCI response. Decision pending capacity discussion with Hirbe lab.
+
+*** Recent progress
+
+See [[id:1ddcef09-b9d9-430e-be6d-d0194a186e85][Change log]] for full detail. Headline items, past 6 weeks:
+- Production alignment running on GCP big-boy VM (224 vCPU, 220 GB RAM); ~36 days projected
+- BISCUIT 1.8.0 header truncation worked around via =samtools view -bS -t ref.fai=
+- CTF grant section enriched with Chr8q-gain sequencing gap details and mu4e thread links
+- Project conda env =nf1-mouse= split off from shared biotools/emseq
+- ICRG strategy retired; project narrative converged on S1 + S3 only
+
 ** Project setup and administration
 *** Yaml
 **** Common
@@ -283,6 +362,9 @@ cfDNA from PDX mouse plasma provides a real-time, systemic measure of tumor biol
 - [[id:c6157337-5f4a-4216-abc8-93d1a84cdbb5][PNST MRD]] and [[id:771f19d4-cd99-4013-b5de-5ba5be6b6d5d][NF1 CAPP-seq]] are related human cfDNA projects using overlapping analytical approaches
 - [[id:57a06d7a-302b-488f-94af-c41a98684555][NF1-associated tissue of origin]] uses cfDNA tissue-of-origin inference across NCI, Hopkins, Mayo, WashU, and U of M samples
 ** Xengraft model read disambiguation bioinformatics
+:PROPERTIES:
+:ID:       3b09d020-bbe8-4a0e-9379-a6de86d47852
+:END:
 
 PDX plasma cfDNA contains a mixture of human tumor-derived and mouse host-derived reads. No established best practice exists for separating species in EM-seq data, where enzymatic C-to-T conversion at unmethylated CpGs precludes direct k-mer classification. Bhandari, et al. benchmarked 12 mouse read removal protocols for PDX WGS/WES/RNA-seq and found Xengsort (k-mer) outperforms alignment-based methods including Disambiguate, but also that "all protocols were effective at removing mouse reads" and "performance difference was minor, usually within 5% of the human reads"  [cite:@bhandari2025]. Xengsort's k-mer identity breaks under bisulfite/EM-seq conversion.
 
@@ -1714,6 +1796,7 @@ Two sub-pipelines:
 #+END_SRC
 ** Direct vs Disambiguate PDX read assignment                   :bioinfo_dev:
 :PROPERTIES:
+:ID:       46aa7d0a-577a-4d6d-85d0-122ad93bbd9e
 :header-args:bash: :dir /home/jeszyman/repos/nf1-mouse/dev/pdx-read-handling
 :header-args:jupyter-R: :session direct-vs-disambig :kernel biotools :async yes :dir /home/jeszyman/repos/nf1-mouse/dev/direct-vs-disambiguate
 :END:
@@ -1925,6 +2008,7 @@ The likely mechanism is that EM-seq C→T conversion at unmethylated CpGs reduce
 
 ** Sub-50M cohort CNA analysis                                  :bioinfo_dev:
 :PROPERTIES:
+:ID:       36229d93-58ae-4aec-8100-0465fed46a6a
 :header-args:jupyter-R: :session cna-sub50M :kernel biotools :async yes :dir ./dev/cna-sub50M
 :EXPORT_FILE_NAME: ./cna-sub50M-analysis
 :EXPORT_TITLE: PDX Read Handling: Sub-50M Cohort CNA Analysis
