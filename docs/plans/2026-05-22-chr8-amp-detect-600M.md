@@ -187,13 +187,64 @@ For each of the 4 libs, compute the per-read cross-classification table comparin
 - Comparing host-contamination rates across sample lines (WU-487 vs MN2 — host:graft ratios likely differ)
 - Sanity-checking that the disambiguators bwa-meth NM scoring behaves consistently across libraries
 
-## TODO: Cross-classification analysis (deferred)
-
-For each of the 4 libs, compute the per-read cross-classification table comparing the straight bwa-meth hg38-only verdict (any read mapped to hg38) against the post-disambiguation verdict (human / mouse / ambiguous). Smoke-test on 50k chr1 reads from lib0626 [2026-05-26] showed ~60% of reads that bwa-meth assigned to hg38 are actually mouse, ~9% ambiguous, ~38% real human. The per-sample full-BAM numbers will quantify mouse-contamination rate per library, and the per-bin / per-chromosome breakdown will reveal which genomic regions concentrate the cross-mapping (likely pericentromeric, ribosomal, and other high-homology zones). Useful for:
-
-- Methods-section reporting of contamination magnitude
-- Identifying regions that would benefit from extra masking even after disambiguation
-- Comparing host-contamination rates across sample lines (WU-487 vs MN2 — host:graft ratios likely differ)
-- Sanity-checking that the disambiguators bwa-meth NM scoring behaves consistently across libraries
-
 Script template: cross_classify.sh used for the smoke test; adapt to operate on full BAMs and emit per-chromosome contamination rates.
+
+## Diagnostic iteration (2026-05-26 / 27)
+
+The initial Phase D no-PoN ichorCNA result on the 4-sample 450M cohort produced a reproducible cross-sample artifact pattern: TFs converging around 0.4-0.5, chr8 calling whole-arm HETD on MN2 samples (where chr8q gain was expected), and a non-physical similarity in genome-wide CNA profile across biologically heterogeneous lines (lib0626/0627 WU-487 WT vs lib0644/0645 MN2 AMP). This section documents the diagnostic experiments run to localize the failure, the conclusions reached, and the methodology for re-running them.
+
+### Iteration sequence and per-condition outcomes
+
+All conditions executed only on lib0626 (WU-487 WT representative) and lib0644 (MN2 AMP representative) for diagnostic purposes. The other two libraries (lib0627, lib0645) were not put through every variant.
+
+| Condition | Rationale | lib0626 chr8 | lib0644 chr8 | lib0644 TF |
+|---|---|---|---|---|
+| hg38-direct + no PoN (Phase D) | baseline | chr8p HETD, q NEUT | whole HETD | 0.44 |
+| hg38-direct + HD-ULP PoN | sample-set bias removal | chr8p HETD, q NEUT | whole NEUT | 0.47 |
+| dual bwa-meth disambig + no PoN | remove mouse cross-mapping | chr8p HETD, q NEUT | whole HETD | 0.43 |
+| disambig + HD-ULP PoN | combined remedy | chr8p HETD, q NEUT | whole NEUT | 0.46 |
+| disambig + q0 readCounter | drop MAPQ filter (test multi-mapper dependence) | whole NEUT | whole NEUT | 0.00 |
+| disambig + q10 readCounter | intermediate MAPQ | whole NEUT | whole NEUT | 0.00 |
+| raw HMMcopy log2 (no HMM segmentation) | inspect pre-segmentation per-bin signal | n/a (per-arm: -0.21p / -0.11q) | n/a (per-arm: -0.32p / -0.18q) | n/a |
+
+### Per-arm median log2 from raw HMMcopy GC+map correction
+
+Computed by extracting the `logR` column from ichorCNA `cna.seg` outputs (which is the pre-HMM-segmentation HMMcopy GC+map-corrected log2 per 1Mb bin) and grouping bins by chr8 position relative to the centromere (~45 Mb):
+
+| Lib | MAPQ | chr8p median log2 | chr8q median log2 | q − p |
+|---|---|---|---|---|
+| lib0626 WU-487 WT | q0 | -0.02 | -0.00 | +0.02 |
+| lib0626 WU-487 WT | q10 | -0.20 | -0.10 | +0.10 |
+| lib0626 WU-487 WT | q20 | -0.21 | -0.11 | +0.10 |
+| lib0644 MN2 AMP | q0 | -0.03 | +0.00 | +0.03 |
+| lib0644 MN2 AMP | q10 | -0.23 | -0.17 | +0.07 |
+| lib0644 MN2 AMP | q20 | -0.32 | -0.18 | +0.14 |
+
+The chr8q-vs-chr8p step exists in the raw data in the correct direction (q > p in all conditions), but the magnitude (+0.07 to +0.14 log2 units) is roughly 3x smaller than expected for a CN=3 gain at 46% TF (which would predict +0.30). lib0644 (MN2 AMP) does not show a meaningfully larger step than lib0626 (WU-487 WT). In q10/q20 conditions both arms sit below baseline ("global chr8 depression"), which is what ichorCNA's HMM fits as HETD; the relative q>p step is invisible to a genome-median-anchored caller.
+
+### Key conclusions
+
+1. **HD-ULP PoN is unsuitable for EM-seq cfDNA.** The bundled HD-ULP PoN was built from non-bisulfite LP-WGS normals. Applied to our bwa-meth EM-seq data, it (a) masks ~50% of bins (bin count drops from ~200/chr to ~99/chr), and (b) produces non-physical CN calls — e.g. chr1 segments labeled GAIN with negative-log2 bin values, multiple chromosomes flipping to GAIN with mean log2 in the +0.1 to +0.2 range. Do not interpret PoN-corrected results as biological without first rebuilding the PoN from EM-seq normals.
+2. **Strategy 3A disambiguation works but does not rescue the chr8q signal.** Full-genome disambiguation on lib0626 and lib0644 classified ~43-48% of reads as human, ~47-52% as mouse, ~3-4% ambiguous (full-BAM rates; the 50k-chr1 smoke test had biased numbers because chr1 enriches for high-homology cross-mapping). After disambiguation, the chr8 HETD signal persists with essentially the same magnitude. The MN2 chr8q artifact is not driven by mouse cross-mapping at the alignment level.
+3. **MAPQ filter is doing real work, but in the wrong direction here.** q0 collapses the entire CNA signal to TF=0 (multi-mapper noise floods every bin uniformly). q20 produces the observed artifact pattern. There is no intermediate MAPQ that recovers the chr8q gain — q10 also collapsed to TF=0.
+4. **The artifact reproducibility across two biologically distinct tumor lines (WU-487 WT and MN2 AMP) is the strongest evidence that the failure is technical, not biological.** Two unrelated tumor genomes should not produce identical genome-wide CNA profiles even at the bin level.
+5. **The chr8 global depression is the dominant artifact.** Whole chr8 (both arms) sits below baseline in q10/q20. The likely mechanism: EM-seq CpG-density-dependent coverage bias that the GC track (built for non-bisulfite WGS) under-corrects on chr8. A small real chr8q > chr8p step is preserved in the raw HMMcopy output but is below the resolution that ichorCNA's HMM can recover when the whole chromosome is depressed relative to the genome median.
+
+### Methodology files (in `dev/chr8-amp-detect/`)
+
+- `03c_ichorcna_hdulp_pon_600M.sh` — committed; ichorCNA with HD-ULP PoN on 450M BAMs.
+- Diagnostic scripts written ad-hoc in `/tmp/` on big-boy or jeff-pad, not yet promoted to the repo:
+  - q0/q10 readCounter + ichorCNA wrapper (lib-loop over the disambig.human.bam wigs at custom MAPQ thresholds)
+  - per-bin chr8 log2 plotter (R, reads cna.seg, facets by lib × MAPQ, no HMM overlay)
+  - cross_classify.sh smoke-test (50k chr1 reads, lib0626 only) — runs disambig on a mini BAM pair and tabulates straight-hg38 vs disambig verdict per read
+- These should be promoted to `dev/chr8-amp-detect/diagnostics/` if the diagnostic loop is going to be re-run on additional libraries or alternative aligners. Captured here as text so the methodology survives even if the /tmp scripts don't.
+
+### Next steps (carried forward from earlier notes, consolidated)
+
+- **EM-seq-matched PoN re-build** from JH-2-055 chr8q-WT serial-bleed normals processed through the same bwa-meth + disambig pipeline. This is the single most likely fix for the global chr8 depression — a properly matched PoN should cancel the EM-seq + chr8-specific coverage bias that the bundled HD-ULP PoN cannot.
+- **Per-arm Mann-Whitney test** (chr8p bins vs chr8q bins) as a CNA-caller-independent statistical check on the small log2 step. Quick win — uses the raw HMMcopy log2 we already have.
+- **Orthogonal dPCR copy number** on the same MN2 samples. PDF at `data/sources/nf1_murine_dpcr_batch2_3_21_25.pdf` from a 2026-03-21 dPCR batch (referenced in Phase 0 of the upstream plan). Definitive read on whether chr8q gain is present in the cfDNA fragment population at all.
+- **Alternative CNA callers** (QDNAseq, CNVkit) as ichorCNA-normalization-independent sanity check. Both use different bin definitions and correction strategies; if the chr8q step pops out in either, it confirms ichor's specific normalization is the bottleneck.
+- **Fragmentomics features** (insert size distribution, fragment end motifs) as coverage-independent tumor-discrimination signal. Less direct for "chr8q copy number" but could distinguish tumor-of-origin reads in a way that side-steps the coverage-bias problem entirely.
+- **Cross-classification analysis** (per-chr straight-hg38 vs disambig verdict) — full-BAM version of the chr1 smoke test. Quantifies per-region mouse contamination and identifies any region-specific masking needs.
+- **Disambig + ichorCNA on remaining 2 libs** (lib0627, lib0645) for completeness if the diagnostic loop continues. lib0627 mm10 BAM is present on big-boy at `/mnt/data/projects/nf1-mouse/chr8-amp-detect/600M/bams_mm10/lib0627.mm10.dedup.bam`; lib0645 similarly.
