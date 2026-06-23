@@ -1,5 +1,5 @@
 * NF1 Mouse PDX cfDNA Studies
-
+[[file:docs/plans/2026-05-22-chr8-amp-detect-600M.md]]
 hg38 and mm10 with BISCUIT (required — bwa-meth NM tags are not conversion-corrected, breaking alignment-score comparison).
 
  BISCUIT separates conversion mismatches (ZC tag) from true mismatches (NM tag).
@@ -1202,7 +1202,7 @@ lualatex -interaction=nonstopmode nf1-mouse-cfdna-isolation-optimization-protoco
 
 ***** Preamble                                                       :ignore:
 
-#+include: "./latex/latex.org::#dd9bb77e-6ff7-44e0-9026-c371bdaf9603" :only-contents t
+#+include: "../latex/latex.org::#dd9bb77e-6ff7-44e0-9026-c371bdaf9603" :only-contents t
 #+latex: % [[file:~/repos/latex/latex.org::#dd9bb77e-6ff7-44e0-9026-c371bdaf9603][Last compiled]]
 
 \vspace{5mm}
@@ -1399,14 +1399,14 @@ Inputs necessary for the protocol are described in Table [[tab_inputs]]]. All in
 #+NAME: tab_inputs
 #+CAPTION: Isolation workflow inputs.
 #+ATTR_LATEX: :align l p{0.7\textwidth} :booktabs t
-| Input Identifier      | Description                                              |
-|-----------------------+----------------------------------------------------------|
-| ms1_pdx1_term         | Mouse 1, PDX1, terminal bleed, no visual hemolysis       |
-| ms2_pdx1_term         | Mouse 2. PDX1, terminal bleed, no visual hemolysis       |
-| ms3_nopdx_term        | Mouse 3, no PDX, terminal bleed, no visual hemolysis     |
-| ms4_nopdx_term_vheme  | Mouse 4, no PDX, terminal bleed, _with_ visual hemolysis |
-| ms5_pdx1_serialf      | Mouse 5, PDX1, final serial sample, no visual hemolysis  |
-| ms6_pdx1_serial_vheme | Mouse 6, PDX1, serial bleed _with_ visual hemolysis      |
+| Input Identifier      | Description                                             |
+|-----------------------+---------------------------------------------------------|
+| ms1_pdx1_term         | Mouse 1, PDX1, terminal bleed, no visual hemolysis      |
+| ms2_pdx1_term         | Mouse 2. PDX1, terminal bleed, no visual hemolysis      |
+| ms3_nopdx_term        | Mouse 3, no PDX, terminal bleed, no visual hemolysis    |
+| ms4_nopdx_term_vheme  | Mouse 4, no PDX, terminal bleed, _with_ visual hemolysis  |
+| ms5_pdx1_serialf      | Mouse 5, PDX1, final serial sample, no visual hemolysis |
+| ms6_pdx1_serial_vheme | Mouse 6, PDX1, serial bleed _with_ visual hemolysis       |
 
 Final isolations to be analyzed are shown in Table [[tab_analytes]]. For each final isolation, the same analyses will be performed, generating the same output variables. Specific experimental questions addressed are in Table [[tab_questions]].
 
@@ -1803,8 +1803,8 @@ Two sub-pipelines:
 
 *** Data
 
-| File                                                        | Contents                                  | Notes                                          |
-|-------------------------------------------------------------+-------------------------------------------+------------------------------------------------|
+| File                                                      | Contents                                  | Notes                                          |
+|-----------------------------------------------------------+-------------------------------------------+------------------------------------------------|
 | =/mnt/data/projects/nf1-mouse/emseq/fastqs/lib06{22..39}/=  | PE150 EM-seq FASTQs, 18 PDX mouse samples | 6 WU-487 terminal + 12 JH-2-055 serial bleeds  |
 | =/mnt/data/projects/nf1-mouse/ref/biscuit/ncbi_hg38_noalt/= | hg38 no-alt analysis set, BISCUIT indexed | NCBI GRCh38, chr-prefixed, no ALTs, no decoys  |
 | =/mnt/data/projects/nf1-mouse/ref/biscuit/ucsc_mm10/=       | mm10 primary assembly, BISCUIT indexed    | UCSC, chr-prefixed, 66 contigs, needs download |
@@ -2416,7 +2416,7 @@ S3B (including ambiguous reads) provides marginally more coverage but dilutes tu
 
 8. *Fragment enrichment is TF-dependent*: Disambiguation enriches the cfDNA nucleosomal peak only in high-TF samples (23-28% of reads in 150-180 bp region for S3A vs 19% for S1). In low-TF samples, S3A actually shows a LOWER peak fraction (3-7%) than S1 (15-17%), because human reads surviving disambiguation are predominantly host genomic DNA rather than tumor cfDNA.
 
-** Chr8q amp detection feasibility (450M re-run)             :bioinfo_dev:
+** Chr8q amp detection feasibility (450M re-run)                :bioinfo_dev:
 :PROPERTIES:
 :plan: [[file:docs/plans/2026-05-22-chr8-amp-detect-600M.md][2026-05-22 plan]]
 :dev: [[file:dev/chr8-amp-detect/][dev/chr8-amp-detect/]]
