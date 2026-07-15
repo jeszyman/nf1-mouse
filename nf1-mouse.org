@@ -1745,7 +1745,7 @@ Two sub-pipelines:
 - Stacey Chamberlain — Nurse Coordinator, Hirbe lab. 314-286-1567.
 - Sanita Burgic — Nurse Practitioner, Hirbe lab.
 - Tiffany Redden — Senior Grant Specialist, WashU DOM Research Administration. Assigned to CTF AW00010324 progress report. reddent@wustl.edu.
-*** Glossary
+*** Terminology
 *** Literature
 - Wang et al. "Dual inhibition of FAK and MEK is a therapeutic vulnerability in chromosome 8 gain MPNST" — JCI manuscript 201331-JCI-RG-1 (Guangfeng Wang first author, Angela Hirbe senior). CRISPR screen of all Chr8 genes identified PTK2/FAK as druggable target in Chr8-gain MPNST. Dual FAK+MEK inhibition (defactinib + avutometinib) synergistically effective in Chr8-gain PDX models (MN2, WU-225) but not Chr8-diploid. Major revision requested [2025-11-18 Tue]; revision in progress. Reviewer A comment #4 asked whether Chr8 gain can be monitored serially in mouse blood — this is the direct motivation for our PDX cfDNA read handling and ichorCNA work. Co-authorship offered to Szymanski and Chaudhuri for contributing the cfDNA monitoring data.
 - [[id:c6157337-5f4a-4216-abc8-93d1a84cdbb5][PNST MRD]] — post-surgical MRD detection in MPNST using EM-seq + WGS methylation, nucleosome positioning. Sample classification states: cNED, cMRD, cOP, pNED, pMRD, pOD.
