@@ -285,8 +285,8 @@ dependencies:
 :END:
 - [[id:96c4073c-59b5-475a-a367-a445b23b3229][NF1 cfDNA characterization]] (parent long goal in career.org)
 - [[id:c8b2ac45-cb1e-46b3-82d3-97245427dc93][Implement MPNST cfDNA LDT]] (sibling long goal — clinical translation)
-- [[id:34483a88-ea9e-4fe3-ab35-b8edd6b70f03][Preliminary mouse MPNST PDX plasma for fragmentomics]] (pilot sample history)
-- [[id:6adf1ba1-0e75-4366-927c-0f08400e2766][NF1 EM-seq pilot]] (technical validation feeding this project)
+- Preliminary mouse MPNST PDX plasma for fragmentomics (pilot sample history)
+- NF1 EM-seq pilot (technical validation feeding this project)
 *** CTF grant and Hirbe collaboration
 - CTF grant AW00010324 (Hirbe PI, WashU) — Year 4 progress report due [2026-04-01], WashU internal deadline [2026-03-30]. Some funding supported Jeff's salary at Mayo during NCE period.
 - NCE deliverables: finish murine cfDNA work, continue banking, get Paul's paper out. Angie covered on banking and paper; murine work is our deliverable.
@@ -386,7 +386,7 @@ PDX plasma cfDNA contains a mixture of human tumor-derived and mouse host-derive
 - [ ] ingest https://mail.google.com/mail/u/0/#inbox/FMfcgzQgKvKNWDpjskqzJTvLfWKwTpDx
 - NCI to Mayo transfers
   - Globus personal must be active on aclm350
-  - Check free storage on aclm350, from cyberark, create a [[id:b06cd426-f20b-4827-98b0-e31ba058324c][cyberark reverse tunnel]]
+  - Check free storage on aclm350, from cyberark, create a cyberark reverse tunnel
   - Initiate transfer in globus web interface on Mayo macbook
   - Upon transfer completion, gsutil rsync data to Chaudhuri lab bucket
 
@@ -1178,7 +1178,6 @@ plasm_ders
 :export_options: toc:nil tags:nil todo:nil \n:t ^:nil H:15 d:nil
 :export_file_name: ./protocols/nf1-mouse-cfdna-isolation-optimization-protocol.pdf
 :export_author: Jeffrey Szymanski
-:export_date:
 :export_latex_class: empty
 :export_latex_header+: \usepackage{/home/jeszyman/repos/latex/sty/documentation}
 :export_latex_header+: \usepackage[backend=bibtex,style=numeric,url=true]{biblatex}
@@ -1751,8 +1750,8 @@ Two sub-pipelines:
 - [[id:c6157337-5f4a-4216-abc8-93d1a84cdbb5][PNST MRD]] — post-surgical MRD detection in MPNST using EM-seq + WGS methylation, nucleosome positioning. Sample classification states: cNED, cMRD, cOP, pNED, pMRD, pOD.
 - [[id:771f19d4-cd99-4013-b5de-5ba5be6b6d5d][NF1 CAPP-seq]] — targeted sequencing of NF1 cfDNA, CTF publication expected by [2025-10-01]. Repo: [[file:~/repos/nf1-cappseq/nf1-cappseq.org]]
 - [[id:36873dd1-7fb7-414c-91b6-9867274a3fd9][cfDNA quantification of cNF burden]] — JHMI/Hopkins IRB, cNF natural history study (NCT04941027) collaboration with Carlos Romo and R. Taylor Sundby
-- [[id:aa6ddddd-02f9-448d-b081-218aae5a35e0][EM-seq low input validation]] — technical validation of EM-seq at low cfDNA inputs
-- [[id:5a924e28-76f7-4217-aa0f-a3c1d9081757][EM-seq WGS fragmentomics validation]] — combined EM-seq and WGS fragmentomics validation
+- EM-seq low input validation — technical validation of EM-seq at low cfDNA inputs
+- EM-seq WGS fragmentomics validation — combined EM-seq and WGS fragmentomics validation
 *** External resources
 - [[file:~/repos/nf1-cappseq/nf1-cappseq.org][NF1 CAPP-seq repo]]
 - [[id:4e0ba57c-5b29-4ef7-8f82-f84008cfe8ee][CTF Private Donor MPNST LDT]] — CTF-funded two-track clinical/research LDT using CHLA LBSeq4Kids assay
