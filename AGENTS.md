@@ -1,1 +1,0 @@
-/home/jeszyman/repos/nf1-mouse/CLAUDE.md
