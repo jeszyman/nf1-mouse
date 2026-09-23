@@ -2441,9 +2441,20 @@ Bundled HD-ULP PoN produces non-physical CN calls (chr1 GAIN labels on negative-
 - Disambig + ichorCNA on remaining 2 libs (lib0627, lib0645) for completeness.
 
 ** Ideas                                                              :ideas:
+:PROPERTIES:
+:ID:       E8806BD6-D76E-4E4C-A05A-CACE63FBF039
+:END:
 - in silico pooling experiment- pool human reads from multiple animals of same cohort- see [cite:@fu2025frag]
 - blacklist approach for PDX cfDNA analysis- exclude genomic regions with systematic mouse/human read misassignment- see [cite:@fu2025frag]
 - ICRG re-test across aligners and full cohort. Pilot used 2 samples only (lib0625, lib0626; WU-487 terminal, 3M read pairs each) with BISCUIT, giving <1% reads to human (50K vs 5.99M mouse for lib0625) vs Disambiguate ground truth ~17-20% human / 71% mouse / 12% ambiguous on the same data. Run ICRG on all 18 EM-seq samples with multiple aligners (BISCUIT, bwa-meth, Bismark/Bowtie2 — the one used by [cite:@callari2018]) to test whether the failure is BWA-MEM-specific or universal across methylation-aware aligners.
+- Species leakage of the rmeth human repeat reference: run the current human-only reference on simulated converted mouse genome fragments (no tumor-free mouse EM-seq library exists) and count matched k-mers per million reads; if leakage is not negligible, add the converted mouse genome to the specificity filter as off-target. Task: [[id:b525d3c0-b874-4c80-83a9-b35d072cfb76][rmeth combined mouse + human reference investigation]] (career.org)
+- HSATII expansion: an HSATII to ALR_Alpha read ratio in human reads that rises across serial bleeds would indicate satellite copy gain in MPNST, as reported for colon tumor xenografts [cite:@bersani2015hsatii] (cited by a literature agent, not yet read)
+- Young-to-old L1 methylation gradient (L1HS, L1PA, L1M) in human reads as a per-line tumor feature; compare with L1 ORF1p staining of tumor at harvest
+- PRC2-lost versus PRC2-retained lines: LTR12C and satellite methylation by H3K27me3 status, once each line's PRC2 status is recorded in pdx_lines
+- chr8 centromere (D8Z2 alpha-satellite array) in the 8q-gain line MN2: methylation of the array, and whether the extra 8q copies carry extra centromeres (isochromosome) or not (unbalanced translocation); needs chromosome-specific k-mers built from CHM13, since RepeatMasker has one alpha-satellite subfamily
+- Methylation versus fragment length for homologous L1 in human and mouse reads, which share one plasma clearance system; a species difference points to the cell of origin rather than plasma nucleases
+- Mouse IAP and major-satellite methylation under MEK inhibition as a readout of drug effect on host tissue
+- Per-molecule methylation entropy in human reads across serial bleeds; a drop would suggest a clone selected by treatment
 *** Methylation-aware Xengsort for EM-seq PDX read classification [#Y]
 :PROPERTIES:
 :ID:       A1835C32-1FEB-4902-8127-DCF343353E83
@@ -2461,6 +2472,54 @@ Key questions:
 - Does this outperform Disambiguate on real EM-seq data, or does Disambiguate's alignment-score comparison remain superior?
 
 For the current PDX read handling evaluation, Xengsort is dropped in favor of Disambiguate (alignment-score comparison handles conversion naturally via bwa-meth). This idea is for potential future tool development.
+*** CENP-B box methylation and protection in PDX plasma: test case for PDX-validated repeat features [#Y]
+:PROPERTIES:
+:ID:       1044E244-2FB5-4A96-9D51-228982214E28
+:END:
+Repeat-subfamily methylation may be a general source of cancer-type-specific predictor features. PDX plasma tests each such feature on tumor cfDNA with no human normal background, and the CENP-B box is the first test case. CENP-B is the only centromere protein that binds a specific DNA sequence: the 17-bp box TTCGnnnnAnnCGGG, present in a subset of alpha-satellite monomers. Methylation of the two box CpGs nearly abolishes CENP-B binding in vitro [cite:@tanaka2004cenpb]. MPNST tissue shows satellite hypomethylation [cite:@feber2011] and ALR_Alpha was the top methylation hit in the patient plasma cohort (repeat-meth), so the prediction is more unmethylated boxes and more CENP-B protection in tumor cfDNA.
+
+- Measurement: in human reads spanning a box, compare fragment-end density and fragment length around the box between molecules with a methylated box and molecules with an unmethylated box. Repeat on mouse minor satellite, which also carries CENP-B boxes, as a replicate in the same tube.
+- Positive result: unmethylated-box molecules show end depletion at the box and methylated-box molecules do not, in both species. Negative: no difference between the two classes.
+- Needs: rmeth per-molecule output with fragment-end positions (not yet checked); mouse minor-satellite k-mers, which need a T2T mouse assembly because GRCm39 contains no minor satellite [cite:@francis2025t2tmouse].
+- Limit: CENP-B knockout mice are viable and the human Y centromere has no boxes (background knowledge, not checked), so this is a centromere-biology and methods result more than a biomarker.
+*** Mitotic death under volasertib read from centromeric cfDNA [#Y]
+:PROPERTIES:
+:ID:       166919B0-B669-40AC-9720-5629D83CE9BE
+:END:
+Volasertib (PLK1 inhibitor) arrests cells in mitosis. Cells that die from mitotic arrest may release centromeric and pericentromeric DNA with a different satellite share, fragment length, or end motif than cells that die by apoptosis in interphase. Alignment-based cfDNA analysis discards most satellite reads; rmeth counts them.
+
+- Measurement: within human reads, satellite share (ALR_Alpha, HSATII, (CATTC)n) normalized to Alu and L1 in the same sample, plus satellite fragment length and end motifs; volasertib-containing arms against vehicle and mirdametinib at the earliest serial bleed.
+- Positive result: a shift present with volasertib and absent with MEK inhibition, appearing before tumor volume changes. Negative: satellite metrics move only with tumor fraction.
+- Existing data: MN2 serial bleeds, combination versus vehicle (lib0644 to lib0653), and JH-2-055 combination serial bleeds (lib0640 to lib0643). No single-agent volasertib arm is sequenced.
+- Confounder: any change in total tumor DNA release shifts coverage and length for every element class, so use ratios within the human reads only. That mitotic death dominates in vivo for these lines is not verified.
+*** Non-tumor human cfDNA in PDX plasma (passenger human cells) [#Y]
+:PROPERTIES:
+:ID:       1A32C106-7C06-4130-84C2-C48286B2A541
+:END:
+These lines are patient-derived and implanted at passage P2 to P4, so non-tumor human cells from the donor can travel with the graft. If they release cfDNA, human fraction is not tumor fraction. The six WU-487 terminal bleeds already show a gap: 18.1 to 22.1% human reads by Disambiguate, but ichorCNA tumor fraction of 0.10 to 0.65 on those human reads ([[file:results/cna/waterfall_summary/waterfall_summary.tsv][waterfall summary]]).
+
+- Explanations to separate: passenger human cells; mouse reads assigned as human; ichorCNA underestimating tumor fraction (copy-neutral LOH, wrong ploidy).
+- Measurement: two-component mixture on per-molecule methylation of human reads in subfamilies where MPNST and blood differ (ALR_Alpha first). Positive if the minor-component weight tracks 1 minus ichorCNA tumor fraction across the six mice. Orthogonal checks: reads mapping to the EBV genome, and human IGH-rearranged reads.
+- Why it matters: (1) the pure-tumor assumption behind using PDX plasma as a validator must be measured before it is used; (2) human B cells transformed by EBV can grow out in immunodeficient hosts (Chen 2012, PLoS One; Tillman 2020, Vet Pathol; cited by a literature agent, not yet read) and would add human cfDNA that does not respond to MEK or PLK1 inhibition; (3) detection from plasma would give the Hirbe lab a colony QC readout.
+- MN2 has no donor record in the metadata; confirm it is patient-derived.
+*** Tumor division history from solo-WCGW CpGs in PDX plasma (mitotic clock) [#Y]
+:PROPERTIES:
+:ID:       891C4AE0-3CEC-44D8-A4FF-2609E6429CDD
+:END:
+CpGs with an A or T on each side and no other CpG within 35 bp (solo-WCGW) in late-replicating partially methylated domains (PMDs) lose methylation in proportion to cumulative cell divisions [cite:@zhou2018hypometh]. Old L1 (L1M, L1PB) and old LTR copies are AT-rich and concentrated in late-replicating DNA, and their diverged copies give single-copy k-mers with CHM13 coordinates in the rmeth per-CpG table. In PDX plasma the human reads come from tumor only, so the index reports the tumor's own division history without a blood background.
+
+- Measurement: tag each human per-CpG call by flanking sequence and by overlap with a published common PMD set. Division index = mean methylation of solo-WCGW CpGs in PMDs, compared with CpGs in dense CpG context.
+- Uses: rank lines by the index against growth rate and passage number; pair with tumor tissue at harvest to check that plasma reflects tissue.
+- Limits: the index is cumulative and changes slowly, so it compares lines, not time points within a 28-day treatment. It does not strictly need repeats, since aligned reads carry the same CpGs.
+*** Host cfDNA response and mouse repeats as an in-library reference [#Y]
+:PROPERTIES:
+:ID:       727F541A-6A52-4161-9DBE-78ED96095778
+:END:
+Mouse cfDNA is about 80% of reads. A tumor effect on host cfDNA is expected (mouse non-tumor cfDNA was enriched in short fragments in a cell-line xenograft study [cite:@fu2025frag]), so "tumor-bearing differs from tumor-free" is not an informative test. The informative split is which part of the host change comes from the tumor and which from the drug.
+
+- Design: tumor-free NRG mice given each drug and bled on the same schedule, compared with tumor-bearing vehicle and treated mice. Readouts: mouse repeat methylation (B1, B2, L1Md, IAP, major satellite) and fragment length.
+- Second use: if host repeat methylation is stable within a condition, library-wide shifts in it are technical and can be removed from the human reads of the same library, which gives a within-sample handle on batch effects.
+- Needs: mouse repeat k-mer sets in rmeth, built on a T2T mouse assembly ([cite:@francis2025t2tmouse]; NRG is NOD background, so satellite arrays may differ from C57BL/6J). No EM-seq library exists yet from the mice recorded as no-PDX (mou0067 to mou0076).
 *** Ideas
 - Divergence-vs-ambiguity QC: use reads classified differently between strategies as positive control for evaluating separation quality
 - Library complexity (preseq) as limiting factor for downstream ichorCNA — check after alignment
