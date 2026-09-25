@@ -3,6 +3,51 @@
 hg38 and mm10 with BISCUIT (required — bwa-meth NM tags are not conversion-corrected, breaking alignment-score comparison).
 
  BISCUIT separates conversion mismatches (ZC tag) from true mismatches (NM tag).
+** Plans
+:PROPERTIES:
+:TODO_SET: plans
+:PLANS_SINCE: [2026-09-25 Fri]
+:END:
+*** ACTIVE Chr8q amp detection, 600M/450M-pair equal-depth re-run
+:PROPERTIES:
+:ID:       24509579-7637-4c9c-89da-627e52ef01d7
+:END:
+[[file:docs/plans/2026-05-22-chr8-amp-detect-600M.md]]
+*** COMPLETE Chr8q amp detection feasibility test (50M)
+:PROPERTIES:
+:ID:       585c285c-98c7-4f1a-9341-98cf4be4bd42
+:END:
+[[file:docs/plans/2026-05-18-chr8-amp-detect.md]]
+*** COMPLETE nf1-mouse project init and mouse-cfdna transfer
+:PROPERTIES:
+:ID:       3541e38e-2db8-47aa-b979-ab4f50caae14
+:END:
+[[file:docs/superpowers/plans/2026-03-16-nf1-mouse-init.md]]
+*** COMPLETE PDX read handling evaluation
+:PROPERTIES:
+:ID:       ab00a0e5-79c9-4f89-9aa0-8809eb6ed385
+:END:
+[[file:docs/superpowers/plans/2026-03-16-pdx-read-handling-eval.md]]
+*** COMPLETE Metadata ingest
+:PROPERTIES:
+:ID:       4e81b28a-7d1f-4ac7-8a6f-2ee02c7d056b
+:END:
+[[file:docs/superpowers/plans/2026-03-17-metadata-ingest.md]]
+*** COMPLETE Direct vs disambiguate PDX read assignment
+:PROPERTIES:
+:ID:       919655a0-00cb-4194-918d-a35ca8f3b351
+:END:
+[[file:docs/superpowers/plans/2026-03-18-direct-vs-disambiguate.md]]
+*** COMPLETE Subsampled VM alignment
+:PROPERTIES:
+:ID:       20f7c1e9-6d4c-499b-a5c0-ffa32982d630
+:END:
+[[file:docs/superpowers/plans/2026-03-30-subsample-vm-alignment.md]]
+*** COMPLETE CTF progress report murine ctDNA update
+:PROPERTIES:
+:ID:       0fe51de6-dd6a-495e-bd83-ada2d96efbd9
+:END:
+[[file:docs/superpowers/plans/2026-04-02-ctf-progress-report-update.md]]
 ** README
 
 *** Project overview
