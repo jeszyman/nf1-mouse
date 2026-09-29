@@ -13,6 +13,11 @@ hg38 and mm10 with BISCUIT (required — bwa-meth NM tags are not conversion-cor
 :ID:       24509579-7637-4c9c-89da-627e52ef01d7
 :END:
 [[file:docs/plans/2026-05-22-chr8-amp-detect-600M.md]]
+**** TODO Settling check for read assignment: build the EM-seq-matched panel of normals from JH-2-055 wild-type normals and rerun lib0644 vs lib0626
+:PROPERTIES:
+:ID:       F1DCA581-0CAD-4380-ACDA-0D70E156A41A
+:END:
+If the q-over-p step stays near +0.1 log2 in both the amplified and the wild-type line, read assignment is exonerated and the parked [[id:BD1A55AA-3B8D-457C-A226-2FF8A2C49C95][human/mouse truth set]] stays parked; the remaining suspect is normalization.
 *** COMPLETE Chr8q amp detection feasibility test (50M)
 :PROPERTIES:
 :ID:       585c285c-98c7-4f1a-9341-98cf4be4bd42
@@ -411,7 +416,7 @@ cfDNA from PDX mouse plasma provides a real-time, systemic measure of tumor biol
 :ID:       3b09d020-bbe8-4a0e-9379-a6de86d47852
 :END:
 
-PDX plasma cfDNA contains a mixture of human tumor-derived and mouse host-derived reads. No established best practice exists for separating species in EM-seq data, where enzymatic C-to-T conversion at unmethylated CpGs precludes direct k-mer classification. Bhandari, et al. benchmarked 12 mouse read removal protocols for PDX WGS/WES/RNA-seq and found Xengsort (k-mer) outperforms alignment-based methods including Disambiguate, but also that "all protocols were effective at removing mouse reads" and "performance difference was minor, usually within 5% of the human reads"  [cite:@bhandari2025]. Xengsort's k-mer identity breaks under bisulfite/EM-seq conversion.
+PDX plasma cfDNA contains a mixture of human tumor-derived and mouse host-derived reads. No established best practice exists for separating species in EM-seq data, where enzymatic C-to-T conversion at unmethylated CpGs precludes direct k-mer classification. Bhandari, et al. benchmarked 12 mouse read removal protocols for PDX WGS/WES/RNA-seq and found Xengsort (k-mer) outperforms alignment-based methods including Disambiguate, but also that "all protocols were effective at removing mouse reads" and "performance difference was minor, usually within 5% of the human reads"  [cite:@bhandari2025]. Xengsort's k-mer identity breaks under bisulfite/EM-seq conversion. Update [2026-09-29 Tue]: this no longer holds. Xengsort 2.1.0 (2025-12) adds a =--bisulfite= mode that indexes C-to-T and G-to-A converted k-mers, and methXsort 0.2.0 (2026-03, NCI CCR Sequencing Facility) wraps xengsort and BBsplit for bisulfite- and enzymatic-converted reads; neither has published benchmarks. See the parked [[id:BD1A55AA-3B8D-457C-A226-2FF8A2C49C95][human/mouse truth set]] idea for the sources.
 
 - [ ] extract visuals from [cite:@bhandari2025]
 - Xenograft experiment and bioinformatics are not documented in [cite:@mouliere2018a]
@@ -2517,6 +2522,7 @@ Key questions:
 - Does this outperform Disambiguate on real EM-seq data, or does Disambiguate's alignment-score comparison remain superior?
 
 For the current PDX read handling evaluation, Xengsort is dropped in favor of Disambiguate (alignment-score comparison handles conversion naturally via bwa-meth). This idea is for potential future tool development.
+- [2026-09-29 Tue] The tooling now exists: xengsort 2.1.0 =--bisulfite= mode (2025-12) and methXsort 0.2.0 (2026-03); unbenchmarked on converted reads. Details under [[id:BD1A55AA-3B8D-457C-A226-2FF8A2C49C95][human/mouse truth set]].
 *** CENP-B box methylation and protection in PDX plasma: test case for PDX-validated repeat features [#Y]
 :PROPERTIES:
 :ID:       1044E244-2FB5-4A96-9D51-228982214E28
@@ -2569,3 +2575,20 @@ Mouse cfDNA is about 80% of reads. A tumor effect on host cfDNA is expected (mou
 - Divergence-vs-ambiguity QC: use reads classified differently between strategies as positive control for evaluating separation quality
 - Library complexity (preseq) as limiting factor for downstream ichorCNA — check after alignment
 - Extend to serial bleeds after terminal bleed evaluation settles
+*** [#Y] In silico human/mouse truth set for PDX plasma EM-seq read assignment
+:PROPERTIES:
+:ID:       BD1A55AA-3B8D-457C-A226-2FF8A2C49C95
+:END:
+Mix pure human cfDNA EM-seq reads and pure mouse EM-seq reads at known ratios (100:0 to 0:100, including the 20:80 and 40:60 range observed in the PDX lines), run each read-assignment method (Xengsort with its bisulfite mode, methXsort, Disambiguate with BISCUIT and with bwa-meth, a combined-genome alignment), and measure the read-level misassignment rate per method and its effect on the chr8q arm-level log2 ratio. Purpose: a ground truth for choosing the read-assignment step in the chr8q amplification analysis.
+
+Pursue check [2026-09-29 Tue]:
+- Closest counterexample: Bhandari et al. 2025, npj Precis Oncol, https://doi.org/10.1038/s41698-025-00902-z (full text read; [cite:@bhandari2025]). Gold-standard human/mouse mixtures at 9:1, 8:2, 6:4 scored 12 protocols by read-ID recovery; Xengsort best, all within about 5% of human reads; CNA detection "minimally affected." Differs: RNA-seq, WES, low-pass WGS; unconverted reads; tissue ratios; CNA impact qualitative. Also Jo et al. 2019 Genome Biol https://doi.org/10.1186/s13059-019-1849-2 (abstract, results) and Callari et al. 2018 BMC Genomics https://doi.org/10.1186/s12864-017-4414-y (abstract, RRBS section; [cite:@callari2018]).
+- Nearest analog: converted-read species sorting now ships as tooling: xengsort 2.1.0 (tag 2025-12-04, https://gitlab.com/genomeinformatics/xengsort) adds =--bisulfite= (C-to-T and G-to-A k-mers indexed, count mode); methXsort 0.2.0 (PyPI 2026-03-04, https://github.com/CCRSF-IFX/methXsort, from the NCI CCR Sequencing Facility) wraps xengsort and BBsplit for bisulfite- and enzymatic-converted reads, with unpublished benchmarks. REMOCON (Rogojina et al. 2023 iScience) does dual-alignment comparison on WGBS PDX tissue. Xenograft plasma: Liu et al. 2021 Front Oncol https://doi.org/10.3389/fonc.2021.615821 (WGBS, per-genome alignment, 0.29% human); An et al. 2025 J Transl Med, GEO GSE279360 (WGS, concatenated genome).
+- Negative precedent: this project's own 450M-pair equal-depth run: disambiguation removes mouse cross-mapping but does not rescue the chr8q signal; the q-over-p step is +0.07 to +0.14 log2 in both the amplified line (MN2) and the wild-type line (WU-487), and whole chr8 is depressed in both. Published: Bhandari 2025, CNA minimally affected by mouse contamination.
+- Likely next to publish: the NCI CCR Sequencing Facility (methXsort) or the Zentgraf/Rahmann group (Xengsort2, ISMB 2025 poster); both on tissue, neither on plasma at 30:70 with a CNA endpoint.
+- Not found: any mixture benchmark of converted reads for species assignment; any PDX plasma methylation study reporting per-method misassignment or its effect on a copy-number ratio; published numbers behind methXsort's benchmarking; a pure-mouse plasma cfDNA EM-seq dataset, in-house or public.
+- Requirements to publish: library-matched pure mouse EM-seq input (cfDNA-like fragment sizes, same chemistry, host strain); five or more ratios; a read-ID confusion matrix per method; a per-bin leakage map with the resulting chr8q log2 error at each ratio; an orthogonal human fraction (LINE dPCR); a spiked CN=3 chr8q positive control, since no verified amplification truth exists in the plasma data.
+- Expected effect: small. Misassignment differences among competent methods are within about 5% of human reads and a relative arm-level log2 ratio is insensitive to uniform read loss; plausible gain 0.02 to 0.05 log2 against a shortfall of 0.16 to 0.23 log2 from the expected +0.30. The null case is the likely case: the chr8q failure is a normalization and panel-of-normals problem, not a species problem.
+- Verdict: park [2026-09-29 Tue]. Settling check: build the EM-seq-matched panel of normals from JH-2-055 wild-type normals and rerun lib0644 against lib0626; if the q-over-p step stays near +0.1 log2 in both lines, read assignment is exonerated and this stays parked. Revisit only to add Xengsort's bisulfite mode as a cheap third assignment method (runs on FASTQ, no alignment; needs a fresh environment with Python 3.12 or later, since the biotools environment resolves only xengsort 2.0.5; untested).
+- Stage by stage: read mixing, seqtk or samtools subsampling of real FASTQs as Bhandari and Jo did, no custom tool; conversion-aware alignment, bwa-meth and BISCUIT already in the pipeline, Bismark for the combined-genome retest; species assignment, xengsort 2.1.0 bisulfite mode or methXsort, the existing disambiguate scripts, combined genome, custom code only for the read-ID confusion matrix; CNA calling, ichorCNA with an EM-seq-matched panel of normals, a custom per-arm test justified as a caller-independent diagnostic only.
+- Search record: Exa web search and fetch (Nature, Springer, PMC, Frontiers, PLOS, GitLab, PyPI, GitHub, GEO), ~/library, bib.bib, this file; 2026-09-29.
