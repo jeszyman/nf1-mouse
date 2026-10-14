@@ -407,6 +407,7 @@ NF1 (neurofibromatosis type 1) affects ~1 in 2,500 individuals worldwide. Plexif
 - Treatment begins when tumors reach 150–200 mm³
 - 3 arms: vehicle, MEKi (mirdametinib), PLK1i (volasertib)
 - n = 4 mice per line per arm (12 conditions, 48 mice total)
+- [2026-10-14 Wed] CTF's Preclinical Hub is adding MPNST patient-derived models from Johns Hopkins for drug screening (announcement pending); the webinar did not say whether JH-2-002 or JH-2-055 are among them. ([[file:~/meetings/ctf-webinars/2026-10-14-notes.md][ctf-webinars 2026-10-14]])
 *** cfDNA as translational platform
 cfDNA from PDX mouse plasma provides a real-time, systemic measure of tumor biology:
 - Serial submandibular bleeds enable longitudinal monitoring without sacrificing the animal
