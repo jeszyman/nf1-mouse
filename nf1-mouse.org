@@ -8,9 +8,15 @@ hg38 and mm10 with BISCUIT (required — bwa-meth NM tags are not conversion-cor
 :TODO_SET: plans
 :PLANS_SINCE: [2026-09-25 Fri]
 :END:
-*** ACTIVE Chr8q amp detection, 600M/450M-pair equal-depth re-run
+*** COMPLETE Chr8q amp detection, 600M/450M-pair equal-depth re-run
+CLOSED: [2026-10-13 Tue 17:27]
 :PROPERTIES:
 :ID:       24509579-7637-4c9c-89da-627e52ef01d7
+:END:
+:LOGBOOK:
+- State "COMPLETE"   from "ACTIVE"     [2026-10-13 Tue 17:27]
+- Note taken on [2026-10-13 Tue 17:27] \\
+  Closed in career weekly review: the 450M-pair re-run found no chr8q gain call in MN2 cfDNA and the JCI revision was submitted 2026-09-12; the EM-seq panel-of-normals TODO stays as a separate task.
 :END:
 [[file:docs/plans/2026-05-22-chr8-amp-detect-600M.md]]
 **** TODO Settling check for read assignment: build the EM-seq-matched panel of normals from JH-2-055 wild-type normals and rerun lib0644 vs lib0626
@@ -352,10 +358,10 @@ dependencies:
   - Jeff also requested untreated terminal bleed Chr8q-gain samples as backup — do not bank 100% on serial bleeds.
 - [2026-03-24 Tue] Bioanalyzer results reviewed for JH-2-055 samples. The 10/1/2024 samples (#4-4) show ~35 pg/uL in the 167 bp mono-nucleosomal cfDNA peak — substantially lower than most other samples (typically ≥100 pg/uL). However, these samples are cleaner (less genomic contamination). Important: the 35 pg/uL is the bioanalyzer-reported concentration within the 167 bp peak region only (area under the electropherogram curve gated around that peak, calibrated against internal standards), not total DNA. Total sample DNA is higher. Need to confirm which EM-seq kit version Chloe has: original E7120 requires 10 ng minimum (would not work at ~890 pg total cfDNA in 25 uL), but EM-seq v2 E8015 requires only 100 pg minimum (890 pg = 8.9× above that, viable).
 - Email threads:
-  - [[mu4e:msgid:BN7PR01MB3715CC434C37B6881079949C9640A@BN7PR01MB3715.prod.exchangelabs.com][CTF Progress Report — Jeff on board, approach confirmed (2026-03-16)]]
-  - [[mu4e:msgid:BN7PR01MB3715C4DC359FE6778A42FA509641A@BN7PR01MB3715.prod.exchangelabs.com][CTF Progress Report — likely CNA data for Guangfeng timeline (2026-03-17)]]
-  - [[mu4e:msgid:BN7PR01MB3715A87513CC83EB65A6032D964EA@BN7PR01MB3715.prod.exchangelabs.com][CTF Progress Report — Chr8q-gain sequencing gap identified (2026-03-18)]]
-  - [[mu4e:msgid:BN7PR01MB3715A87513CC83EB65A6032D964EA@BN7PR01MB3715.prod.exchangelabs.com][CTF Progress Report — EM-seq confirmed, NIH sequencing, sample plan (2026-03-20 through 2026-03-24)]]
+  - [[https://mail.google.com/mail/u/0/#all/19cf6cfb26a76ac7][CTF Progress Report — Jeff on board, approach confirmed (2026-03-16)]]
+  - [[https://mail.google.com/mail/u/0/#all/19cf6cfb26a76ac7][CTF Progress Report — likely CNA data for Guangfeng timeline (2026-03-17)]]
+  - [[https://mail.google.com/mail/u/0/#all/19cf6cfb26a76ac7][CTF Progress Report — Chr8q-gain sequencing gap identified (2026-03-18)]]
+  - [[https://mail.google.com/mail/u/0/#all/19cf6cfb26a76ac7][CTF Progress Report — EM-seq confirmed, NIH sequencing, sample plan (2026-03-20 through 2026-03-24)]]
 - [2026-03-30 Mon] Shipment sent to NCI. Manifest, tumor volume xlsx, bioanalyzer PDF, and shipment-position PDF were sent by Mark Zoberi. Sample selection criteria: cfDNA total ≥0.1 ng with a discernible 167 bp peak. WashU shipper: Xiaochun Zhang; NCI receiver: Chloe Sachs.
 - [2026-05-11 Sun] Metadata schema updates from the March 30 shipment thread (this session):
   - Added =mice.treatment_start_date= and =mice.treatment_end_date= as the anchor for =samples.timepoint_day=.
