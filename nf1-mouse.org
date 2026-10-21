@@ -1243,8 +1243,8 @@ plasm_ders
 :END:
 :DRAWER:
 - [[elisp:(run-latex-at-point)][compile]] using [[id:3975a173-ac71-4c02-b032-ef215329ca59][run-latex-at-point]]
-- [[file:protocols/nf1-mouse-cfdna-isolation-optimization-protocol.pdf][PDF]]
-- [[file:protocols/nf1-mouse-cfdna-isolation-optimization-protocol.tex][TeX]]
+- =protocols/nf1-mouse-cfdna-isolation-optimization-protocol.pdf=
+- =protocols/nf1-mouse-cfdna-isolation-optimization-protocol.tex=
 :END:
 #+begin_src emacs-lisp
 (setq org-latex-prefer-user-labels t)
@@ -1449,7 +1449,7 @@ The experiment workflow is summarized in Figure [[fig_workflow]].
 #+CAPTION: Experiment Workflow. Workflow is divided into stages from left to right of input, pooling, aliquoting, isolation, right-sided bead selection, and analysis. Final isolations to be analyzed are labeled to the right.
 #+NAME: fig_workflow
 #+ATTR_LATEX: :placement [H]
-[[file:../resources/media/workflow.pdf]]
+[[file:resources/media/workflow.pdf]]
 
 Inputs necessary for the protocol are described in Table [[tab_inputs]]]. All inputs should be from untreated mice. Note ms1 and ms2 share PDX1 (WU-255) so their terminal plasma can be pooled; ms5 and ms6 share PDX2 (JH-2-055) for the serial-bleed arm (per Version 2 of the protocol). Ideally, all PDX mice should have large tumors at each time point sampled.
 
@@ -2600,3 +2600,4 @@ Pursue check [2026-09-29 Tue]:
 - Verdict: park [2026-09-29 Tue]. Settling check: build the EM-seq-matched panel of normals from JH-2-055 wild-type normals and rerun lib0644 against lib0626; if the q-over-p step stays near +0.1 log2 in both lines, read assignment is exonerated and this stays parked. Revisit only to add Xengsort's bisulfite mode as a cheap third assignment method (runs on FASTQ, no alignment; needs a fresh environment with Python 3.12 or later, since the biotools environment resolves only xengsort 2.0.5; untested).
 - Stage by stage: read mixing, seqtk or samtools subsampling of real FASTQs as Bhandari and Jo did, no custom tool; conversion-aware alignment, bwa-meth and BISCUIT already in the pipeline, Bismark for the combined-genome retest; species assignment, xengsort 2.1.0 bisulfite mode or methXsort, the existing disambiguate scripts, combined genome, custom code only for the read-ID confusion matrix; CNA calling, ichorCNA with an EM-seq-matched panel of normals, a custom per-arm test justified as a caller-independent diagnostic only.
 - Search record: Exa web search and fetch (Nature, Springer, PMC, Frontiers, PLOS, GitLab, PyPI, GitHub, GEO), ~/library, bib.bib, this file; 2026-09-29.
+- [2026-10-21 Wed] Named the first K08 spend for a mouse PDX plasma methods paper offered to CTF: [[id:344c3bc7-aa77-4647-9fce-d786c286373b][Mouse PDX cfDNA chr8 amplification analysis]]
