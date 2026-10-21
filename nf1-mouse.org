@@ -2094,7 +2094,7 @@ Six WU-487 terminal bleeds from NRG mice: 3 vehicle-treated (mou0001-mou0003, co
 | lib0623 | mou0002  | vehicle      | 1,410              |          26 |           536 |
 | lib0624 | mou0003  | vehicle      | 1,048              |          26 |           111 |
 | lib0625 | mou0004  | mirdametinib | 1,902              |          23 |         1,720 |
-| lib0626 | mou0005  | mirdametinib | 2,380              |          21 |         2,380 |
+| lib0626 | mou0005  | mirdametinib | 1,868              |          21 |         2,380 |
 | lib0627 | mou0006  | mirdametinib | 2,551              |          27 |           387 |
 
 **** Tumor growth curves
