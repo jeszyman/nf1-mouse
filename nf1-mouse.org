@@ -59,6 +59,12 @@ If the q-over-p step stays near +0.1 log2 in both the amplified and the wild-typ
 :ID:       0fe51de6-dd6a-495e-bd83-ada2d96efbd9
 :END:
 [[file:docs/superpowers/plans/2026-04-02-ctf-progress-report-update.md]]
+*** FUTURE PDX plasma on rmeth with a joint human and mouse reference
+:PROPERTIES:
+:ID:       75fbf2c2-f72b-4655-a2c6-ef9dd2b34cf6
+:END:
+
+[[file:docs/plans/pdx-rmeth.md]]
 ** README
 
 *** Project overview
